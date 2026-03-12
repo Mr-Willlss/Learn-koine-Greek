@@ -1,0 +1,89 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#f2c94c" />
+  <meta name="description" content="Greek Quest: Koine Greek learning game prototype." />
+  <title>Greek Quest</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo" role="button" tabindex="0" aria-label="Back to map">
+        <span class="logo-mark">GQ</span>
+        <div>
+          <h1>Learn Koine Greek</h1>
+          <p>Koine Greek for beginners</p>
+        </div>
+      </div>
+
+      <div class="stats" aria-label="Stats">
+        <div class="stat" id="stat-xp">XP 0</div>
+        <div class="stat" id="stat-level">Level 1</div>
+        <div class="stat" id="stat-hearts">Hearts 5</div>
+      </div>
+
+      <button id="sign-in-btn" class="btn ghost" type="button">Sign in</button>
+      <button id="log-in-btn" class="btn ghost" type="button">log in</button>
+    </header>
+
+    <main class="main">
+      <section class="map-panel" aria-label="World map">
+        <div class="map-header">
+          <h2>World Map</h2>
+          <div class="progress" aria-label="Completion">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
+          <span id="progress-text">0% complete</span>
+        </div>
+        <div id="world-map" class="world-map"></div>
+      </section>
+
+      <section class="lesson-panel" id="lesson-panel" aria-label="Lesson">
+        <div class="lesson-header">
+          <h2 id="lesson-title">Welcome</h2>
+          <div class="lesson-meta">
+            <span id="lesson-type">Choose a lesson to begin</span>
+            <span id="lesson-xp">+0 XP</span>
+          </div>
+        </div>
+
+        <div class="teacher" id="teacher" aria-hidden="true"></div>
+
+        <div class="lesson-body" id="lesson-body">
+          <div class="welcome">
+            <h3>Tap a lesson bubble to start.</h3>
+            <p>connect to mobile internet. Speech features work best in Chrome.</p>
+          </div>
+        </div>
+
+        <div class="lesson-footer">
+          <button id="hint-btn" class="btn ghost" type="button" disabled>Hint</button>
+          <button id="check-btn" class="btn" type="button" disabled>Check</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- Firebase (optional). Leave config placeholders to stay fully local. -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+  <script src="firebase.js"></script>
+  <script src="auth.js"></script>
+  <script src="spacedRepetition.js"></script>
+  <script src="speech.js"></script>
+  <script src="teacherCharacter.js"></script>
+  <script src="lessons.js"></script>
+  <script src="map.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
