@@ -4,7 +4,9 @@ let currentLesson = null;
 let currentExerciseIndex = 0;
 let currentSelection = null;
 let lessonXpEarned = 0;
-let userOptions = { sound: true, autoSave: true, brightness: "normal" };
+let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "system" };
+let audioCtx = null;
+let masterGain = null;
 
 const progressState = {
   xp: 0,
@@ -21,6 +23,36 @@ function toast(message) {
   toastEl.classList.add("show");
   setTimeout(() => toastEl.classList.remove("show"), 2400);
 }
+
+function initAudio() {
+  if (audioCtx) return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  audioCtx = new AudioCtx();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = userOptions.volume;
+  masterGain.connect(audioCtx.destination);
+}
+
+function playTone(freq, duration = 0.2) {
+  if (!userOptions.sound) return;
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = freq;
+  gain.gain.value = 0.0001;
+  osc.connect(gain).connect(masterGain);
+  const now = audioCtx.currentTime;
+  gain.gain.exponentialRampToValueAtTime(userOptions.volume, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  osc.start(now);
+  osc.stop(now + duration + 0.05);
+}
+
+function playCorrectSound() { playTone(880, 0.25); }
+function playIncorrectSound() { playTone(220, 0.35); }
 
 function ensureModalShell() {
   let modal = document.getElementById("app-modal");
@@ -246,11 +278,13 @@ function checkAnswer() {
     setTeacherMood("happy");
     teacherSpeak("Great job!");
     updateSpacedRepetition(exercise.vocab?.id, true);
+    playCorrectSound();
   } else {
     progressState.hearts = Math.max(progressState.hearts - 1, 0);
     setTeacherMood("sad");
     teacherSpeak("Try again!");
     updateSpacedRepetition(exercise.vocab?.id, false);
+    playIncorrectSound();
   }
 
   updateStats();
@@ -333,7 +367,9 @@ function registerEvents() {
   const resumeBtn = document.getElementById("resume-btn");
   if (resumeBtn) resumeBtn.addEventListener("click", () => { if (requireSignIn()) startNextUnlockedLesson(); });
   const startNewBtn = document.getElementById("start-new-btn");
-  if (startNewBtn) startNewBtn.addEventListener("click", () => { if (requireSignIn()) startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]); });
+  if (startNewBtn) startNewBtn.addEventListener("click", confirmStartNew);
+  const lockSignin = document.getElementById("lock-signin");
+  if (lockSignin) lockSignin.addEventListener("click", () => openAuthModal());
 
   const logo = document.querySelector(".logo, .side-logo");
   if (logo) logo.addEventListener("click", () => {
@@ -368,6 +404,7 @@ function initApp() {
   registerEvents();
   playStartupChime();
   lockUI(!isSignedIn());
+  handleAuthChange();
 
   loadVocabDatabase()
     .then((data) => {
@@ -422,6 +459,40 @@ function getNextLesson(currentId) {
   return null;
 }
 
+function confirmStartNew() {
+  if (!requireSignIn()) return;
+  const body = document.createElement("div");
+  body.innerHTML = `<p>Are you sure you want to proceed? This will reset your progress.</p>`;
+  const agree = document.createElement("button");
+  agree.className = "btn";
+  agree.textContent = "Agree and continue";
+  const cancel = document.createElement("button");
+  cancel.className = "btn ghost";
+  cancel.style.marginLeft = "8px";
+  cancel.textContent = "Cancel";
+  const wrap = document.createElement("div");
+  wrap.appendChild(body);
+  wrap.appendChild(agree);
+  wrap.appendChild(cancel);
+  agree.addEventListener("click", () => {
+    progressState.completedLessons = [];
+    progressState.xp = 0;
+    progressState.level = 1;
+    updateStats();
+    updateProgressBar();
+    renderMap(progressState);
+    toast("Progress reset. Pick any unlocked lesson.");
+    const modal = document.getElementById("app-modal");
+    if (modal) modal.classList.remove("show");
+    startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]);
+  });
+  cancel.addEventListener("click", () => {
+    const modal = document.getElementById("app-modal");
+    if (modal) modal.classList.remove("show");
+  });
+  showModal("Reset progress?", wrap);
+}
+
 function isSignedIn() {
   return typeof authState !== "undefined" && !!authState.user;
 }
@@ -449,6 +520,11 @@ function handleAuthChange() {
     renderMap(progressState);
     updateStats();
     updateProgressBar();
+    const lock = document.getElementById("auth-lock");
+    if (lock) lock.classList.remove("show");
+  } else {
+    const lock = document.getElementById("auth-lock");
+    if (lock) lock.classList.add("show");
   }
 }
 
@@ -493,17 +569,23 @@ function openOptionsModal() {
   const wrap = document.createElement("div");
   wrap.innerHTML = `
     <label><input type="checkbox" id="opt-sound"> Sound on</label><br>
+    <label>Volume: <input type="range" id="opt-volume" min="0" max="1" step="0.05"></label><br>
     <label><input type="checkbox" id="opt-autosave"> Auto-save progress</label><br>
-    <label>Brightness:
-      <select id="opt-brightness">
-        <option value="normal">Normal</option>
-        <option value="dim">Dim</option>
+    <label>Brightness: <input type="range" id="opt-brightness" min="0.7" max="1.2" step="0.05"></label><br>
+    <br>
+    <label>Theme:
+      <select id="opt-theme">
+        <option value="system">System</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
       </select>
     </label>
   `;
   wrap.querySelector("#opt-sound").checked = userOptions.sound;
+  wrap.querySelector("#opt-volume").value = userOptions.volume;
   wrap.querySelector("#opt-autosave").checked = userOptions.autoSave;
-  wrap.querySelector("#opt-brightness").value = userOptions.brightness;
+  wrap.querySelector("#opt-brightness").value = userOptions.brightness || 1;
+  wrap.querySelector("#opt-theme").value = userOptions.theme || "system";
   wrap.querySelectorAll("input,select").forEach((el) => el.addEventListener("change", saveOptions));
   showModal("Settings", wrap);
 }
@@ -512,10 +594,16 @@ function saveOptions() {
   const modal = document.getElementById("app-modal");
   if (!modal) return;
   userOptions.sound = modal.querySelector("#opt-sound").checked;
+  userOptions.volume = parseFloat(modal.querySelector("#opt-volume").value || "0.5");
   userOptions.autoSave = modal.querySelector("#opt-autosave").checked;
-  userOptions.brightness = modal.querySelector("#opt-brightness").value;
+  userOptions.brightness = parseFloat(modal.querySelector("#opt-brightness").value || "1");
+  userOptions.theme = modal.querySelector("#opt-theme").value || "system";
   localStorage.setItem("gqOptions", JSON.stringify(userOptions));
-  document.body.style.filter = userOptions.brightness === "dim" ? "brightness(0.9)" : "none";
+  document.body.style.filter = `brightness(${userOptions.brightness})`;
+  document.body.classList.remove("light", "dark");
+  if (userOptions.theme === "light") document.body.classList.add("light");
+  if (userOptions.theme === "dark") document.body.classList.add("dark");
+  if (masterGain) masterGain.gain.value = userOptions.volume;
 }
 
 function loadOptions() {
@@ -523,7 +611,11 @@ function loadOptions() {
   if (stored) {
     try { userOptions = JSON.parse(stored); } catch (e) {}
   }
-  document.body.style.filter = userOptions.brightness === "dim" ? "brightness(0.9)" : "none";
+  document.body.style.filter = `brightness(${userOptions.brightness || 1})`;
+  document.body.classList.remove("light", "dark");
+  if (userOptions.theme === "light") document.body.classList.add("light");
+  if (userOptions.theme === "dark") document.body.classList.add("dark");
+  if (masterGain) masterGain.gain.value = userOptions.volume;
 }
 
 function openContactModal() {
@@ -548,6 +640,8 @@ function openAuthModal() {
   });
   wrap.appendChild(btn);
   showModal("Login", wrap);
+  const lock = document.getElementById("auth-lock");
+  if (lock) lock.classList.add("show");
 }
 
 // Startup chime + intro overlay
@@ -559,13 +653,13 @@ function playStartupChime() {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = "sine";
-  osc.frequency.value = 660;
+  osc.frequency.value = 440;
   gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+  gain.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 15);
   osc.connect(gain).connect(ctx.destination);
   osc.start();
-  osc.stop(ctx.currentTime + 0.65);
+  osc.stop(ctx.currentTime + 15.2);
 }
 
 function hideIntro() {

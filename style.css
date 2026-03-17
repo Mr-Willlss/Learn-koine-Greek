@@ -196,6 +196,51 @@ p { margin: 0; }
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
+.lock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 12, 10, 0.7);
+  display: grid;
+  place-items: center;
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.lock-overlay.show { opacity: 1; pointer-events: auto; }
+.lock-card {
+  background: #fff7ec;
+  padding: 22px 24px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.28);
+  text-align: center;
+  max-width: 320px;
+}
+
+/* Motion */
+.world-card, .lesson-panel, .map-shell, .hero, .sidebar {
+  animation: floatIn 0.6s ease;
+}
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.level-chip { position: relative; overflow: hidden; }
+.level-chip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255,255,255,0.25), rgba(255,255,255,0));
+  transform: translateX(-120%);
+  transition: transform 0.8s ease;
+}
+.level-chip:hover::after { transform: translateX(120%); }
+
+/* Theme handling */
+body.light { background: radial-gradient(circle at 20% 20%, #fffdf7 0%, #f7f0e8 55%, #f0e5d6 100%); color: #2f2a24; }
+body.dark { background: #0f0b09; color: #f4e7d6; }
+body.dark .panel, body.dark .map-shell, body.dark .lesson-panel, body.dark .sidebar, body.dark .world-card, body.dark .hero { background: #1b1512; color: #f4e7d6; }
+
 .eyebrow { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: #746454; }
 .muted { color: #6b5c4f; }
 
