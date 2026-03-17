@@ -64,25 +64,29 @@ function signInWithGoogle() {
 
   toast("Opening Google sign-in...");
 
+  const tryPopup = () =>
+    auth
+      .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => auth.signInWithPopup(provider))
+      .catch((error) => {
+        if (
+          error.code === "auth/operation-not-supported-in-this-environment" ||
+          error.code === "auth/popup-blocked" ||
+          error.code === "auth/popup-closed-by-user"
+        ) {
+          doRedirect();
+        } else {
+          toast(error.message);
+        }
+      });
+
   if (isMobile) {
-    doRedirect();
+    // Mobile Chrome sometimes breaks redirect state; try popup first.
+    tryPopup();
     return;
   }
 
-  auth
-    .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => auth.signInWithPopup(provider))
-    .catch((error) => {
-      if (
-        error.code === "auth/operation-not-supported-in-this-environment" ||
-        error.code === "auth/popup-blocked" ||
-        error.code === "auth/popup-closed-by-user"
-      ) {
-        doRedirect();
-      } else {
-        toast(error.message);
-      }
-    });
+  tryPopup();
 }
 
 function observeAuth() {
@@ -94,7 +98,11 @@ function observeAuth() {
     .then(() => auth.getRedirectResult())
     .catch((error) => {
       console.error("Redirect error", error);
-      toast(error.message || "Sign-in failed. Check authorized domain.");
+      if (error && /missing initial state/i.test(error.message || "")) {
+        toast("Sign-in blocked by browser storage. Enable cookies for firebaseapp.com and retry.");
+      } else {
+        toast(error.message || "Sign-in failed. Check authorized domain.");
+      }
     })
     .finally(() => {
       auth.onAuthStateChanged((user) => {
