@@ -652,6 +652,12 @@ function openContactModal() {
 }
 
 function openAuthModal() {
+  // On mobile, skip modal and jump straight to Google auth
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (isMobile) {
+    signInWithGoogle();
+    return;
+  }
   const wrap = document.createElement("div");
   const btn = document.createElement("button");
   btn.className = "btn";
