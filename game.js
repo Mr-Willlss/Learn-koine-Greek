@@ -7,6 +7,7 @@ let lessonXpEarned = 0;
 let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "system" };
 let audioCtx = null;
 let masterGain = null;
+let startupPlayed = false;
 
 const progressState = {
   xp: 0,
@@ -51,8 +52,29 @@ function playTone(freq, duration = 0.2) {
   osc.stop(now + duration + 0.05);
 }
 
-function playCorrectSound() { playTone(880, 0.25); }
-function playIncorrectSound() { playTone(220, 0.35); }
+function playSequence(freqs, totalDur = 0.5) {
+  if (!userOptions.sound) return;
+  initAudio();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const step = totalDur / freqs.length;
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = f;
+    osc.connect(gain).connect(masterGain);
+    const t0 = now + i * step;
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(userOptions.volume * 0.8, t0 + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + step);
+    osc.start(t0);
+    osc.stop(t0 + step + 0.05);
+  });
+}
+
+function playCorrectSound() { playSequence([523, 659, 784, 1046], 0.6); } // upbeat arpeggio
+function playIncorrectSound() { playSequence([392, 330, 247], 0.45); } // descending wobble
 
 function ensureModalShell() {
   let modal = document.getElementById("app-modal");
@@ -379,6 +401,15 @@ function registerEvents() {
   });
 
   window.addEventListener("gq-auth-changed", handleAuthChange);
+
+  // First user gesture triggers ambient intro
+  const armAmbient = () => {
+    playStartupAmbient();
+    window.removeEventListener("click", armAmbient, true);
+    window.removeEventListener("keydown", armAmbient, true);
+  };
+  window.addEventListener("click", armAmbient, true);
+  window.addEventListener("keydown", armAmbient, true);
 }
 
 function showHint() {
@@ -415,10 +446,6 @@ function initApp() {
       updateStats();
       updateProgressBar();
       setTimeout(hideIntro, 800);
-      if (!isSignedIn()) {
-        openAuthModal();
-        lockUI(true);
-      }
     })
     .catch((err) => {
       console.error(err);
@@ -427,10 +454,6 @@ function initApp() {
       updateStats();
       updateProgressBar();
       setTimeout(hideIntro, 800);
-      if (!isSignedIn()) {
-        openAuthModal();
-        lockUI(true);
-      }
     });
 }
 
@@ -660,6 +683,35 @@ function playStartupChime() {
   osc.connect(gain).connect(ctx.destination);
   osc.start();
   osc.stop(ctx.currentTime + 15.2);
+}
+
+function playStartupAmbient() {
+  if (startupPlayed || !userOptions.sound) return;
+  initAudio();
+  if (!audioCtx) return;
+  startupPlayed = true;
+
+  const pad = audioCtx.createOscillator();
+  const padGain = audioCtx.createGain();
+  pad.type = "sawtooth";
+  pad.frequency.value = 220;
+  padGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  padGain.gain.exponentialRampToValueAtTime(userOptions.volume * 0.35, audioCtx.currentTime + 0.8);
+  padGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 15);
+  pad.connect(padGain).connect(masterGain);
+  pad.start();
+  pad.stop(audioCtx.currentTime + 15.2);
+
+  const shimmer = audioCtx.createOscillator();
+  const shimmerGain = audioCtx.createGain();
+  shimmer.type = "triangle";
+  shimmer.frequency.value = 880;
+  shimmerGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  shimmerGain.gain.exponentialRampToValueAtTime(userOptions.volume * 0.2, audioCtx.currentTime + 0.4);
+  shimmerGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 6);
+  shimmer.connect(shimmerGain).connect(masterGain);
+  shimmer.start();
+  shimmer.stop(audioCtx.currentTime + 6.2);
 }
 
 function hideIntro() {
