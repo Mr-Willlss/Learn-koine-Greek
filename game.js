@@ -112,6 +112,11 @@ function loadVocabDatabase() {
 }
 
 function startLesson(lesson, world) {
+  if (typeof authState !== "undefined" && !authState.user) {
+    openAuthModal();
+    toast("Please sign in with Google to play.");
+    return;
+  }
   currentLesson = { ...lesson, worldId: world.id };
   currentExerciseIndex = 0;
   lessonXpEarned = 0;
@@ -273,10 +278,13 @@ function finishLesson() {
   updateProgressBar();
   renderMap(progressState);
   saveLocalProgress();
-  showLessonCompleteModal(lessonXpEarned);
+  const next = getNextLesson(currentLesson.id);
+  showLessonCompleteModal(lessonXpEarned, () => {
+    if (next) startLesson(next.lesson, next.world);
+  });
 }
 
-function showLessonCompleteModal(xpEarned) {
+function showLessonCompleteModal(xpEarned, onContinue) {
   let modal = document.getElementById("lesson-complete-modal");
   if (!modal) {
     modal = document.createElement("div");
@@ -290,12 +298,14 @@ function showLessonCompleteModal(xpEarned) {
       </div>
     `;
     document.body.appendChild(modal);
-    modal.querySelector("button").addEventListener("click", () => {
-      modal.classList.remove("show");
-    });
   }
   const xpText = modal.querySelector(".modal-xp");
   xpText.textContent = `You earned ${xpEarned} XP in this lesson.`;
+  const btn = modal.querySelector("button");
+  btn.onclick = () => {
+    modal.classList.remove("show");
+    if (typeof onContinue === "function") onContinue();
+  };
   modal.classList.add("show");
 }
 
@@ -375,6 +385,16 @@ function startNextUnlockedLesson() {
   });
   if (!target) target = flat[0];
   startLesson(target, target.world);
+}
+
+function getNextLesson(currentId) {
+  const flat = [];
+  lessonData.worlds.forEach((w) => w.lessons.forEach((l) => flat.push({ lesson: l, world: w })));
+  const idx = flat.findIndex((i) => i.lesson.id === currentId);
+  if (idx >= 0 && idx < flat.length - 1) {
+    return flat[idx + 1];
+  }
+  return null;
 }
 
 // Modal helpers for nav buttons
