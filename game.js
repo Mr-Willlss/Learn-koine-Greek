@@ -2,7 +2,9 @@
 let vocabDatabase = [];
 let currentLesson = null;
 let currentExerciseIndex = 0;
-let currentSelection = null;`nlet lessonXpEarned = 0;
+let currentSelection = null;
+let lessonXpEarned = 0;
+let userOptions = { sound: true, autoSave: true, brightness: "normal" };
 
 const progressState = {
   xp: 0,
@@ -14,9 +16,32 @@ const progressState = {
 
 function toast(message) {
   const toastEl = document.getElementById("toast");
+  if (!toastEl) return;
   toastEl.textContent = message;
   toastEl.classList.add("show");
   setTimeout(() => toastEl.classList.remove("show"), 2400);
+}
+
+function ensureModalShell() {
+  let modal = document.getElementById("app-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "app-modal";
+    modal.className = "modal-overlay";
+    modal.innerHTML = `<div class="modal-card"><h3 class="modal-title"></h3><div class="modal-body"></div><button class="btn" id="modal-close">Close</button></div>`;
+    document.body.appendChild(modal);
+    modal.querySelector("#modal-close").addEventListener("click", () => modal.classList.remove("show"));
+  }
+  return modal;
+}
+
+function showModal(title, bodyNode) {
+  const modal = ensureModalShell();
+  modal.querySelector(".modal-title").textContent = title;
+  const body = modal.querySelector(".modal-body");
+  body.innerHTML = "";
+  if (bodyNode) body.appendChild(bodyNode);
+  modal.classList.add("show");
 }
 
 function updateStats() {
@@ -45,9 +70,7 @@ function getProgressPayload() {
 }
 
 function applyProgress(payload) {
-  if (!payload) {
-    return;
-  }
+  if (!payload) return;
   progressState.xp = payload.xp || 0;
   progressState.level = payload.level || 1;
   progressState.hearts = payload.hearts || 5;
@@ -60,7 +83,9 @@ function applyProgress(payload) {
 }
 
 function saveLocalProgress() {
-  localStorage.setItem("greekQuestProgress", JSON.stringify(getProgressPayload()));
+  if (userOptions.autoSave) {
+    localStorage.setItem("greekQuestProgress", JSON.stringify(getProgressPayload()));
+  }
   syncProgress();
 }
 
@@ -72,21 +97,15 @@ function loadLocalProgress() {
 }
 
 function normalizeVocabEntry(item) {
-  // Support both schemas:
-  // - { greek, english }
-  // - { greek, meaning }
   const english = item.english || item.meaning || "";
   const transliteration = item.transliteration || item.translit || "";
   return { ...item, english, transliteration };
 }
 
 function loadVocabDatabase() {
-  // Online-only: fetch from JSON.
   return fetch("vocabDatabase.json", { cache: "force-cache" })
     .then((res) => {
-      if (!res.ok) {
-        throw new Error("Failed to load vocabDatabase.json");
-      }
+      if (!res.ok) throw new Error("Failed to load vocabDatabase.json");
       return res.json();
     })
     .then((data) => (data || []).map(normalizeVocabEntry));
@@ -124,28 +143,15 @@ function renderExercise() {
 
   if (exercise.type === "vocab-recognition" || exercise.type === "listening") {
     const vocab = exercise.vocab || vocabDatabase[0];
-    if (!vocab) {
-      const fallback = document.createElement("p");
-      fallback.textContent = "No vocabulary available yet.";
-      wrapper.appendChild(fallback);
-      body.appendChild(wrapper);
-      return;
-    }
-    exercise.vocab = vocab;
-
+    if (!vocab) { body.textContent = "No vocab loaded."; return; }
     const playBtn = document.createElement("button");
     playBtn.className = "btn ghost";
     playBtn.textContent = "Play";
     playBtn.addEventListener("click", () => speakGreek(vocab.greek));
     wrapper.appendChild(playBtn);
 
-    const distractors = shuffleArray(
-      (vocabDatabase || [])
-        .map((v) => v.english)
-        .filter((word) => word && word !== vocab.english)
-    ).slice(0, 3);
+    const distractors = shuffleArray((vocabDatabase || []).map((v) => v.english).filter((w) => w && w !== vocab.english)).slice(0, 3);
     const choices = shuffleArray([vocab.english, ...distractors]);
-
     const grid = document.createElement("div");
     grid.className = "choice-grid";
     choices.forEach((choice) => {
@@ -164,15 +170,7 @@ function renderExercise() {
 
   if (exercise.type === "pronunciation") {
     const vocab = exercise.vocab || vocabDatabase[0];
-    if (!vocab) {
-      const fallback = document.createElement("p");
-      fallback.textContent = "No vocabulary available yet.";
-      wrapper.appendChild(fallback);
-      body.appendChild(wrapper);
-      return;
-    }
-    exercise.vocab = vocab;
-
+    if (!vocab) { body.textContent = "No vocab loaded."; return; }
     const speakBtn = document.createElement("button");
     speakBtn.className = "btn";
     speakBtn.textContent = "Speak";
@@ -188,7 +186,6 @@ function renderExercise() {
   if (exercise.type === "sentence-builder") {
     const bank = document.createElement("div");
     bank.className = "drag-bank";
-
     const target = document.createElement("div");
     target.className = "drag-target";
 
@@ -201,34 +198,22 @@ function renderExercise() {
       });
       bank.appendChild(chip);
     });
-
     wrapper.appendChild(bank);
     wrapper.appendChild(target);
-
     currentSelection = () => Array.from(target.children).map((c) => c.textContent).join(" ");
   }
 
   if (exercise.type === "translation") {
     const vocab = exercise.vocab || vocabDatabase[0];
-    if (!vocab) {
-      const fallback = document.createElement("p");
-      fallback.textContent = "No vocabulary available yet.";
-      wrapper.appendChild(fallback);
-      body.appendChild(wrapper);
-      return;
-    }
-    exercise.vocab = vocab;
-
+    if (!vocab) { body.textContent = "No vocab loaded."; return; }
     const text = document.createElement("p");
     text.textContent = `Greek: ${vocab.greek}`;
-
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Type the translation";
     input.addEventListener("input", () => {
       currentSelection = input.value.trim();
     });
-
     wrapper.appendChild(text);
     wrapper.appendChild(input);
   }
@@ -243,15 +228,12 @@ function checkAnswer() {
   if (exercise.type === "vocab-recognition" || exercise.type === "listening") {
     correct = currentSelection === exercise.vocab.english;
   }
-
   if (exercise.type === "pronunciation") {
     correct = currentSelection && currentSelection.score >= 60;
   }
-
   if (exercise.type === "sentence-builder") {
     correct = typeof currentSelection === "function" && currentSelection().trim() === exercise.sentence;
   }
-
   if (exercise.type === "translation") {
     correct = currentSelection && currentSelection.toLowerCase() === exercise.vocab.english.toLowerCase();
   }
@@ -259,9 +241,7 @@ function checkAnswer() {
   if (correct) {
     progressState.xp += 5;
     lessonXpEarned += 5;
-    if (progressState.xp % 50 === 0) {
-      progressState.level += 1;
-    }
+    if (progressState.xp % 50 === 0) progressState.level += 1;
     setTeacherMood("happy");
     teacherSpeak("Great job!");
     updateSpacedRepetition(exercise.vocab?.id, true);
@@ -289,7 +269,6 @@ function finishLesson() {
     progressState.xp += currentLesson.xp;
     lessonXpEarned += currentLesson.xp;
   }
-
   updateStats();
   updateProgressBar();
   renderMap(progressState);
@@ -321,17 +300,37 @@ function showLessonCompleteModal(xpEarned) {
 }
 
 function shuffleArray(array) {
-  return array.sort(() => Math.random() - 0.5);
+  return [...array].sort(() => Math.random() - 0.5);
 }
 
 function registerEvents() {
-  document.getElementById("check-btn").addEventListener("click", checkAnswer);
-  document.getElementById("hint-btn").addEventListener("click", () => {
-    toast("Hint: listen carefully to the Greek sound.");
-  });
-  document.getElementById("sign-in-btn").addEventListener("click", signInWithGoogle);
+  const checkBtn = document.getElementById("check-btn");
+  if (checkBtn) checkBtn.addEventListener("click", checkAnswer);
+  const hintBtn = document.getElementById("hint-btn");
+  if (hintBtn) hintBtn.addEventListener("click", () => toast("Hint: listen carefully to the Greek sound."));
+  const signInBtn = document.getElementById("sign-in-btn");
+  if (signInBtn) signInBtn.addEventListener("click", openAuthModal);
+  const logInBtn = document.getElementById("log-in-btn");
+  if (logInBtn) logInBtn.addEventListener("click", openAuthModal);
 
-  document.querySelector(".logo").addEventListener("click", () => {
+  const mapBtn = document.getElementById("map-btn");
+  if (mapBtn) mapBtn.addEventListener("click", openMapModal);
+  const profileBtn = document.getElementById("profile-btn");
+  if (profileBtn) profileBtn.addEventListener("click", openProfileModal);
+  const optionsBtn = document.getElementById("options-btn");
+  if (optionsBtn) optionsBtn.addEventListener("click", openOptionsModal);
+  const contactBtn = document.getElementById("contact-btn");
+  if (contactBtn) contactBtn.addEventListener("click", openContactModal);
+  const aboutBtn = document.getElementById("about-btn");
+  if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
+
+  const resumeBtn = document.getElementById("resume-btn");
+  if (resumeBtn) resumeBtn.addEventListener("click", () => startNextUnlockedLesson());
+  const startNewBtn = document.getElementById("start-new-btn");
+  if (startNewBtn) startNewBtn.addEventListener("click", () => startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]));
+
+  const logo = document.querySelector(".logo, .side-logo");
+  if (logo) logo.addEventListener("click", () => {
     document.getElementById("lesson-title").textContent = "Welcome";
     document.getElementById("lesson-type").textContent = "Choose a lesson to begin";
     document.getElementById("lesson-xp").textContent = "+0 XP";
@@ -339,7 +338,9 @@ function registerEvents() {
 }
 
 function initApp() {
+  loadOptions();
   registerEvents();
+  playStartupChime();
 
   loadVocabDatabase()
     .then((data) => {
@@ -349,6 +350,7 @@ function initApp() {
       renderMap(progressState);
       updateStats();
       updateProgressBar();
+      setTimeout(hideIntro, 800);
     })
     .catch((err) => {
       console.error(err);
@@ -356,14 +358,145 @@ function initApp() {
       renderMap(progressState);
       updateStats();
       updateProgressBar();
+      setTimeout(hideIntro, 800);
     });
 }
 
-initApp();
+document.addEventListener("DOMContentLoaded", initApp);
 
+function startNextUnlockedLesson() {
+  const flat = [];
+  lessonData.worlds.forEach((w) => w.lessons.forEach((l) => flat.push({ ...l, world: w })));
+  const completed = new Set(progressState.completedLessons);
+  let target = flat.find((l, idx) => {
+    const prev = flat[idx - 1];
+    const unlocked = idx === 0 || completed.has(prev.id);
+    return unlocked && !completed.has(l.id);
+  });
+  if (!target) target = flat[0];
+  startLesson(target, target.world);
+}
 
+// Modal helpers for nav buttons
+function openMapModal() {
+  const container = document.createElement("div");
+  const flat = [];
+  lessonData.worlds.forEach((w) => w.lessons.forEach((l) => flat.push({ lesson: l, world: w })));
+  flat.forEach((item, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "level-chip " + (progressState.completedLessons.includes(item.lesson.id) ? "completed" : "unlocked");
+    btn.style.margin = "4px";
+    btn.textContent = `${idx + 1}. ${item.lesson.title}`;
+    btn.addEventListener("click", () => {
+      startLesson(item.lesson, item.world);
+      document.getElementById("app-modal").classList.remove("show");
+    });
+    container.appendChild(btn);
+  });
+  showModal("All Lessons", container);
+}
 
+function openProfileModal() {
+  const body = document.createElement("div");
+  const user = (window.firebase && window.firebase.auth && firebase.auth().currentUser) || null;
+  if (user) {
+    body.innerHTML = `<p><strong>Name:</strong> ${user.displayName || "Anonymous"}</p><p><strong>Email:</strong> ${user.email || "N/A"}</p>`;
+  } else {
+    const p = document.createElement("p");
+    p.textContent = "Please sign in with Google to view your profile.";
+    body.appendChild(p);
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = "Sign in with Google";
+    btn.addEventListener("click", () => signInWithGoogle());
+    body.appendChild(btn);
+  }
+  showModal("Profile", body);
+}
 
+function openOptionsModal() {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <label><input type="checkbox" id="opt-sound"> Sound on</label><br>
+    <label><input type="checkbox" id="opt-autosave"> Auto-save progress</label><br>
+    <label>Brightness:
+      <select id="opt-brightness">
+        <option value="normal">Normal</option>
+        <option value="dim">Dim</option>
+      </select>
+    </label>
+  `;
+  wrap.querySelector("#opt-sound").checked = userOptions.sound;
+  wrap.querySelector("#opt-autosave").checked = userOptions.autoSave;
+  wrap.querySelector("#opt-brightness").value = userOptions.brightness;
+  wrap.querySelectorAll("input,select").forEach((el) => el.addEventListener("change", saveOptions));
+  showModal("Settings", wrap);
+}
 
+function saveOptions() {
+  const modal = document.getElementById("app-modal");
+  if (!modal) return;
+  userOptions.sound = modal.querySelector("#opt-sound").checked;
+  userOptions.autoSave = modal.querySelector("#opt-autosave").checked;
+  userOptions.brightness = modal.querySelector("#opt-brightness").value;
+  localStorage.setItem("gqOptions", JSON.stringify(userOptions));
+  document.body.style.filter = userOptions.brightness === "dim" ? "brightness(0.9)" : "none";
+}
 
+function loadOptions() {
+  const stored = localStorage.getItem("gqOptions");
+  if (stored) {
+    try { userOptions = JSON.parse(stored); } catch (e) {}
+  }
+  document.body.style.filter = userOptions.brightness === "dim" ? "brightness(0.9)" : "none";
+}
 
+function openContactModal() {
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <p style="font-size:2rem">📞</p>
+    <p><strong>WhatsApp:</strong> 09073638440</p>
+    <p class="muted">Feel free to reach out to us incase of any bug or observed problem (note: this website is still in it's testing phase)</p>
+  `;
+  showModal("Contact us", wrap);
+}
+
+function openAuthModal() {
+  const wrap = document.createElement("div");
+  const btn = document.createElement("button");
+  btn.className = "btn";
+  btn.textContent = "Sign in with Google";
+  btn.addEventListener("click", () => {
+    signInWithGoogle();
+    const modal = document.getElementById("app-modal");
+    if (modal) modal.classList.remove("show");
+  });
+  wrap.appendChild(btn);
+  showModal("Login", wrap);
+}
+
+// Startup chime + intro overlay
+function playStartupChime() {
+  if (!userOptions.sound) return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  const ctx = new AudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 660;
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.65);
+}
+
+function hideIntro() {
+  const intro = document.getElementById("intro-overlay");
+  if (intro) {
+    intro.classList.add("hide");
+    setTimeout(() => intro.remove(), 700);
+  }
+}

@@ -1,48 +1,60 @@
-﻿// Map rendering with lesson bubbles and connectors.
+// Map rendering redesigned as world cards with level chips.
 function renderMap(progress) {
   const map = document.getElementById("world-map");
+  if (!map || !window.lessonData || !Array.isArray(lessonData.worlds)) return;
   map.innerHTML = "";
-  const bubbles = [];
+
+  const worldsWrap = document.createElement("div");
+  worldsWrap.className = "worlds";
+
+  // Build a flattened lessons array without flatMap for wider compatibility.
+  const flatLessons = [];
+  lessonData.worlds.forEach((w) => {
+    w.lessons.forEach((l) => flatLessons.push(l));
+  });
 
   lessonData.worlds.forEach((world, worldIndex) => {
-    world.lessons.forEach((lesson, lessonIndex) => {
-      const bubble = document.createElement("div");
-      bubble.className = "lesson-bubble";
-      const unlocked = progress.completedLessons.length >= bubbles.length;
-      bubble.classList.add(unlocked ? "unlocked" : "locked");
-      if (progress.completedLessons.includes(lesson.id)) {
-        bubble.classList.add("completed");
-      }
-      bubble.textContent = lesson.title;
-      bubble.style.top = `${40 + (worldIndex * 90) + (lessonIndex * 20)}px`;
-      bubble.style.left = `${60 + (lessonIndex * 120)}px`;
-      bubble.addEventListener("click", () => {
-        if (!unlocked) {
-          return;
-        }
+    const card = document.createElement("div");
+    card.className = "world-card";
+
+    const header = document.createElement("div");
+    header.className = "world-card__header";
+    header.innerHTML = `<div><p class="eyebrow">World ${worldIndex + 1}</p><h3>${world.title}</h3></div>`;
+
+    const worldLessons = world.lessons;
+    const completedCount = worldLessons.filter((l) => progress.completedLessons.includes(l.id)).length;
+    const pct = Math.round((completedCount / worldLessons.length) * 100);
+    const bar = document.createElement("div");
+    bar.className = "world-card__progress";
+    bar.innerHTML = `<div class="world-card__bar"><span style="width:${pct}%"></span></div><span class="world-card__pct">${pct}%</span>`;
+
+    header.appendChild(bar);
+    card.appendChild(header);
+
+    const levelGrid = document.createElement("div");
+    levelGrid.className = "level-grid";
+
+    worldLessons.forEach((lesson, lessonIndex) => {
+      const chip = document.createElement("button");
+      chip.className = "level-chip";
+      const flatIndex = flatLessons.findIndex((l) => l.id === lesson.id);
+      const prev = flatLessons[flatIndex - 1];
+      const unlocked = flatIndex === 0 || progress.completedLessons.includes(prev?.id);
+      const completed = progress.completedLessons.includes(lesson.id);
+
+      chip.classList.add(unlocked ? "unlocked" : "locked");
+      if (completed) chip.classList.add("completed");
+      chip.textContent = lesson.title;
+      chip.addEventListener("click", () => {
+        if (!unlocked) return;
         startLesson(lesson, world);
       });
-      map.appendChild(bubble);
-      bubbles.push(bubble);
+      levelGrid.appendChild(chip);
     });
+
+    card.appendChild(levelGrid);
+    worldsWrap.appendChild(card);
   });
 
-  // Simple connector paths.
-  bubbles.forEach((bubble, index) => {
-    if (index === 0) {
-      return;
-    }
-    const prev = bubbles[index - 1];
-    const path = document.createElement("div");
-    path.className = "map-path";
-    const x1 = prev.offsetLeft + 32;
-    const y1 = prev.offsetTop + 32;
-    const x2 = bubble.offsetLeft + 32;
-    const y2 = bubble.offsetTop + 32;
-    const height = Math.abs(y2 - y1);
-    path.style.height = `${Math.max(height, 60)}px`;
-    path.style.left = `${Math.min(x1, x2)}px`;
-    path.style.top = `${Math.min(y1, y2)}px`;
-    map.appendChild(path);
-  });
+  map.appendChild(worldsWrap);
 }
