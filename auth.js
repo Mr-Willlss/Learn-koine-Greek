@@ -53,9 +53,14 @@ function signInWithGoogle() {
   }
 
   const provider = new firebase.auth.GoogleAuthProvider();
+  auth.useDeviceLanguage();
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-  const doRedirect = () => auth.signInWithRedirect(provider).catch((err) => toast(err.message));
+  const doRedirect = () =>
+    auth
+      .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => auth.signInWithRedirect(provider))
+      .catch((err) => toast(err.message));
 
   toast("Opening Google sign-in...");
 
@@ -65,7 +70,8 @@ function signInWithGoogle() {
   }
 
   auth
-    .signInWithPopup(provider)
+    .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => auth.signInWithPopup(provider))
     .catch((error) => {
       if (
         error.code === "auth/operation-not-supported-in-this-environment" ||
