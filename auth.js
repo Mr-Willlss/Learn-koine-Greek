@@ -47,15 +47,35 @@ function signInWithGoogle() {
   }
 
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch((error) => {
-    toast(error.message);
-  });
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  const doRedirect = () => auth.signInWithRedirect(provider).catch((err) => toast(err.message));
+
+  if (isMobile) {
+    doRedirect();
+    return;
+  }
+
+  auth
+    .signInWithPopup(provider)
+    .catch((error) => {
+      if (
+        error.code === "auth/operation-not-supported-in-this-environment" ||
+        error.code === "auth/popup-blocked" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        doRedirect();
+      } else {
+        toast(error.message);
+      }
+    });
 }
 
 function observeAuth() {
   if (!auth) {
     return;
   }
+  auth.getRedirectResult().catch((error) => toast(error.message));
   auth.onAuthStateChanged((user) => {
     authState.user = user || null;
     if (user) {
