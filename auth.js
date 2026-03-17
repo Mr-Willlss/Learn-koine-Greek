@@ -51,6 +51,8 @@ function signInWithGoogle() {
 
   const doRedirect = () => auth.signInWithRedirect(provider).catch((err) => toast(err.message));
 
+  toast("Opening Google sign-in...");
+
   if (isMobile) {
     doRedirect();
     return;
@@ -75,7 +77,10 @@ function observeAuth() {
   if (!auth) {
     return;
   }
-  auth.getRedirectResult().catch((error) => toast(error.message));
+  auth.getRedirectResult().catch((error) => {
+    console.error("Redirect error", error);
+    toast(error.message || "Sign-in failed. Check authorized domain.");
+  });
   auth.onAuthStateChanged((user) => {
     authState.user = user || null;
     if (user) {
