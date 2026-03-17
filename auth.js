@@ -23,7 +23,26 @@ function signInWithGoogle() {
   const st = window.GreekQuestFirebaseState;
 
   if (!st || !st.configured || !auth) {
-    toast(st?.reason || "Firebase not configured.");
+    const msg = st?.reason || "Firebase not configured.";
+    toast(msg);
+    if (typeof showModal === "function") {
+      const body = document.createElement("div");
+      body.innerHTML = `<p>${msg}</p><p>Sign-in requires hosting over https:// (or http://localhost) with a valid Firebase web config.</p>`;
+      showModal("Sign-in blocked", body);
+    }
+    return;
+  }
+
+  // Extra guard for insecure context
+  const secure = location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  if (!secure) {
+    const note = "Google sign-in needs https:// or http://localhost. Current context is blocked (likely a firewall/security restriction).";
+    toast(note);
+    if (typeof showModal === "function") {
+      const body = document.createElement("div");
+      body.innerHTML = `<p>${note}</p><p>Please host the folder with a local server (e.g., VS Code Live Server) or deploy to GitHub Pages.</p>`;
+      showModal("Sign-in blocked", body);
+    }
     return;
   }
 

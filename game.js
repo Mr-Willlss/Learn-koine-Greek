@@ -317,7 +317,7 @@ function registerEvents() {
   const checkBtn = document.getElementById("check-btn");
   if (checkBtn) checkBtn.addEventListener("click", checkAnswer);
   const hintBtn = document.getElementById("hint-btn");
-  if (hintBtn) hintBtn.addEventListener("click", () => toast("Hint: listen carefully to the Greek sound."));
+  if (hintBtn) hintBtn.addEventListener("click", showHint);
   const signInBtn = document.getElementById("sign-in-btn");
   if (signInBtn) signInBtn.addEventListener("click", openAuthModal);
   const logInBtn = document.getElementById("log-in-btn");
@@ -345,6 +345,24 @@ function registerEvents() {
     document.getElementById("lesson-type").textContent = "Choose a lesson to begin";
     document.getElementById("lesson-xp").textContent = "+0 XP";
   });
+}
+
+function showHint() {
+  const ex = currentLesson?.exercises?.[currentExerciseIndex];
+  if (!ex) {
+    toast("Hint: pick a lesson to begin.");
+    return;
+  }
+  if (ex.vocab) {
+    const translit = ex.vocab.transliteration || "(listen for the sound)";
+    toast(`Hint: ${ex.vocab.greek || "Listen"} (${translit})`);
+    return;
+  }
+  if (ex.type === "sentence-builder" && ex.sentence) {
+    toast(`Hint: Order should be "${ex.sentence}".`);
+    return;
+  }
+  toast("Hint: listen carefully to the Greek sound.");
 }
 
 function initApp() {
