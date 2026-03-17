@@ -1,16 +1,14 @@
-﻿// Firebase bootstrapping.
-//
-// Notes:
-// - Google sign-in requires running on http://localhost or https:// (not file://).
-// - Fill firebaseConfig with your project settings to enable login + cloud sync.
+﻿// Firebase bootstrapping (compat build).
+// Requires the compat CDN scripts loaded in index.html.
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+  authDomain: "learn-basic-greek.firebaseapp.com",
+  projectId: "learn-basic-greek",
+  storageBucket: "learn-basic-greek.firebasestorage.app",
+  messagingSenderId: "628557836662",
+  appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+  measurementId: "G-6BYGXRJFT"
 };
 
 let app = null;
@@ -22,39 +20,33 @@ const firebaseState = {
   reason: ""
 };
 
-function isPlaceholderConfig() {
-  return !firebaseConfig || firebaseConfig.apiKey === "YOUR_API_KEY";
-}
-
 function initFirebase() {
-  // Firebase Auth popups generally require a secure context.
-  if (!(location.protocol === "http:" || location.protocol === "https:")) {
-    firebaseState.configured = false;
-    firebaseState.reason = "Run this app from a hosted URL (https:// or http://localhost), not file://.";
-    return;
-  }
-
   if (!window.firebase) {
     firebaseState.configured = false;
     firebaseState.reason = "Firebase SDK did not load.";
+    window.GreekQuestFirebaseState = firebaseState;
     return;
   }
 
-  if (isPlaceholderConfig()) {
+  const secure = location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  if (!secure) {
     firebaseState.configured = false;
-    firebaseState.reason = "Firebase is not configured. Edit firebase.js and paste your Firebase web config.";
+    firebaseState.reason = "Google sign-in needs https:// or http://localhost.";
+    window.GreekQuestFirebaseState = firebaseState;
     return;
   }
 
-  app = firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-
-  firebaseState.configured = true;
-  firebaseState.reason = "";
+  try {
+    app = firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseState.configured = true;
+    firebaseState.reason = "";
+  } catch (e) {
+    firebaseState.configured = false;
+    firebaseState.reason = e.message;
+  }
+  window.GreekQuestFirebaseState = firebaseState;
 }
 
 initFirebase();
-
-// Expose status so auth.js can adjust the UI.
-window.GreekQuestFirebaseState = firebaseState;

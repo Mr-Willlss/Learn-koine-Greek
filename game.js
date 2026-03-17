@@ -112,11 +112,7 @@ function loadVocabDatabase() {
 }
 
 function startLesson(lesson, world) {
-  if (typeof authState !== "undefined" && !authState.user) {
-    openAuthModal();
-    toast("Please sign in with Google to play.");
-    return;
-  }
+  if (!requireSignIn()) return;
   currentLesson = { ...lesson, worldId: world.id };
   currentExerciseIndex = 0;
   lessonXpEarned = 0;
@@ -335,9 +331,9 @@ function registerEvents() {
   if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
 
   const resumeBtn = document.getElementById("resume-btn");
-  if (resumeBtn) resumeBtn.addEventListener("click", () => startNextUnlockedLesson());
+  if (resumeBtn) resumeBtn.addEventListener("click", () => { if (requireSignIn()) startNextUnlockedLesson(); });
   const startNewBtn = document.getElementById("start-new-btn");
-  if (startNewBtn) startNewBtn.addEventListener("click", () => startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]));
+  if (startNewBtn) startNewBtn.addEventListener("click", () => { if (requireSignIn()) startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]); });
 
   const logo = document.querySelector(".logo, .side-logo");
   if (logo) logo.addEventListener("click", () => {
@@ -345,6 +341,8 @@ function registerEvents() {
     document.getElementById("lesson-type").textContent = "Choose a lesson to begin";
     document.getElementById("lesson-xp").textContent = "+0 XP";
   });
+
+  window.addEventListener("gq-auth-changed", handleAuthChange);
 }
 
 function showHint() {
@@ -369,6 +367,7 @@ function initApp() {
   loadOptions();
   registerEvents();
   playStartupChime();
+  lockUI(!isSignedIn());
 
   loadVocabDatabase()
     .then((data) => {
@@ -379,6 +378,10 @@ function initApp() {
       updateStats();
       updateProgressBar();
       setTimeout(hideIntro, 800);
+      if (!isSignedIn()) {
+        openAuthModal();
+        lockUI(true);
+      }
     })
     .catch((err) => {
       console.error(err);
@@ -387,6 +390,10 @@ function initApp() {
       updateStats();
       updateProgressBar();
       setTimeout(hideIntro, 800);
+      if (!isSignedIn()) {
+        openAuthModal();
+        lockUI(true);
+      }
     });
 }
 
@@ -413,6 +420,36 @@ function getNextLesson(currentId) {
     return flat[idx + 1];
   }
   return null;
+}
+
+function isSignedIn() {
+  return typeof authState !== "undefined" && !!authState.user;
+}
+
+function requireSignIn() {
+  if (isSignedIn()) return true;
+  openAuthModal();
+  toast("Please sign in with Google to play.");
+  return false;
+}
+
+function lockUI(locked) {
+  const ids = ["check-btn","hint-btn","resume-btn","start-new-btn","map-btn","profile-btn","options-btn","contact-btn","about-btn"];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = locked;
+  });
+}
+
+function handleAuthChange() {
+  const signedIn = isSignedIn();
+  lockUI(!signedIn);
+  if (signedIn) {
+    loadLocalProgress();
+    renderMap(progressState);
+    updateStats();
+    updateProgressBar();
+  }
 }
 
 // Modal helpers for nav buttons

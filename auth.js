@@ -64,6 +64,7 @@ function observeAuth() {
     } else {
       toast("Signed out. Using local progress.");
     }
+    window.dispatchEvent(new CustomEvent("gq-auth-changed", { detail: { user: authState.user } }));
   });
 }
 
