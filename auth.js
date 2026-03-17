@@ -4,19 +4,25 @@ const authState = {
 };
 
 function updateAuthButton() {
-  const btn = document.getElementById("sign-in-btn");
-  if (!btn) return;
+  const signBtn = document.getElementById("sign-in-btn");
+  const logBtn = document.getElementById("log-in-btn");
+  const outBtn = document.getElementById("logout-btn");
+  if (!signBtn || !logBtn || !outBtn) return;
 
   const st = window.GreekQuestFirebaseState;
 
   if (!st || !st.configured) {
-    btn.disabled = true;
-    btn.title = st?.reason || "Firebase not configured.";
+    [signBtn, logBtn, outBtn].forEach((btn) => {
+      btn.disabled = true;
+      btn.title = st?.reason || "Firebase not configured.";
+    });
     return;
   }
 
-  btn.disabled = false;
-  btn.title = "";
+  [signBtn, logBtn, outBtn].forEach((btn) => {
+    btn.disabled = false;
+    btn.title = "";
+  });
 }
 
 function signInWithGoogle() {
@@ -89,6 +95,15 @@ function observeAuth() {
     } else {
       toast("Signed out. Using local progress.");
     }
+    const signBtn = document.getElementById("sign-in-btn");
+    const logBtn = document.getElementById("log-in-btn");
+    const outBtn = document.getElementById("logout-btn");
+    if (signBtn && logBtn && outBtn) {
+      const signedIn = !!user;
+      signBtn.style.display = signedIn ? "none" : "";
+      logBtn.style.display = signedIn ? "none" : "";
+      outBtn.style.display = signedIn ? "" : "none";
+    }
     window.dispatchEvent(new CustomEvent("gq-auth-changed", { detail: { user: authState.user } }));
   });
 }
@@ -120,6 +135,14 @@ function syncProgress() {
   if (authState.user) {
     saveRemoteProgress(authState.user.uid);
   }
+}
+
+function signOutUser() {
+  if (!auth) {
+    toast("Firebase not ready.");
+    return;
+  }
+  auth.signOut().catch((err) => toast(err.message));
 }
 
 document.addEventListener("DOMContentLoaded", () => {

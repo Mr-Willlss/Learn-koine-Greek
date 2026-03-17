@@ -371,9 +371,11 @@ function registerEvents() {
   const hintBtn = document.getElementById("hint-btn");
   if (hintBtn) hintBtn.addEventListener("click", showHint);
   const signInBtn = document.getElementById("sign-in-btn");
-  if (signInBtn) signInBtn.addEventListener("click", openAuthModal);
+  if (signInBtn) signInBtn.addEventListener("click", signInWithGoogle);
   const logInBtn = document.getElementById("log-in-btn");
-  if (logInBtn) logInBtn.addEventListener("click", openAuthModal);
+  if (logInBtn) logInBtn.addEventListener("click", signInWithGoogle);
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) logoutBtn.addEventListener("click", signOutUser);
 
   const mapBtn = document.getElementById("map-btn");
   if (mapBtn) mapBtn.addEventListener("click", openMapModal);
@@ -390,9 +392,6 @@ function registerEvents() {
   if (resumeBtn) resumeBtn.addEventListener("click", () => { if (requireSignIn()) startNextUnlockedLesson(); });
   const startNewBtn = document.getElementById("start-new-btn");
   if (startNewBtn) startNewBtn.addEventListener("click", confirmStartNew);
-  const lockSignin = document.getElementById("lock-signin");
-  if (lockSignin) lockSignin.addEventListener("click", () => openAuthModal());
-
   const logo = document.querySelector(".logo, .side-logo");
   if (logo) logo.addEventListener("click", () => {
     document.getElementById("lesson-title").textContent = "Welcome";
@@ -522,7 +521,6 @@ function isSignedIn() {
 
 function requireSignIn() {
   if (isSignedIn()) return true;
-  openAuthModal();
   toast("Please sign in with Google to play.");
   return false;
 }
@@ -543,11 +541,6 @@ function handleAuthChange() {
     renderMap(progressState);
     updateStats();
     updateProgressBar();
-    const lock = document.getElementById("auth-lock");
-    if (lock) lock.classList.remove("show");
-  } else {
-    const lock = document.getElementById("auth-lock");
-    if (lock) lock.classList.add("show");
   }
 }
 
@@ -651,27 +644,7 @@ function openContactModal() {
   showModal("Contact us", wrap);
 }
 
-function openAuthModal() {
-  // On mobile, skip modal and jump straight to Google auth
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-  if (isMobile) {
-    signInWithGoogle();
-    return;
-  }
-  const wrap = document.createElement("div");
-  const btn = document.createElement("button");
-  btn.className = "btn";
-  btn.textContent = "Sign in with Google";
-  btn.addEventListener("click", () => {
-    signInWithGoogle();
-    const modal = document.getElementById("app-modal");
-    if (modal) modal.classList.remove("show");
-  });
-  wrap.appendChild(btn);
-  showModal("Login", wrap);
-  const lock = document.getElementById("auth-lock");
-  if (lock) lock.classList.add("show");
-}
+// No auth modal. Sign-in is handled directly by the sidebar buttons.
 
 // Startup chime + intro overlay
 function playStartupChime() {
