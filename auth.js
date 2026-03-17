@@ -83,29 +83,34 @@ function observeAuth() {
   if (!auth) {
     return;
   }
-  auth.getRedirectResult().catch((error) => {
-    console.error("Redirect error", error);
-    toast(error.message || "Sign-in failed. Check authorized domain.");
-  });
-  auth.onAuthStateChanged((user) => {
-    authState.user = user || null;
-    if (user) {
-      toast(`Signed in as ${user.displayName || user.email}`);
-      loadRemoteProgress(user.uid);
-    } else {
-      toast("Signed out. Using local progress.");
-    }
-    const signBtn = document.getElementById("sign-in-btn");
-    const logBtn = document.getElementById("log-in-btn");
-    const outBtn = document.getElementById("logout-btn");
-    if (signBtn && logBtn && outBtn) {
-      const signedIn = !!user;
-      signBtn.style.display = signedIn ? "none" : "";
-      logBtn.style.display = signedIn ? "none" : "";
-      outBtn.style.display = signedIn ? "" : "none";
-    }
-    window.dispatchEvent(new CustomEvent("gq-auth-changed", { detail: { user: authState.user } }));
-  });
+  auth
+    .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => auth.getRedirectResult())
+    .catch((error) => {
+      console.error("Redirect error", error);
+      toast(error.message || "Sign-in failed. Check authorized domain.");
+    })
+    .finally(() => {
+      auth.onAuthStateChanged((user) => {
+        authState.user = user || null;
+        if (user) {
+          toast(`Signed in as ${user.displayName || user.email}`);
+          loadRemoteProgress(user.uid);
+        } else {
+          toast("Not signed in. Progress will stay on this device.");
+        }
+        const signBtn = document.getElementById("sign-in-btn");
+        const logBtn = document.getElementById("log-in-btn");
+        const outBtn = document.getElementById("logout-btn");
+        if (signBtn && logBtn && outBtn) {
+          const signedIn = !!user;
+          signBtn.style.display = signedIn ? "none" : "";
+          logBtn.style.display = signedIn ? "none" : "";
+          outBtn.style.display = signedIn ? "" : "none";
+        }
+        window.dispatchEvent(new CustomEvent("gq-auth-changed", { detail: { user: authState.user } }));
+      });
+    });
 }
 
 function loadRemoteProgress(uid) {
