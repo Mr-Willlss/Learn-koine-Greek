@@ -112,13 +112,19 @@ function listenForGreek(expected, callback) {
   const recognition = new SpeechRecognition();
   recognition.lang = "el-GR";
   recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
+  recognition.maxAlternatives = 5;
 
   recognition.start();
   recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript.trim();
-    const score = scorePronunciation(expected, transcript);
-    callback({ score, transcript });
+    const alts = Array.from(event.results[0] || []).map((r) => r.transcript.trim());
+    const best = alts.reduce(
+      (acc, t) => {
+        const s = scorePronunciation(expected, t);
+        return s > acc.score ? { score: s, transcript: t } : acc;
+      },
+      { score: 0, transcript: "" }
+    );
+    callback(best);
   };
   recognition.onerror = () => {
     callback({ score: 0, transcript: "" });
@@ -131,8 +137,8 @@ function scorePronunciation(expected, actual) {
     return 0;
   }
 
-  const normalizedExpected = expected.toLowerCase();
-  const normalizedActual = actual.toLowerCase();
+  const normalizedExpected = normalizeGreek(expected);
+  const normalizedActual = normalizeGreek(actual);
 
   let matches = 0;
   const minLength = Math.min(normalizedExpected.length, normalizedActual.length);
@@ -146,3 +152,20 @@ function scorePronunciation(expected, actual) {
 }
 
 initSpeech();
+
+function normalizeGreek(text) {
+  return (text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // strip accents/diacritics
+    .replace(/[^a-z\u0370-\u03ff\s]/g, "")
+    .replace(/\s+/g, "")
+    .replace(/ph/g, "f")
+    .replace(/th/g, "t")
+    .replace(/ch/g, "k")
+    .replace(/ps/g, "p")
+    .replace(/kh/g, "k")
+    .replace(/ou/g, "u")
+    .replace(/ei/g, "i")
+    .replace(/ai/g, "e");
+}
