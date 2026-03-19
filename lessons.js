@@ -95,13 +95,20 @@ function getLessonVocab(lessonNum, vocab, count) {
 
 function buildSentenceExercise(lessonNum, vocab) {
   const pool = (vocab || []).filter((v) => !lessonNum || v.lesson === lessonNum);
+  const reviewPool = (vocab || []).filter((v) => lessonNum > 1 && v.lesson === lessonNum - 1);
   const pick = pool.length ? pool : (vocab || []);
   const words = pick
     .map((v) => v.greek || v.transliteration || "")
     .filter((w) => w && w.trim().length > 0);
+  const reviewWords = reviewPool
+    .map((v) => v.greek || v.transliteration || "")
+    .filter((w) => w && w.trim().length > 0);
   const uniqueWords = Array.from(new Set(words));
 
-  let sentenceWords = uniqueWords.slice(0, 4);
+  let sentenceWords = uniqueWords.slice(0, 3);
+  if (reviewWords.length) {
+    sentenceWords.push(reviewWords[0]);
+  }
   if (sentenceWords.length < 3) {
     const allWords = (vocab || [])
       .map((v) => v.greek || v.transliteration || "")
@@ -124,13 +131,21 @@ function buildSentenceExercise(lessonNum, vocab) {
 function buildLessonExercises(lesson, vocab) {
   const lessonNum = parseInt((lesson.id || "").replace(/\D/g, ""), 10);
   const sample = getLessonVocab(lessonNum, vocab, 4);
+  const reviewSample = getLessonVocab(Math.max(1, lessonNum - 1), vocab, 3);
+
   const exercises = [
+    // New material
     { type: "vocab-recognition", prompt: "Listen and choose the correct meaning.", vocab: sample[0] },
     { type: "listening", prompt: "What did you hear?", vocab: sample[1] },
     { type: "pronunciation", prompt: "Speak the Greek word.", vocab: sample[2] },
     buildSentenceExercise(lessonNum, vocab),
-    { type: "translation", prompt: "Translate to English.", vocab: sample[3] }
+    { type: "translation", prompt: "Translate to English.", vocab: sample[3] },
+    // Review from previous lesson (builds on prior words)
+    { type: "vocab-recognition", prompt: "Review: choose the meaning.", vocab: reviewSample[0] },
+    { type: "listening", prompt: "Review: what did you hear?", vocab: reviewSample[1] },
+    { type: "translation", prompt: "Review: translate to English.", vocab: reviewSample[2] }
   ];
+
   return shuffleItems(exercises);
 }
 

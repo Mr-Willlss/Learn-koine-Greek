@@ -312,11 +312,15 @@ function checkAnswer() {
   updateStats();
   saveLocalProgress();
 
-  currentExerciseIndex += 1;
-  if (currentExerciseIndex >= currentLesson.exercises.length) {
-    finishLesson();
+  if (correct) {
+    currentExerciseIndex += 1;
+    if (currentExerciseIndex >= currentLesson.exercises.length) {
+      finishLesson();
+    } else {
+      renderExercise();
+    }
   } else {
-    renderExercise();
+    toast("Re-attempt required to continue.");
   }
 }
 
@@ -383,6 +387,8 @@ function registerEvents() {
   if (profileBtn) profileBtn.addEventListener("click", openProfileModal);
   const optionsBtn = document.getElementById("options-btn");
   if (optionsBtn) optionsBtn.addEventListener("click", openOptionsModal);
+  const tourBtn = document.getElementById("tour-btn");
+  if (tourBtn) tourBtn.addEventListener("click", startTour);
   const contactBtn = document.getElementById("contact-btn");
   if (contactBtn) contactBtn.addEventListener("click", openContactModal);
   const aboutBtn = document.getElementById("about-btn");
@@ -542,6 +548,67 @@ function handleAuthChange() {
     updateStats();
     updateProgressBar();
   }
+}
+
+// Guided tour with mascot
+const tourSteps = [
+  { target: ".side-logo", title: "Welcome!", text: "I am Aletheia, your guide. I'll show you around." },
+  { target: "#map-btn", title: "Map", text: "Open the map to pick any unlocked level." },
+  { target: "#profile-btn", title: "Profile", text: "See your Google profile after sign-in." },
+  { target: "#options-btn", title: "Options", text: "Adjust sound, brightness, autosave, and theme." },
+  { target: "#resume-btn", title: "Resume", text: "Jump back to your last saved level." },
+  { target: "#start-new-btn", title: "Start new lesson", text: "Reset and begin from Level 1." },
+  { target: "#world-map", title: "Worlds & Levels", text: "Each world contains levels that build on earlier words." },
+  { target: "#lesson-panel", title: "Lesson area", text: "Activities appear here. You must answer correctly to move on." },
+  { target: "#check-btn", title: "Check", text: "Submit your answer for each activity." }
+];
+
+let tourIndex = 0;
+
+function startTour() {
+  const overlay = document.getElementById("tour-overlay");
+  if (!overlay) return;
+  tourIndex = 0;
+  overlay.classList.add("show");
+  showTourStep();
+  document.getElementById("tour-next").onclick = () => {
+    tourIndex += 1;
+    if (tourIndex >= tourSteps.length) {
+      endTour();
+    } else {
+      showTourStep();
+    }
+  };
+  document.getElementById("tour-skip").onclick = endTour;
+}
+
+function showTourStep() {
+  const overlay = document.getElementById("tour-overlay");
+  if (!overlay) return;
+  const step = tourSteps[tourIndex];
+  const title = document.getElementById("tour-title");
+  const text = document.getElementById("tour-text");
+  const spotlight = overlay.querySelector(".tour-spotlight");
+  const targetEl = document.querySelector(step.target);
+  title.textContent = step.title;
+  text.textContent = step.text;
+  if (targetEl) {
+    const rect = targetEl.getBoundingClientRect();
+    spotlight.style.top = `${rect.top - 8}px`;
+    spotlight.style.left = `${rect.left - 8}px`;
+    spotlight.style.width = `${rect.width + 16}px`;
+    spotlight.style.height = `${rect.height + 16}px`;
+  } else {
+    spotlight.style.top = "20%";
+    spotlight.style.left = "20%";
+    spotlight.style.width = "60%";
+    spotlight.style.height = "20%";
+  }
+}
+
+function endTour() {
+  const overlay = document.getElementById("tour-overlay");
+  if (overlay) overlay.classList.remove("show");
 }
 
 // Modal helpers for nav buttons
