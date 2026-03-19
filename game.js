@@ -4,7 +4,7 @@ let currentLesson = null;
 let currentExerciseIndex = 0;
 let currentSelection = null;
 let lessonXpEarned = 0;
-let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "system" };
+let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "dark" };
 let audioCtx = null;
 let masterGain = null;
 let startupPlayed = false;
@@ -33,6 +33,9 @@ function initAudio() {
   masterGain = audioCtx.createGain();
   masterGain.gain.value = userOptions.volume;
   masterGain.connect(audioCtx.destination);
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {});
+  }
 }
 
 function playTone(freq, duration = 0.2) {
@@ -226,6 +229,10 @@ function renderExercise() {
   if (exercise.type === "pronunciation") {
     const vocab = exercise.vocab || vocabDatabase[0];
     if (!vocab) { body.textContent = "No vocab loaded."; return; }
+    const word = document.createElement("p");
+    word.className = "prompt-word";
+    word.textContent = `Say: ${vocab.greek} (${vocab.transliteration || "listen"})`;
+    wrapper.appendChild(word);
     const speakBtn = document.createElement("button");
     speakBtn.className = "btn";
     speakBtn.textContent = "Speak";
@@ -407,7 +414,7 @@ function registerEvents() {
 
   window.addEventListener("gq-auth-changed", handleAuthChange);
 
-  // First user gesture triggers ambient intro
+  // First user gesture triggers ambient intro (fallback if autoplay is blocked)
   const armAmbient = () => {
     playStartupAmbient();
     window.removeEventListener("click", armAmbient, true);
@@ -438,7 +445,7 @@ function showHint() {
 function initApp() {
   loadOptions();
   registerEvents();
-  playStartupChime();
+  attemptStartupAutoplay();
   lockUI(!isSignedIn());
   handleAuthChange();
 
@@ -460,6 +467,21 @@ function initApp() {
       updateProgressBar();
       setTimeout(hideIntro, 800);
     });
+}
+
+function attemptStartupAutoplay() {
+  if (!userOptions.sound) return;
+  try {
+    playStartupChime();
+    playStartupAmbient();
+  } catch (e) {
+    toast("Audio blocked by browser. Tap anywhere to start sound.");
+  }
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {
+      toast("Audio blocked by browser. Tap anywhere to start sound.");
+    });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", initApp);
@@ -698,6 +720,10 @@ function loadOptions() {
   document.body.classList.remove("light", "dark");
   if (userOptions.theme === "light") document.body.classList.add("light");
   if (userOptions.theme === "dark") document.body.classList.add("dark");
+  if (userOptions.theme === "system") {
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.body.classList.add(prefersDark ? "dark" : "light");
+  }
   if (masterGain) masterGain.gain.value = userOptions.volume;
 }
 
