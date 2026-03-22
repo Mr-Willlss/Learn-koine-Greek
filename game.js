@@ -4,10 +4,11 @@ let currentLesson = null;
 let currentExerciseIndex = 0;
 let currentSelection = null;
 let lessonXpEarned = 0;
-let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "dark" };
+let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "dark", autoHideSidebar: true };
 let audioCtx = null;
 let masterGain = null;
 let startupPlayed = false;
+const alphabetKeys = new Set(["alpha","beta","gamma","delta","epsilon","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","omicron","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega"]);
 
 const progressState = {
   xp: 0,
@@ -182,6 +183,7 @@ function startLesson(lesson, world) {
   document.getElementById("lesson-xp").textContent = `+${lesson.xp} XP`;
   document.getElementById("check-btn").disabled = false;
   document.getElementById("hint-btn").disabled = false;
+  updateLessonProgress();
   setTeacherMood("idle");
   renderExercise();
 }
@@ -191,6 +193,8 @@ function renderExercise() {
   const body = document.getElementById("lesson-body");
   body.innerHTML = "";
   currentSelection = null;
+  const hintBox = document.getElementById("hero-status");
+  if (hintBox) hintBox.textContent = "";
 
   const wrapper = document.createElement("div");
   wrapper.className = "exercise";
@@ -205,7 +209,7 @@ function renderExercise() {
     const playBtn = document.createElement("button");
     playBtn.className = "btn ghost";
     playBtn.textContent = "Play";
-    playBtn.addEventListener("click", () => speakGreek(vocab.greek));
+    playBtn.addEventListener("click", () => playLessonAudio(vocab));
     wrapper.appendChild(playBtn);
 
     const distractors = shuffleArray((vocabDatabase || []).map((v) => v.english).filter((w) => w && w !== vocab.english)).slice(0, 3);
@@ -233,11 +237,17 @@ function renderExercise() {
     word.className = "prompt-word";
     word.textContent = `Say: ${vocab.greek} (${vocab.transliteration || "listen"})`;
     wrapper.appendChild(word);
+    const refBtn = document.createElement("button");
+    refBtn.className = "btn ghost";
+    refBtn.textContent = "Play reference";
+    refBtn.addEventListener("click", () => playLessonAudio(vocab));
+    wrapper.appendChild(refBtn);
     const speakBtn = document.createElement("button");
     speakBtn.className = "btn";
     speakBtn.textContent = "Speak";
     speakBtn.addEventListener("click", () => {
-      listenForGreek(vocab.greek, (result) => {
+      const expected = vocab.transliteration || vocab.english || vocab.greek;
+      listenForGreek(expected, (result) => {
         currentSelection = result;
         toast(`You said: ${result.transcript} (${result.score}%)`);
       });
@@ -281,6 +291,25 @@ function renderExercise() {
   }
 
   body.appendChild(wrapper);
+  updateLessonProgress();
+}
+
+function playLessonAudio(vocab) {
+  const key = getAudioKey(vocab);
+  if (key && typeof playAudioSegment === "function") {
+    const dataset = alphabetKeys.has(key) ? "alphabet" : "vocab";
+    playAudioSegment(dataset, key).then((played) => {
+      if (!played) speakGreek(vocab.greek || vocab.transliteration || vocab.english || "");
+    });
+  } else {
+    speakGreek(vocab.greek || vocab.transliteration || vocab.english || "");
+  }
+}
+
+function getAudioKey(vocab) {
+  if (!vocab) return null;
+  const key = (vocab.transliteration || vocab.english || vocab.greek || "").toLowerCase().trim();
+  return key || null;
 }
 
 function checkAnswer() {
@@ -291,7 +320,7 @@ function checkAnswer() {
     correct = currentSelection === exercise.vocab.english;
   }
   if (exercise.type === "pronunciation") {
-    correct = currentSelection && currentSelection.score >= 60;
+    correct = currentSelection && currentSelection.score >= 45;
   }
   if (exercise.type === "sentence-builder") {
     correct = typeof currentSelection === "function" && currentSelection().trim() === exercise.sentence;
@@ -400,11 +429,13 @@ function registerEvents() {
   if (contactBtn) contactBtn.addEventListener("click", openContactModal);
   const aboutBtn = document.getElementById("about-btn");
   if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  if (sidebarToggle) sidebarToggle.addEventListener("click", toggleSidebar);
+  const sidebarToggleFloating = document.getElementById("sidebar-toggle-floating");
+  if (sidebarToggleFloating) sidebarToggleFloating.addEventListener("click", toggleSidebar);
 
-  const resumeBtn = document.getElementById("resume-btn");
-  if (resumeBtn) resumeBtn.addEventListener("click", () => { if (requireSignIn()) startNextUnlockedLesson(); });
-  const startNewBtn = document.getElementById("start-new-btn");
-  if (startNewBtn) startNewBtn.addEventListener("click", confirmStartNew);
+  const introStart = document.getElementById("intro-start");
+  if (introStart) introStart.addEventListener("click", startOrResumeFromIntro);
   const logo = document.querySelector(".logo, .side-logo");
   if (logo) logo.addEventListener("click", () => {
     document.getElementById("lesson-title").textContent = "Welcome";
@@ -414,38 +445,37 @@ function registerEvents() {
 
   window.addEventListener("gq-auth-changed", handleAuthChange);
 
-  // First user gesture triggers ambient intro (fallback if autoplay is blocked)
-  const armAmbient = () => {
-    playStartupAmbient();
-    window.removeEventListener("click", armAmbient, true);
-    window.removeEventListener("keydown", armAmbient, true);
-  };
-  window.addEventListener("click", armAmbient, true);
-  window.addEventListener("keydown", armAmbient, true);
+  // Startup audio removed per request
 }
 
 function showHint() {
   const ex = currentLesson?.exercises?.[currentExerciseIndex];
+  const hintBox = document.getElementById("hero-status");
   if (!ex) {
+    if (hintBox) hintBox.textContent = "";
     toast("Hint: pick a lesson to begin.");
     return;
   }
   if (ex.vocab) {
     const translit = ex.vocab.transliteration || "(listen for the sound)";
+    if (hintBox) hintBox.textContent = `${ex.vocab.greek || "Listen"} (${translit})`;
     toast(`Hint: ${ex.vocab.greek || "Listen"} (${translit})`);
     return;
   }
   if (ex.type === "sentence-builder" && ex.sentence) {
+    if (hintBox) hintBox.textContent = `Order should be "${ex.sentence}".`;
     toast(`Hint: Order should be "${ex.sentence}".`);
     return;
   }
+  if (hintBox) hintBox.textContent = "Listen carefully to the Greek sound.";
   toast("Hint: listen carefully to the Greek sound.");
 }
 
 function initApp() {
   loadOptions();
   registerEvents();
-  attemptStartupAutoplay();
+  const hintBox = document.getElementById("hero-status");
+  if (hintBox) hintBox.textContent = "";
   lockUI(!isSignedIn());
   handleAuthChange();
 
@@ -457,7 +487,6 @@ function initApp() {
       renderMap(progressState);
       updateStats();
       updateProgressBar();
-      setTimeout(hideIntro, 800);
     })
     .catch((err) => {
       console.error(err);
@@ -465,24 +494,13 @@ function initApp() {
       renderMap(progressState);
       updateStats();
       updateProgressBar();
-      setTimeout(hideIntro, 800);
     });
+
+  // Safety: never keep intro longer than 10 seconds
+  setTimeout(startOrResumeFromIntro, 9000);
 }
 
-function attemptStartupAutoplay() {
-  if (!userOptions.sound) return;
-  try {
-    playStartupChime();
-    playStartupAmbient();
-  } catch (e) {
-    toast("Audio blocked by browser. Tap anywhere to start sound.");
-  }
-  if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume().catch(() => {
-      toast("Audio blocked by browser. Tap anywhere to start sound.");
-    });
-  }
-}
+// Startup audio intentionally removed.
 
 document.addEventListener("DOMContentLoaded", initApp);
 
@@ -554,7 +572,7 @@ function requireSignIn() {
 }
 
 function lockUI(locked) {
-  const ids = ["check-btn","hint-btn","resume-btn","start-new-btn","map-btn","profile-btn","options-btn","contact-btn","about-btn"];
+  const ids = ["check-btn","hint-btn","map-btn","profile-btn","options-btn","contact-btn","about-btn"];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.disabled = locked;
@@ -578,8 +596,6 @@ const tourSteps = [
   { target: "#map-btn", title: "Map", text: "Open the map to pick any unlocked level." },
   { target: "#profile-btn", title: "Profile", text: "See your Google profile after sign-in." },
   { target: "#options-btn", title: "Options", text: "Adjust sound, brightness, autosave, and theme." },
-  { target: "#resume-btn", title: "Resume", text: "Jump back to your last saved level." },
-  { target: "#start-new-btn", title: "Start new lesson", text: "Reset and begin from Level 1." },
   { target: "#world-map", title: "Worlds & Levels", text: "Each world contains levels that build on earlier words." },
   { target: "#lesson-panel", title: "Lesson area", text: "Activities appear here. You must answer correctly to move on." },
   { target: "#check-btn", title: "Check", text: "Submit your answer for each activity." }
@@ -673,9 +689,10 @@ function openProfileModal() {
 function openOptionsModal() {
   const wrap = document.createElement("div");
   wrap.innerHTML = `
-    <label><input type="checkbox" id="opt-sound"> Sound on</label><br>
+    <div class="toggle-row"><span>Sound on</span><label class="switch"><input type="checkbox" id="opt-sound"><span class="slider"></span></label></div>
     <label>Volume: <input type="range" id="opt-volume" min="0" max="1" step="0.05"></label><br>
-    <label><input type="checkbox" id="opt-autosave"> Auto-save progress</label><br>
+    <div class="toggle-row"><span>Auto-save progress</span><label class="switch"><input type="checkbox" id="opt-autosave"><span class="slider"></span></label></div>
+    <div class="toggle-row"><span>Auto-hide sidebar</span><label class="switch"><input type="checkbox" id="opt-autohide"><span class="slider"></span></label></div>
     <label>Brightness: <input type="range" id="opt-brightness" min="0.7" max="1.2" step="0.05"></label><br>
     <br>
     <label>Theme:
@@ -689,6 +706,7 @@ function openOptionsModal() {
   wrap.querySelector("#opt-sound").checked = userOptions.sound;
   wrap.querySelector("#opt-volume").value = userOptions.volume;
   wrap.querySelector("#opt-autosave").checked = userOptions.autoSave;
+  wrap.querySelector("#opt-autohide").checked = userOptions.autoHideSidebar;
   wrap.querySelector("#opt-brightness").value = userOptions.brightness || 1;
   wrap.querySelector("#opt-theme").value = userOptions.theme || "system";
   wrap.querySelectorAll("input,select").forEach((el) => el.addEventListener("change", saveOptions));
@@ -701,6 +719,7 @@ function saveOptions() {
   userOptions.sound = modal.querySelector("#opt-sound").checked;
   userOptions.volume = parseFloat(modal.querySelector("#opt-volume").value || "0.5");
   userOptions.autoSave = modal.querySelector("#opt-autosave").checked;
+  userOptions.autoHideSidebar = modal.querySelector("#opt-autohide").checked;
   userOptions.brightness = parseFloat(modal.querySelector("#opt-brightness").value || "1");
   userOptions.theme = modal.querySelector("#opt-theme").value || "system";
   localStorage.setItem("gqOptions", JSON.stringify(userOptions));
@@ -708,6 +727,7 @@ function saveOptions() {
   document.body.classList.remove("light", "dark");
   if (userOptions.theme === "light") document.body.classList.add("light");
   if (userOptions.theme === "dark") document.body.classList.add("dark");
+  document.body.classList.toggle("sidebar-hidden", !!userOptions.autoHideSidebar);
   if (masterGain) masterGain.gain.value = userOptions.volume;
 }
 
@@ -724,7 +744,33 @@ function loadOptions() {
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.body.classList.add(prefersDark ? "dark" : "light");
   }
+  document.body.classList.toggle("sidebar-hidden", !!userOptions.autoHideSidebar);
   if (masterGain) masterGain.gain.value = userOptions.volume;
+}
+
+function toggleSidebar() {
+  document.body.classList.toggle("sidebar-hidden");
+  userOptions.autoHideSidebar = document.body.classList.contains("sidebar-hidden");
+  localStorage.setItem("gqOptions", JSON.stringify(userOptions));
+}
+
+function updateLessonProgress() {
+  const bar = document.getElementById("lesson-progress-bar");
+  const text = document.getElementById("lesson-progress-text");
+  const cat = document.getElementById("lesson-category");
+  if (!bar || !text || !cat) return;
+  if (!currentLesson) {
+    bar.style.width = "0%";
+    text.textContent = "Lesson: —";
+    cat.textContent = "Category: —";
+    return;
+  }
+  const total = currentLesson.exercises.length || 1;
+  const pct = Math.min(100, Math.floor((currentExerciseIndex / total) * 100));
+  bar.style.width = `${pct}%`;
+  text.textContent = `Lesson: ${currentLesson.title}`;
+  const world = lessonData.worlds.find((w) => w.id === currentLesson.worldId);
+  cat.textContent = `Category: ${world ? world.title.replace(/World\\s\\d+\\:\\s*/i, "") : "Lesson"}`;
 }
 
 function openContactModal() {
@@ -735,6 +781,144 @@ function openContactModal() {
     <p class="muted">Feel free to reach out to us incase of any bug or observed problem (note: this website is still in it's testing phase)</p>
   `;
   showModal("Contact us", wrap);
+}
+
+function loadAudioMap() {
+  const stored = localStorage.getItem("gqAudioMap");
+  if (stored) {
+    try { return JSON.parse(stored); } catch (e) {}
+  }
+  return { alphabet: { items: {} }, vocab: { items: {} } };
+}
+
+function loadVocabMapFile() {
+  return fetch("assets/audio/vocab-map.json", { cache: "force-cache" })
+    .then((res) => (res.ok ? res.json() : {}))
+    .catch(() => ({}));
+}
+
+function mergeVocabMaps(localMap, fileMap) {
+  const merged = { alphabet: { items: {} }, vocab: { items: {} } };
+  if (fileMap?.alphabet?.items) merged.alphabet.items = { ...fileMap.alphabet.items };
+  if (fileMap?.vocab?.items) merged.vocab.items = { ...fileMap.vocab.items };
+  if (localMap?.alphabet?.items) merged.alphabet.items = { ...merged.alphabet.items, ...localMap.alphabet.items };
+  if (localMap?.vocab?.items) merged.vocab.items = { ...merged.vocab.items, ...localMap.vocab.items };
+  return merged;
+}
+
+function openVocabListModal() {
+  const wrap = document.createElement("div");
+  wrap.className = "vocab-list";
+  wrap.innerHTML = `
+    <div class="audio-map">
+      <p class="muted">Assign audio times for each vocabulary entry.</p>
+      <audio id="audio-map-player" controls preload="metadata"></audio>
+      <div class="audio-map-row">
+        <label>Start (sec):
+          <input id="audio-start" type="number" min="0" step="0.01">
+        </label>
+        <button id="set-start" class="btn ghost" type="button">Use current time</button>
+      </div>
+      <div class="audio-map-row">
+        <label>End (sec):
+          <input id="audio-end" type="number" min="0" step="0.01">
+        </label>
+        <button id="set-end" class="btn ghost" type="button">Use current time</button>
+      </div>
+      <div class="audio-map-row">
+        <button id="save-mark" class="btn" type="button">Save mark</button>
+        <button id="play-range" class="btn ghost" type="button">Play range</button>
+        <button id="export-map" class="btn ghost" type="button">Export JSON</button>
+      </div>
+    </div>
+    <div class="vocab-list__items" id="vocab-list"></div>
+  `;
+
+  const audioMap = loadAudioMap();
+  const player = wrap.querySelector("#audio-map-player");
+  const startInput = wrap.querySelector("#audio-start");
+  const endInput = wrap.querySelector("#audio-end");
+  const list = wrap.querySelector("#vocab-list");
+  player.src = "assets/audio/vocab56.m4a";
+
+  let selectedKey = null;
+
+  function selectRow(key, rowEl) {
+    selectedKey = key;
+    list.querySelectorAll(".vocab-list__row").forEach((r) => r.classList.remove("active"));
+    rowEl.classList.add("active");
+    const entry = audioMap.vocab?.items?.[key];
+    startInput.value = entry?.start ?? "";
+    endInput.value = entry?.end ?? "";
+  }
+
+  loadVocabMapFile().then((fileMap) => {
+    const merged = mergeVocabMaps(audioMap, fileMap);
+    const mappedKeys = new Set(Object.keys(merged.vocab?.items || {}));
+    list.innerHTML = "";
+    let displayIndex = 0;
+    (vocabDatabase || []).forEach((v) => {
+      const key = (v.transliteration || v.english || v.greek || "").toLowerCase().trim();
+      if (mappedKeys.has(key)) return;
+      displayIndex += 1;
+      const row = document.createElement("div");
+      row.className = "vocab-list__row";
+      row.innerHTML = `<span class="muted">${displayIndex}.</span> <strong>${v.greek || ""}</strong> <span class="muted">${v.transliteration || ""}</span> — ${v.english || ""}`;
+      row.addEventListener("click", () => selectRow(key, row));
+      list.appendChild(row);
+    });
+  });
+
+  wrap.querySelector("#set-start").addEventListener("click", () => { startInput.value = player.currentTime.toFixed(2); });
+  wrap.querySelector("#set-end").addEventListener("click", () => { endInput.value = player.currentTime.toFixed(2); });
+  wrap.querySelector("#save-mark").addEventListener("click", () => {
+    if (!selectedKey) {
+      toast("Select a vocabulary row first.");
+      return;
+    }
+    const start = parseFloat(startInput.value);
+    const end = parseFloat(endInput.value);
+    if (!audioMap.vocab) audioMap.vocab = { items: {} };
+    audioMap.vocab.items[selectedKey] = { start, end };
+    localStorage.setItem("gqAudioMap", JSON.stringify(audioMap));
+    toast("Saved audio mark.");
+    // Auto-scroll and move to next vocab entry
+    const rows = Array.from(list.querySelectorAll(".vocab-list__row"));
+    const currentIndex = rows.findIndex((r) => r.classList.contains("active"));
+    if (currentIndex >= 0 && currentIndex < rows.length - 1) {
+      const nextRow = rows[currentIndex + 1];
+      nextRow.click();
+      nextRow.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+  wrap.querySelector("#play-range").addEventListener("click", () => {
+    const s = parseFloat(startInput.value || "0");
+    const e = parseFloat(endInput.value || "0");
+    if (!isNaN(s)) {
+      player.currentTime = s;
+      player.play();
+      if (!isNaN(e) && e > s) {
+        const stop = () => {
+          if (player.currentTime >= e) {
+            player.pause();
+            player.removeEventListener("timeupdate", stop);
+          }
+        };
+        player.addEventListener("timeupdate", stop);
+      }
+    }
+  });
+  wrap.querySelector("#export-map").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(audioMap, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "audio-map.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  showModal("All Vocabulary", wrap);
 }
 
 // No auth modal. Sign-in is handled directly by the sidebar buttons.
@@ -790,6 +974,19 @@ function hideIntro() {
   const intro = document.getElementById("intro-overlay");
   if (intro) {
     intro.classList.add("hide");
-    setTimeout(() => intro.remove(), 700);
+    setTimeout(() => intro.remove(), 900);
   }
+}
+
+function startOrResumeFromIntro() {
+  const intro = document.getElementById("intro-overlay");
+  if (!intro || intro.classList.contains("hide")) return;
+  if (requireSignIn()) {
+    if (progressState.completedLessons.length) {
+      startNextUnlockedLesson();
+    } else {
+      startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]);
+    }
+  }
+  hideIntro();
 }

@@ -12,7 +12,13 @@
 </head>
 <body>
   <div id="app" class="layout">
+    <button id="sidebar-toggle-floating" class="hamburger floating" aria-label="Toggle sidebar">
+      ☰
+    </button>
     <aside class="sidebar">
+      <button id="sidebar-toggle" class="hamburger" aria-label="Toggle sidebar">
+        ☰
+      </button>
       <div class="side-logo">
         <div class="logo-mark">
           <img src="assets/images/mascot-logo.svg" alt="Greek Quest mascot logo" />
@@ -52,22 +58,23 @@
         <div>
           <p class="eyebrow">Welcome back</p>
           <h2>Learn Koine Greek</h2>
-          <p class="muted">Bounce into each lesson; quick animations keep things playful. Last saved state pops in first.</p>
-          <div class="hero-actions">
-            <button class="btn" id="resume-btn" type="button">Resume</button>
-            <button class="btn ghost" id="start-new-btn" type="button">Start new lesson</button>
-          </div>
         </div>
         <div class="hero-chip">
           <p class="eyebrow">Hint / Status</p>
-          <p id="hero-status">Tap any level chip to begin. Speech works best in Chrome.</p>
+          <p id="hero-status"></p>
         </div>
       </header>
 
       <section class="map-shell" aria-label="World map">
         <div class="section-head">
           <h3>Worlds & Levels</h3>
-          <span class="eyebrow">Answers and questions reshuffle each playthrough.</span>
+          <div class="lesson-progress">
+            <div class="lesson-progress__meta">
+              <span id="lesson-category" class="eyebrow">Category: —</span>
+              <span id="lesson-progress-text" class="eyebrow">Lesson: —</span>
+            </div>
+            <div class="lesson-progress__bar"><span id="lesson-progress-bar"></span></div>
+          </div>
         </div>
         <div id="world-map" class="world-map"></div>
       </section>
@@ -104,9 +111,17 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="intro-overlay" class="intro-overlay" aria-hidden="true">
     <div class="intro-card">
-      <div class="logo-mark">GQ</div>
+      <div class="logo-mark">
+        <img src="assets/images/mascot-logo.svg" alt="Greek Quest mascot logo" />
+      </div>
       <p class="eyebrow">Loading</p>
-      <h3>Learn Koine Greek</h3>
+      <h3 class="intro-title" aria-label="Learn Koine Greek">
+        <span>L</span><span>e</span><span>a</span><span>r</span><span>n</span>
+        <span>K</span><span>o</span><span>i</span><span>n</span><span>e</span>
+        <span>G</span><span>r</span><span>e</span><span>e</span><span>k</span>
+      </h3>
+      <p class="muted intro-note">Connect to the internet for speech and sync. Last saved state will pop in automatically.</p>
+      <button id="intro-start" class="btn">Start</button>
     </div>
   </div>
 

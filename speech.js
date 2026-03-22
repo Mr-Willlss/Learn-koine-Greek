@@ -1,7 +1,9 @@
 ﻿// Web Speech API helpers for synthesis and recognition.
 const speech = {
   voices: [],
-  synth: window.speechSynthesis
+  synth: window.speechSynthesis,
+  audioMap: null,
+  mapLoaded: false
 };
 
 function initSpeech() {
@@ -101,6 +103,46 @@ function speakGreek(text) {
   });
 }
 
+function loadAudioMap() {
+  if (speech.mapLoaded) return Promise.resolve(speech.audioMap || {});
+  speech.mapLoaded = true;
+  return Promise.all([
+    fetch("assets/audio/audio-map.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : {})),
+    fetch("assets/audio/vocab-map.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : {}))
+  ])
+    .then(([alphabetMap, vocabMap]) => {
+      speech.audioMap = {
+        alphabet: { items: { ...(alphabetMap?.alphabet?.items || {}) } },
+        vocab: { items: { ...(vocabMap?.vocab?.items || {}) } }
+      };
+      return speech.audioMap;
+    })
+    .catch(() => {
+      speech.audioMap = {};
+      return {};
+    });
+}
+
+function playAudioSegment(dataset, key) {
+  return loadAudioMap().then((map) => {
+    const entry = map?.[dataset]?.items?.[key];
+    if (!entry) return false;
+    const audioSrc = dataset === "alphabet" ? "assets/audio/alphabet.m4a" : "assets/audio/vocab56.m4a";
+    const audio = new Audio(audioSrc);
+    audio.currentTime = Math.max(0, entry.start || 0);
+    audio.play().catch(() => {});
+    const stopAt = entry.end || (entry.start || 0) + 1;
+    const onTime = () => {
+      if (audio.currentTime >= stopAt) {
+        audio.pause();
+        audio.removeEventListener("timeupdate", onTime);
+      }
+    };
+    audio.addEventListener("timeupdate", onTime);
+    return true;
+  });
+}
+
 function listenForGreek(expected, callback) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
@@ -140,18 +182,16 @@ function scorePronunciation(expected, actual) {
   const normalizedExpected = normalizeGreek(expected);
   const normalizedActual = normalizeGreek(actual);
 
-  let matches = 0;
-  const minLength = Math.min(normalizedExpected.length, normalizedActual.length);
-  for (let i = 0; i < minLength; i += 1) {
-    if (normalizedExpected[i] === normalizedActual[i]) {
-      matches += 1;
-    }
+  if (!normalizedExpected || !normalizedActual) return 0;
+  if (normalizedActual.includes(normalizedExpected) || normalizedExpected.includes(normalizedActual)) {
+    return 90;
   }
 
-  return Math.floor((matches / Math.max(normalizedExpected.length, normalizedActual.length)) * 100);
+  const distance = levenshtein(normalizedExpected, normalizedActual);
+  const maxLen = Math.max(normalizedExpected.length, normalizedActual.length);
+  const score = Math.floor((1 - distance / maxLen) * 100);
+  return Math.max(0, Math.min(100, score));
 }
-
-initSpeech();
 
 function normalizeGreek(text) {
   return (text || "")
@@ -169,3 +209,22 @@ function normalizeGreek(text) {
     .replace(/ei/g, "i")
     .replace(/ai/g, "e");
 }
+
+function levenshtein(a, b) {
+  const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i += 1) dp[i][0] = i;
+  for (let j = 0; j <= b.length; j += 1) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+initSpeech();
