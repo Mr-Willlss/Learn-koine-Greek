@@ -101,6 +101,34 @@ function speakGreek(text) {
   });
 }
 
+function speakLatin(text) {
+  if (!speech.synth) {
+    toast("Speech synthesis not supported in this browser.");
+    return;
+  }
+
+  ensureVoicesReady().finally(() => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    const v = pickVoice("en");
+    if (v) {
+      utterance.voice = v;
+    }
+
+    try {
+      speech.synth.cancel();
+      speech.synth.resume();
+      speech.synth.speak(utterance);
+    } catch (_) {
+      toast("Could not play speech. Check if the tab is muted.");
+    }
+  });
+}
+
 
 function listenForGreek(expected, callback) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;

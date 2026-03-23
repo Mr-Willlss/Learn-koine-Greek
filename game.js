@@ -294,8 +294,21 @@ function renderExercise() {
 }
 
 function playLessonAudio(vocab) {
-  const fallback = vocab.greek || vocab.transliteration || vocab.meaning || vocab.english || "";
-  speakGreek(fallback);
+  const greek = (vocab.greek || "").trim();
+  const latin = (vocab.transliteration || vocab.meaning || vocab.english || "").trim();
+  const isSingleLetter = greek.length === 1;
+  if (isSingleLetter && latin) {
+    speakLatin(latin);
+    return;
+  }
+  if (greek) {
+    speakGreek(greek);
+    return;
+  }
+  if (latin) {
+    speakLatin(latin);
+    return;
+  }
 }
 
 function getAudioKey(vocab) {
