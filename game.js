@@ -8,7 +8,6 @@ let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, the
 let audioCtx = null;
 let masterGain = null;
 let startupPlayed = false;
-const alphabetKeys = new Set(["alpha","beta","gamma","delta","epsilon","zeta","eta","theta","iota","kappa","lambda","mu","nu","xi","omicron","pi","rho","sigma","tau","upsilon","phi","chi","psi","omega"]);
 
 const progressState = {
   xp: 0,
@@ -295,21 +294,16 @@ function renderExercise() {
 }
 
 function playLessonAudio(vocab) {
-  const key = getAudioKey(vocab);
-  if (key && typeof playAudioSegment === "function") {
-    const dataset = alphabetKeys.has(key) ? "alphabet" : "vocab";
-    playAudioSegment(dataset, key).then((played) => {
-      if (!played) speakGreek(vocab.greek || vocab.transliteration || vocab.english || "");
-    });
-  } else {
-    speakGreek(vocab.greek || vocab.transliteration || vocab.english || "");
-  }
+  const fallback = vocab.greek || vocab.transliteration || vocab.meaning || vocab.english || "";
+  speakGreek(fallback);
 }
 
 function getAudioKey(vocab) {
   if (!vocab) return null;
+  const meaning = (vocab.meaning || vocab.english || "").toLowerCase().trim();
+  if (meaning && alphabetKeys.has(meaning)) return meaning;
   const key = (vocab.transliteration || vocab.english || vocab.greek || "").toLowerCase().trim();
-  return key || null;
+  return key || meaning || null;
 }
 
 function checkAnswer() {

@@ -1,9 +1,7 @@
 ﻿// Web Speech API helpers for synthesis and recognition.
 const speech = {
   voices: [],
-  synth: window.speechSynthesis,
-  audioMap: null,
-  mapLoaded: false
+  synth: window.speechSynthesis
 };
 
 function initSpeech() {
@@ -103,45 +101,6 @@ function speakGreek(text) {
   });
 }
 
-function loadAudioMap() {
-  if (speech.mapLoaded) return Promise.resolve(speech.audioMap || {});
-  speech.mapLoaded = true;
-  return Promise.all([
-    fetch("assets/audio/audio-map.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : {})),
-    fetch("assets/audio/vocab-map.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : {}))
-  ])
-    .then(([alphabetMap, vocabMap]) => {
-      speech.audioMap = {
-        alphabet: { items: { ...(alphabetMap?.alphabet?.items || {}) } },
-        vocab: { items: { ...(vocabMap?.vocab?.items || {}) } }
-      };
-      return speech.audioMap;
-    })
-    .catch(() => {
-      speech.audioMap = {};
-      return {};
-    });
-}
-
-function playAudioSegment(dataset, key) {
-  return loadAudioMap().then((map) => {
-    const entry = map?.[dataset]?.items?.[key];
-    if (!entry) return false;
-    const audioSrc = dataset === "alphabet" ? "assets/audio/alphabet.m4a" : "assets/audio/vocab56.m4a";
-    const audio = new Audio(audioSrc);
-    audio.currentTime = Math.max(0, entry.start || 0);
-    audio.play().catch(() => {});
-    const stopAt = entry.end || (entry.start || 0) + 1;
-    const onTime = () => {
-      if (audio.currentTime >= stopAt) {
-        audio.pause();
-        audio.removeEventListener("timeupdate", onTime);
-      }
-    };
-    audio.addEventListener("timeupdate", onTime);
-    return true;
-  });
-}
 
 function listenForGreek(expected, callback) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
