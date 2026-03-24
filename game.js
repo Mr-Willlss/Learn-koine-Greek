@@ -488,7 +488,7 @@ function checkAnswer() {
     correct = currentSelection === exercise.vocab.english;
   }
   if (exercise.type === "pronunciation") {
-    correct = currentSelection && currentSelection.score >= 30;
+    correct = currentSelection && currentSelection.score >= 25;
   }
   if (exercise.type === "sentence-builder") {
     correct = typeof currentSelection === "function" && currentSelection().trim() === exercise.sentence;

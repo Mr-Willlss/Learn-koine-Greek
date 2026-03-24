@@ -364,7 +364,34 @@ function scorePronunciation(expected, actual) {
       }
     }
 
-    return Math.max(best, Math.max(0, Math.min(100, score)), Math.max(0, Math.min(100, skeletonScore)));
+    let looseScore = 0;
+    if (
+      expectedSkeleton &&
+      actualSkeleton &&
+      levenshtein(expectedSkeleton, actualSkeleton) <= 1 &&
+      normalizedExpected.charAt(0) === normalizedActual.charAt(0)
+    ) {
+      looseScore = 88;
+    } else if (
+      normalizedExpected.charAt(0) === normalizedActual.charAt(0) &&
+      normalizedExpected.slice(-1) === normalizedActual.slice(-1) &&
+      Math.abs(normalizedExpected.length - normalizedActual.length) <= 2
+    ) {
+      looseScore = 76;
+    } else if (
+      expectedSkeleton &&
+      actualSkeleton &&
+      (expectedSkeleton.startsWith(actualSkeleton) || actualSkeleton.startsWith(expectedSkeleton))
+    ) {
+      looseScore = 74;
+    }
+
+    return Math.max(
+      best,
+      Math.max(0, Math.min(100, score)),
+      Math.max(0, Math.min(100, skeletonScore)),
+      looseScore
+    );
   }, 0);
 }
 
