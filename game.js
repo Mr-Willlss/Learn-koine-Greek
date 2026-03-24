@@ -8,11 +8,14 @@ let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, the
 let audioCtx = null;
 let masterGain = null;
 let startupPlayed = false;
+let heartRefillTicker = null;
 
 const progressState = {
   xp: 0,
   level: 1,
   hearts: 5,
+  heartsUpdatedAt: Date.now(),
+  exhaustedHeartTimes: [],
   completedLessons: [],
   vocabProgress: {}
 };
@@ -101,10 +104,53 @@ function showModal(title, bodyNode) {
   modal.classList.add("show");
 }
 
+function renderHeartDiagram(containerId, hearts = progressState.hearts, maxHearts = HEART_MAX) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+  container.setAttribute("aria-label", `${hearts} of ${maxHearts} hearts remaining`);
+
+  for (let i = 0; i < hearts; i += 1) {
+    const heart = document.createElement("span");
+    heart.className = "heart-diagram__heart is-filled";
+    heart.setAttribute("aria-hidden", "true");
+    heart.textContent = "♥";
+    container.appendChild(heart);
+  }
+}
+
 function updateStats() {
   document.getElementById("stat-xp").textContent = `XP ${progressState.xp}`;
   document.getElementById("stat-level").textContent = `Level ${progressState.level}`;
   document.getElementById("stat-hearts").textContent = `Hearts ${progressState.hearts}`;
+  const heartEl = document.getElementById("lesson-hearts");
+  if (heartEl) heartEl.textContent = `Hearts: ${progressState.hearts}`;
+  renderHeartDiagram("lesson-hearts-diagram");
+}
+
+function setLessonActionState(disabled) {
+  const checkBtn = document.getElementById("check-btn");
+  const hintBtn = document.getElementById("hint-btn");
+  const skipBtn = document.getElementById("skip-btn");
+  if (checkBtn) checkBtn.disabled = disabled;
+  if (hintBtn) hintBtn.disabled = disabled;
+  if (skipBtn) skipBtn.disabled = disabled;
+}
+
+function showOutOfHeartsState() {
+  const body = document.getElementById("lesson-body");
+  const hintBox = document.getElementById("hero-status");
+  if (hintBox) hintBox.textContent = "Out of hearts. One heart refills every 5 minutes.";
+  if (!body) return;
+
+  body.innerHTML = `
+    <div class="welcome">
+      <h4>Out of hearts</h4>
+      <p>You need at least 1 heart to keep playing.</p>
+      <p>Each exhausted heart refills after 5 minutes.</p>
+    </div>
+  `;
+  setLessonActionState(true);
 }
 
 function updateProgressBar() {
@@ -120,6 +166,8 @@ function getProgressPayload() {
     xp: progressState.xp,
     level: progressState.level,
     hearts: progressState.hearts,
+    heartsUpdatedAt: progressState.heartsUpdatedAt,
+    exhaustedHeartTimes: progressState.exhaustedHeartTimes,
     completedLessons: progressState.completedLessons,
     vocabProgress: progressState.vocabProgress,
     spacedRepetition: spacedRepetition.items
@@ -128,12 +176,17 @@ function getProgressPayload() {
 
 function applyProgress(payload) {
   if (!payload) return;
-  progressState.xp = payload.xp || 0;
-  progressState.level = payload.level || 1;
-  progressState.hearts = payload.hearts || 5;
+  progressState.xp = Number.isFinite(payload.xp) ? payload.xp : 0;
+  progressState.level = Number.isFinite(payload.level) ? payload.level : 1;
+  progressState.hearts = Number.isFinite(payload.hearts) ? payload.hearts : HEART_MAX;
+  progressState.heartsUpdatedAt = Number.isFinite(payload.heartsUpdatedAt) ? payload.heartsUpdatedAt : Date.now();
+  progressState.exhaustedHeartTimes = Array.isArray(payload.exhaustedHeartTimes)
+    ? payload.exhaustedHeartTimes.filter((t) => Number.isFinite(t))
+    : [];
   progressState.completedLessons = payload.completedLessons || [];
   progressState.vocabProgress = payload.vocabProgress || {};
   spacedRepetition.items = payload.spacedRepetition || spacedRepetition.items;
+  hydrateHeartRefillState();
   updateStats();
   updateProgressBar();
   renderMap(progressState);
@@ -170,6 +223,7 @@ function loadVocabDatabase() {
 
 function startLesson(lesson, world) {
   if (!requireSignIn()) return;
+  if (!consumeHeartIfNeeded()) return;
   currentLesson = { ...lesson, worldId: world.id };
   currentExerciseIndex = 0;
   lessonXpEarned = 0;
@@ -180,20 +234,45 @@ function startLesson(lesson, world) {
   document.getElementById("lesson-title").textContent = `${world.title} · ${lesson.title}`;
   document.getElementById("lesson-type").textContent = "Lesson";
   document.getElementById("lesson-xp").textContent = `+${lesson.xp} XP`;
-  document.getElementById("check-btn").disabled = false;
-  document.getElementById("hint-btn").disabled = false;
+  setLessonActionState(false);
   updateLessonProgress();
   setTeacherMood("idle");
   renderExercise();
 }
 
+function skipCurrentExercise() {
+  if (!currentLesson || progressState.hearts <= 0) {
+    if (progressState.hearts <= 0) showOutOfHeartsState();
+    return;
+  }
+
+  const exercises = currentLesson.exercises || [];
+  if (currentExerciseIndex >= exercises.length) return;
+  if (exercises.length - currentExerciseIndex <= 1) {
+    toast("This is already the last activity.");
+    return;
+  }
+
+  const [skipped] = exercises.splice(currentExerciseIndex, 1);
+  exercises.push(skipped);
+  currentSelection = null;
+  renderExercise();
+  toast("Activity moved to the end.");
+}
+
 function renderExercise() {
+  if (progressState.hearts <= 0) {
+    showOutOfHeartsState();
+    return;
+  }
+
   const exercise = currentLesson.exercises[currentExerciseIndex];
   const body = document.getElementById("lesson-body");
   body.innerHTML = "";
   currentSelection = null;
   const hintBox = document.getElementById("hero-status");
   if (hintBox) hintBox.textContent = "";
+  setLessonActionState(false);
 
   const wrapper = document.createElement("div");
   wrapper.className = "exercise";
@@ -205,6 +284,10 @@ function renderExercise() {
   if (exercise.type === "vocab-recognition" || exercise.type === "listening") {
     const vocab = exercise.vocab || vocabDatabase[0];
     if (!vocab) { body.textContent = "No vocab loaded."; return; }
+    const word = document.createElement("p");
+    word.className = "prompt-word";
+    word.textContent = `Greek: ${vocab.greek || "—"}`;
+    wrapper.appendChild(word);
     const playBtn = document.createElement("button");
     playBtn.className = "btn ghost";
     playBtn.textContent = "Play";
@@ -232,10 +315,21 @@ function renderExercise() {
   if (exercise.type === "pronunciation") {
     const vocab = exercise.vocab || vocabDatabase[0];
     if (!vocab) { body.textContent = "No vocab loaded."; return; }
+    const expected = [
+      vocab.transliteration,
+      buildGreekSpeechText(vocab.greek || "", vocab.transliteration || ""),
+      vocab.greek
+    ].filter(Boolean);
     const word = document.createElement("p");
     word.className = "prompt-word";
-    word.textContent = `Say: ${vocab.greek} (${vocab.transliteration || "listen"})`;
+    word.textContent = `Greek: ${vocab.greek || "—"}`;
     wrapper.appendChild(word);
+    const help = document.createElement("p");
+    help.className = "muted";
+    help.textContent = supportsSpeechRecognition()
+      ? "Say the pronunciation clearly, or type it below if the microphone mishears you."
+      : "This browser does not support speech recognition. Type the pronunciation below or use Chrome.";
+    wrapper.appendChild(help);
     const refBtn = document.createElement("button");
     refBtn.className = "btn ghost";
     refBtn.textContent = "Play reference";
@@ -244,14 +338,42 @@ function renderExercise() {
     const speakBtn = document.createElement("button");
     speakBtn.className = "btn";
     speakBtn.textContent = "Speak";
+    speakBtn.disabled = !supportsSpeechRecognition();
     speakBtn.addEventListener("click", () => {
-      const expected = vocab.transliteration || vocab.english || vocab.greek;
       listenForGreek(expected, (result) => {
         currentSelection = result;
+        if (result.unsupported) {
+          toast("Type the pronunciation below, or use Chrome for microphone input.");
+          return;
+        }
+        if (result.error === "no-match" || result.error === "no-speech") {
+          toast("I could not hear that clearly. Try again or type the pronunciation below.");
+          return;
+        }
+        if (result.error) {
+          toast("Speech recognition failed. Type the pronunciation below.");
+          return;
+        }
         toast(`You said: ${result.transcript} (${result.score}%)`);
       });
     });
     wrapper.appendChild(speakBtn);
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Type the pronunciation, for example logos";
+    input.addEventListener("input", () => {
+      const typed = input.value.trim();
+      if (!typed) {
+        currentSelection = null;
+        return;
+      }
+      currentSelection = {
+        transcript: typed,
+        score: scorePronunciation(expected, typed),
+        manual: true
+      };
+    });
+    wrapper.appendChild(input);
   }
 
   if (exercise.type === "sentence-builder") {
@@ -295,14 +417,48 @@ function renderExercise() {
 
 function playLessonAudio(vocab) {
   const greek = (vocab.greek || "").trim();
-  const latin = (vocab.transliteration || vocab.meaning || vocab.english || "").trim();
+  const latin = (vocab.meaning || vocab.english || vocab.transliteration || "").trim();
   const isSingleLetter = greek.length === 1;
+  if (isSingleLetter) {
+    const letterNames = {
+      "α": "alpha",
+      "β": "beta",
+      "γ": "gamma",
+      "δ": "delta",
+      "ε": "epsilon",
+      "ζ": "zeta",
+      "η": "eta",
+      "θ": "theta",
+      "ι": "iota",
+      "κ": "kappa",
+      "λ": "lambda",
+      "μ": "mu",
+      "ν": "nu",
+      "ξ": "xi",
+      "ο": "omicron",
+      "π": "pi",
+      "ρ": "rho",
+      "σ": "sigma",
+      "ς": "sigma",
+      "τ": "tau",
+      "υ": "upsilon",
+      "φ": "phi",
+      "χ": "chi",
+      "ψ": "psi",
+      "ω": "omega"
+    };
+    const name = letterNames[greek] || latin;
+    if (name) {
+      speakLatin(name);
+      return;
+    }
+  }
   if (isSingleLetter && latin) {
     speakLatin(latin);
     return;
   }
   if (greek) {
-    speakGreek(greek);
+    speakGreek(greek, vocab.transliteration || "");
     return;
   }
   if (latin) {
@@ -320,6 +476,11 @@ function getAudioKey(vocab) {
 }
 
 function checkAnswer() {
+  if (progressState.hearts <= 0) {
+    showOutOfHeartsState();
+    return;
+  }
+
   const exercise = currentLesson.exercises[currentExerciseIndex];
   let correct = false;
 
@@ -327,7 +488,7 @@ function checkAnswer() {
     correct = currentSelection === exercise.vocab.english;
   }
   if (exercise.type === "pronunciation") {
-    correct = currentSelection && currentSelection.score >= 45;
+    correct = currentSelection && currentSelection.score >= 30;
   }
   if (exercise.type === "sentence-builder") {
     correct = typeof currentSelection === "function" && currentSelection().trim() === exercise.sentence;
@@ -345,7 +506,7 @@ function checkAnswer() {
     updateSpacedRepetition(exercise.vocab?.id, true);
     playCorrectSound();
   } else {
-    progressState.hearts = Math.max(progressState.hearts - 1, 0);
+    loseHeart();
     setTeacherMood("sad");
     teacherSpeak("Try again!");
     updateSpacedRepetition(exercise.vocab?.id, false);
@@ -363,8 +524,93 @@ function checkAnswer() {
       renderExercise();
     }
   } else {
-    toast("Re-attempt required to continue.");
+    if (progressState.hearts <= 0) {
+      showOutOfHeartsState();
+      toast("Out of hearts. Wait for a refill.");
+    } else {
+      toast("Re-attempt required to continue.");
+    }
   }
+}
+
+const HEART_MAX = 5;
+const HEART_REFILL_MS = 5 * 60 * 1000;
+
+function hydrateHeartRefillState() {
+  if (progressState.exhaustedHeartTimes.length) {
+    progressState.exhaustedHeartTimes = progressState.exhaustedHeartTimes
+      .sort((a, b) => a - b)
+      .slice(-HEART_MAX);
+    progressState.hearts = Math.max(0, HEART_MAX - progressState.exhaustedHeartTimes.length);
+    return;
+  }
+
+  const savedHearts = Number.isFinite(progressState.hearts) ? progressState.hearts : HEART_MAX;
+  const missingHearts = Math.max(0, HEART_MAX - savedHearts);
+  if (!missingHearts) {
+    progressState.hearts = HEART_MAX;
+    progressState.exhaustedHeartTimes = [];
+    return;
+  }
+
+  const fallbackTime = progressState.heartsUpdatedAt || Date.now();
+  progressState.exhaustedHeartTimes = Array.from({ length: missingHearts }, () => fallbackTime);
+  progressState.hearts = HEART_MAX - missingHearts;
+}
+
+function refillHeartsIfNeeded() {
+  const now = Date.now();
+  const before = progressState.hearts;
+
+  progressState.exhaustedHeartTimes = (progressState.exhaustedHeartTimes || [])
+    .filter((lostAt) => now - lostAt < HEART_REFILL_MS)
+    .sort((a, b) => a - b);
+
+  progressState.hearts = Math.max(0, HEART_MAX - progressState.exhaustedHeartTimes.length);
+  progressState.heartsUpdatedAt = progressState.exhaustedHeartTimes[0] || now;
+
+  if (progressState.hearts !== before) {
+    updateStats();
+    saveLocalProgress();
+    if (before <= 0 && progressState.hearts > 0 && currentLesson) {
+      renderExercise();
+    }
+  }
+}
+
+function loseHeart() {
+  refillHeartsIfNeeded();
+  if (progressState.hearts <= 0) {
+    updateStats();
+    saveLocalProgress();
+    toast("Out of hearts. Please wait for a refill.");
+    return;
+  }
+
+  progressState.hearts = Math.max(progressState.hearts - 1, 0);
+  if (!Array.isArray(progressState.exhaustedHeartTimes)) {
+    progressState.exhaustedHeartTimes = [];
+  }
+  progressState.exhaustedHeartTimes.push(Date.now());
+  progressState.exhaustedHeartTimes = progressState.exhaustedHeartTimes
+    .sort((a, b) => a - b)
+    .slice(-HEART_MAX);
+  progressState.heartsUpdatedAt = Date.now();
+  updateStats();
+  saveLocalProgress();
+  if (progressState.hearts <= 0) {
+    toast("Out of hearts. Please wait for a refill.");
+  }
+}
+
+function consumeHeartIfNeeded() {
+  refillHeartsIfNeeded();
+  if (progressState.hearts <= 0) {
+    showOutOfHeartsState();
+    toast("Out of hearts. Please wait for a refill.");
+    return false;
+  }
+  return true;
 }
 
 function finishLesson() {
@@ -373,6 +619,10 @@ function finishLesson() {
     progressState.xp += currentLesson.xp;
     lessonXpEarned += currentLesson.xp;
   }
+  // Restore hearts on lesson completion
+  progressState.hearts = HEART_MAX;
+  progressState.heartsUpdatedAt = Date.now();
+  progressState.exhaustedHeartTimes = [];
   updateStats();
   updateProgressBar();
   renderMap(progressState);
@@ -417,6 +667,8 @@ function registerEvents() {
   if (checkBtn) checkBtn.addEventListener("click", checkAnswer);
   const hintBtn = document.getElementById("hint-btn");
   if (hintBtn) hintBtn.addEventListener("click", showHint);
+  const skipBtn = document.getElementById("skip-btn");
+  if (skipBtn) skipBtn.addEventListener("click", skipCurrentExercise);
   const signInBtn = document.getElementById("sign-in-btn");
   if (signInBtn) signInBtn.addEventListener("click", signInWithGoogle);
   const logInBtn = document.getElementById("log-in-btn");
@@ -503,6 +755,11 @@ function initApp() {
       updateProgressBar();
     });
 
+  if (heartRefillTicker) {
+    clearInterval(heartRefillTicker);
+  }
+  heartRefillTicker = setInterval(refillHeartsIfNeeded, 1000);
+
   // Safety: never keep intro longer than 10 seconds
   setTimeout(startOrResumeFromIntro, 9000);
 }
@@ -579,7 +836,7 @@ function requireSignIn() {
 }
 
 function lockUI(locked) {
-  const ids = ["check-btn","hint-btn","map-btn","profile-btn","options-btn","contact-btn","about-btn"];
+  const ids = ["check-btn","hint-btn","skip-btn","map-btn","profile-btn","options-btn","contact-btn","about-btn"];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.disabled = locked;

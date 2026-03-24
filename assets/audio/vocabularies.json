@@ -1,0 +1,686 @@
+{
+  "alphabet": {
+    "items": {
+      "alpha": {
+        "start": 0,
+        "end": 2
+      },
+      "beta": {
+        "start": 2,
+        "end": 3
+      },
+      "gamma": {
+        "start": 3,
+        "end": 4
+      },
+      "epsilon": {
+        "start": 6,
+        "end": 7
+      },
+      "zeta": {
+        "start": 7,
+        "end": 8
+      },
+      "omega": {
+        "start": 30,
+        "end": 31
+      }
+    }
+  },
+  "vocab": {
+    "items": {
+      "a": {
+        "start": 3,
+        "end": 5
+      },
+      "b": {
+        "start": 6,
+        "end": 8
+      },
+      "g": {
+        "start": 9,
+        "end": 12
+      },
+      "d": {
+        "start": 12,
+        "end": 14
+      },
+      "z": {
+        "start": 18,
+        "end": 20
+      },
+      "e": {
+        "start": 20,
+        "end": 22
+      },
+      "th": {
+        "start": 23,
+        "end": 24
+      },
+      "i": {
+        "start": 25,
+        "end": 27
+      },
+      "k": {
+        "start": 28,
+        "end": 30
+      },
+      "l": {
+        "start": 31,
+        "end": 33
+      },
+      "m": {
+        "start": 34,
+        "end": 36
+      },
+      "n": {
+        "start": 36,
+        "end": 38
+      },
+      "x": {
+        "start": 39,
+        "end": 41
+      },
+      "o": {
+        "start": 121,
+        "end": 123
+      },
+      "p": {
+        "start": 45,
+        "end": 47
+      },
+      "r": {
+        "start": 48,
+        "end": 50
+      },
+      "s  s": {
+        "start": 50,
+        "end": 52
+      },
+      "t": {
+        "start": 54,
+        "end": 56
+      },
+      "u": {
+        "start": 60,
+        "end": 62
+      },
+      "ph": {
+        "start": 63,
+        "end": 65
+      },
+      "ch": {
+        "start": 66,
+        "end": 68
+      },
+      "ps": {
+        "start": 69,
+        "end": 71
+      },
+      "ai": {
+        "start": 76,
+        "end": 78
+      },
+      "au": {
+        "start": 80,
+        "end": 82
+      },
+      "ei": {
+        "start": 83,
+        "end": 85
+      },
+      "eu": {
+        "start": 86,
+        "end": 88
+      },
+      "oi": {
+        "start": 90,
+        "end": 92
+      },
+      "ou": {
+        "start": 92,
+        "end": 94
+      },
+      "ui": {
+        "start": 102,
+        "end": 104
+      },
+      "adelphos": {
+        "start": 105,
+        "end": 107
+      },
+      "anthropos": {
+        "start": 108,
+        "end": 110
+      },
+      "blepo": {
+        "start": 111,
+        "end": 113
+      },
+      "echo": {
+        "start": 115,
+        "end": 117
+      },
+      "lego": {
+        "start": 118,
+        "end": 120
+      },
+      "ton": {
+        "start": 124,
+        "end": 126
+      },
+      "chaire  chairete": {
+        "start": 127,
+        "end": 131
+      },
+      "kai": {
+        "start": 132,
+        "end": 134
+      },
+      "kaikai": {
+        "start": 132,
+        "end": 134
+      },
+      "blepeis": {
+        "start": 138,
+        "end": 140
+      },
+      "blepei": {
+        "start": 141,
+        "end": 143
+      },
+      "blepomen": {
+        "start": 144,
+        "end": 146
+      },
+      "blepete": {
+        "start": 148,
+        "end": 150
+      },
+      "blepousi": {
+        "start": 151,
+        "end": 1153
+      },
+      "artos": {
+        "start": 155,
+        "end": 157
+      },
+      "karpos": {
+        "start": 159,
+        "end": 162
+      },
+      "esthio": {
+        "start": 167,
+        "end": 167
+      },
+      "phero": {
+        "start": 168,
+        "end": 170
+      },
+      "ouk  ou": {
+        "start": 173,
+        "end": 177
+      },
+      "apo": {
+        "start": 180,
+        "end": 182
+      },
+      "eis": {
+        "start": 184,
+        "end": 186
+      },
+      "en": {
+        "start": 187,
+        "end": 189
+      },
+      "ek": {
+        "start": 189,
+        "end": 191
+      },
+      "kalos": {
+        "start": 193,
+        "end": 195
+      },
+      "doulos": {
+        "start": 196,
+        "end": 198
+      },
+      "deipnon": {
+        "start": 204,
+        "end": 206
+      },
+      "oinos": {
+        "start": 207,
+        "end": 209
+      },
+      "kepos": {
+        "start": 219,
+        "end": null
+      },
+      "teknon": {
+        "start": 213,
+        "end": 215
+      },
+      "apoluo": {
+        "start": 220,
+        "end": 222
+      },
+      "therapeuo": {
+        "start": 225,
+        "end": 228
+      },
+      "ischuo": {
+        "start": 230,
+        "end": 233
+      },
+      "kakos": {
+        "start": 234,
+        "end": 236
+      },
+      "oti": {
+        "start": 237,
+        "end": 239
+      },
+      "puretos": {
+        "start": 240,
+        "end": 243
+      },
+      "douleuo": {
+        "start": 244,
+        "end": 246
+      },
+      "alla": {
+        "start": 246,
+        "end": 247
+      },
+      "dikaios": {
+        "start": 252,
+        "end": 254
+      },
+      "eleutheros": {
+        "start": 255,
+        "end": 257
+      },
+      "kardia": {
+        "start": 269,
+        "end": 261
+      },
+      "kosmos": {
+        "start": 262,
+        "end": 264
+      },
+      "nai": {
+        "start": 266,
+        "end": 268
+      },
+      "nun": {
+        "start": 269,
+        "end": 271
+      },
+      "idios": {
+        "start": 271,
+        "end": 273
+      },
+      "parresia": {
+        "start": 275,
+        "end": 277
+      },
+      "dorea": {
+        "start": 278,
+        "end": 280
+      },
+      "episteuon": {
+        "start": 294,
+        "end": 297
+      },
+      "episteues": {
+        "start": 284,
+        "end": 287
+      },
+      "episteuomen": {
+        "start": 288,
+        "end": 290
+      },
+      "episteuete": {
+        "start": 291,
+        "end": 293
+      },
+      "ego": {
+        "start": 299,
+        "end": 301
+      },
+      "emou  mou": {
+        "start": 305,
+        "end": 309
+      },
+      "emoi  moi": {
+        "start": 310,
+        "end": 313
+      },
+      "eme  me": {
+        "start": 315,
+        "end": 319
+      },
+      "emeis": {
+        "start": 323,
+        "end": 325
+      },
+      "su": {
+        "start": 327,
+        "end": 329
+      },
+      "umeis": {
+        "start": 333,
+        "end": 335
+      },
+      "pepisteuka": {
+        "start": 335,
+        "end": 337
+      },
+      "episteue": {
+        "start": 286,
+        "end": 288
+      },
+      "pepisteukas": {
+        "start": 338,
+        "end": 340
+      },
+      "pepisteuke": {
+        "start": 341,
+        "end": 344
+      },
+      "pepisteukamen": {
+        "start": 346,
+        "end": 348
+      },
+      "pepisteukate": {
+        "start": 349,
+        "end": 352
+      },
+      "pepisteukasi": {
+        "start": null,
+        "end": null
+      },
+      "-mai": {
+        "start": 353,
+        "end": 354
+      },
+      "-sai  -e": {
+        "start": 355,
+        "end": 356
+      },
+      "-tai": {
+        "start": 357,
+        "end": 359
+      },
+      "-metha": {
+        "start": 360,
+        "end": 362
+      },
+      "-sthe": {
+        "start": 363,
+        "end": 365
+      },
+      "-ntai": {
+        "start": 366,
+        "end": 368
+      },
+      "tis en o abram": {
+        "start": 370,
+        "end": 374
+      },
+      "ti eipen": {
+        "start": 375,
+        "end": 378
+      },
+      "sun tini elthes": {
+        "start": 383,
+        "end": 386
+      },
+      "esan tines en to oiko": {
+        "start": 288,
+        "end": 393
+      },
+      "anthropos tis eiche duo uious": {
+        "start": 400,
+        "end": 404
+      },
+      "eimi": {
+        "start": 407,
+        "end": 408
+      },
+      "estin": {
+        "start": 411,
+        "end": 412
+      },
+      "esmen": {
+        "start": 413,
+        "end": 414
+      },
+      "este": {
+        "start": 416,
+        "end": 417
+      },
+      "eisin": {
+        "start": 418,
+        "end": 419
+      },
+      "emen": {
+        "start": 420,
+        "end": 421
+      },
+      "esomai": {
+        "start": 424,
+        "end": 425
+      },
+      "erchou": {
+        "start": 428,
+        "end": 429
+      },
+      "erchestho": {
+        "start": 429,
+        "end": 431
+      },
+      "erchesthe": {
+        "start": 433,
+        "end": 435
+      },
+      "erchesthosan": {
+        "start": 440,
+        "end": 442
+      },
+      "akouo": {
+        "start": 445,
+        "end": 448
+      },
+      "aletheia": {
+        "start": 450,
+        "end": 452
+      },
+      "apothnesko": {
+        "start": 462,
+        "end": 464
+      },
+      "apokteino": {
+        "start": 469,
+        "end": 471
+      },
+      "apostello": {
+        "start": 472,
+        "end": 474
+      },
+      "angelos": {
+        "start": 478,
+        "end": 480
+      },
+      "ago": {
+        "start": 481,
+        "end": 483
+      },
+      "baptizo": {
+        "start": 484,
+        "end": 486
+      },
+      "basileus": {
+        "start": 490,
+        "end": 492
+      },
+      "glossa": {
+        "start": 493,
+        "end": 495
+      },
+      "ginomai": {
+        "start": 497,
+        "end": 499
+      },
+      "ge": {
+        "start": 500,
+        "end": 501
+      },
+      "ginosko  epiginosko": {
+        "start": 503,
+        "end": 506
+      },
+      "gune": {
+        "start": 512,
+        "end": 514
+      },
+      "didaskalos": {
+        "start": 515,
+        "end": 517
+      },
+      "dunamai": {
+        "start": 518,
+        "end": 520
+      },
+      "ek  ex": {
+        "start": 529,
+        "end": 530
+      },
+      "elpizo": {
+        "start": 530,
+        "end": 532
+      },
+      "epangelia": {
+        "start": 535,
+        "end": 537
+      },
+      "episteuo  pisteuo": {
+        "start": 540,
+        "end": 544
+      },
+      "erchomai": {
+        "start": 546,
+        "end": 548
+      },
+      "esthio  phagomai": {
+        "start": 550,
+        "end": 553
+      },
+      "kurios": {
+        "start": 580,
+        "end": 582
+      },
+      "lambano": {
+        "start": 589,
+        "end": 591
+      },
+      "logos": {
+        "start": 598,
+        "end": 600
+      },
+      "makarios": {
+        "start": 601,
+        "end": 603
+      },
+      "mathetes": {
+        "start": 612,
+        "end": 614
+      },
+      "manthano": {
+        "start": 616,
+        "end": 618
+      },
+      "meno": {
+        "start": 619,
+        "end": 621
+      },
+      "mnemoneuo": {
+        "start": 623,
+        "end": 625
+      },
+      "o  e  to": {
+        "start": 627,
+        "end": 631
+      },
+      "ou  ouk  ouch": {
+        "start": 636,
+        "end": 640
+      },
+      "ouketi": {
+        "start": 644,
+        "end": 647
+      },
+      "outos  aute  touto": {
+        "start": 648,
+        "end": 654
+      },
+      "palin": {
+        "start": 656,
+        "end": 658
+      },
+      "pempo": {
+        "start": 662,
+        "end": 664
+      },
+      "pino": {
+        "start": 664,
+        "end": 666
+      },
+      "pisteuo": {
+        "start": 668,
+        "end": 670
+      },
+      "pros": {
+        "start": 671,
+        "end": 673
+      },
+      "prophetes": {
+        "start": 675,
+        "end": 677
+      },
+      "sun": {
+        "start": 679,
+        "end": 682
+      },
+      "sunagoge": {
+        "start": 688,
+        "end": 693
+      },
+      "tis  ti": {
+        "start": 695,
+        "end": 698
+      },
+      "tote": {
+        "start": 700,
+        "end": 702
+      },
+      "uios": {
+        "start": 704,
+        "end": 706
+      },
+      "phos": {
+        "start": 711,
+        "end": 712
+      },
+      "chronos": {
+        "start": 708,
+        "end": 710
+      },
+      "psuche": {
+        "start": 712,
+        "end": 714
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#25c06d"/>
+      <stop offset="1" stop-color="#52d6ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="14" y="14" width="228" height="228" rx="48" fill="url(#g)" opacity="0.18"/>
+  <rect x="30" y="30" width="196" height="196" rx="44" fill="#ffffff" opacity="0.65"/>
+  <path d="M74 178c18-36 40-54 66-54s48 18 66 54" fill="none" stroke="#10213b" stroke-width="10" stroke-linecap="round" opacity="0.35"/>
+  <path d="M82 116c10-24 25-36 46-36s36 12 46 36" fill="none" stroke="#10213b" stroke-width="10" stroke-linecap="round" opacity="0.35"/>
+  <text x="128" y="160" text-anchor="middle" font-family="Rubik, Nunito, Arial" font-size="56" font-weight="900" fill="#10213b" opacity="0.78">GQ</text>
+</svg>

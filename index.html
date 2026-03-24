@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#f2c94c" />
+  <meta name="theme-color" content="#0b0f1a" />
   <title>Learn Koine Greek</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -69,10 +69,14 @@
         <div class="section-head">
           <h3>Worlds & Levels</h3>
           <div class="lesson-progress">
-            <div class="lesson-progress__meta">
-              <span id="lesson-category" class="eyebrow">Category: —</span>
-              <span id="lesson-progress-text" class="eyebrow">Lesson: —</span>
+          <div class="lesson-progress__meta">
+            <span id="lesson-category" class="eyebrow">Category: —</span>
+            <span id="lesson-progress-text" class="eyebrow">Lesson: —</span>
+            <div class="lesson-hearts-panel">
+              <span id="lesson-hearts" class="eyebrow">Hearts: 5</span>
+              <div id="lesson-hearts-diagram" class="heart-diagram" aria-label="5 of 5 hearts remaining"></div>
             </div>
+          </div>
             <div class="lesson-progress__bar"><span id="lesson-progress-bar"></span></div>
           </div>
         </div>
@@ -103,6 +107,7 @@
         <div class="lesson-footer">
           <button id="hint-btn" class="btn ghost" type="button" disabled>Hint</button>
           <button id="check-btn" class="btn" type="button" disabled>Check</button>
+          <button id="skip-btn" class="btn ghost" type="button" disabled>Skip</button>
         </div>
       </section>
     </div>
