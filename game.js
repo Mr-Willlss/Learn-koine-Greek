@@ -11,6 +11,8 @@ let audioCtx = null;
 let masterGain = null;
 let startupPlayed = false;
 let heartRefillTicker = null;
+let vocabReady = false;
+let pendingIntroResume = false;
 
 const progressState = {
   xp: 0,
@@ -19,7 +21,13 @@ const progressState = {
   heartsUpdatedAt: Date.now(),
   exhaustedHeartTimes: [],
   completedLessons: [],
-  vocabProgress: {}
+  vocabProgress: {},
+  activeLessonId: null,
+  activeWorldId: null,
+  activeExerciseIndex: 0,
+  activeLessonCorrectCount: 0,
+  activeLessonWrongCount: 0,
+  activeLessonXpEarned: 0
 };
 
 function toast(message) {
@@ -130,6 +138,14 @@ function updateStats() {
   const heartEl = document.getElementById("lesson-hearts");
   if (heartEl) heartEl.textContent = `Hearts: ${progressState.hearts}`;
   renderHeartDiagram("lesson-hearts-diagram");
+  const rewardLast = document.getElementById("reward-last");
+  if (rewardLast && progressState.hearts <= 3) {
+    const missingHearts = Math.max(0, HEART_MAX - progressState.hearts);
+    const recommendedHearts = Math.min(2, missingHearts);
+    rewardLast.textContent = recommendedHearts
+      ? `Low hearts. ${recommendedHearts} heart${recommendedHearts === 1 ? "" : "s"} cost ${recommendedHearts * HEART_GEM_COST} gems.`
+      : `Low hearts. Full refill costs ${missingHearts * HEART_GEM_COST} gems.`;
+  }
   updateFocusStrip();
 }
 
@@ -154,8 +170,15 @@ function showOutOfHeartsState() {
       <h4>Out of hearts</h4>
       <p>You need at least 1 heart to keep playing.</p>
       <p>Each exhausted heart refills after 5 minutes.</p>
+      <div class="social-card__actions" style="margin-top:12px">
+        <button id="open-heart-shop-btn" class="btn btn--sky" type="button">Use gems for hearts</button>
+      </div>
     </div>
   `;
+  const openHeartShopBtn = document.getElementById("open-heart-shop-btn");
+  if (openHeartShopBtn) {
+    openHeartShopBtn.addEventListener("click", () => window.openGiftsModal?.());
+  }
   setLessonActionState(true);
 }
 
@@ -280,6 +303,35 @@ function pulseLessonPanel(kind = "success") {
   }, 520);
 }
 
+function cheerMascot(kind = "success") {
+  const mascot = document.querySelector(".mascot-cheer");
+  if (!mascot) return;
+  mascot.classList.remove("is-cheering", "is-concerned");
+  mascot.classList.add(kind === "warning" ? "is-concerned" : "is-cheering");
+  setTimeout(() => {
+    mascot.classList.remove("is-cheering", "is-concerned");
+  }, 900);
+}
+
+function flashRewardPocket(rewardSummary) {
+  if (!rewardSummary) return;
+  const pocket = document.getElementById("reward-pocket");
+  const reel = document.getElementById("reward-reel");
+  if (pocket) {
+    pocket.classList.remove("reward-pocket--burst");
+    void pocket.offsetWidth;
+    pocket.classList.add("reward-pocket--burst");
+    setTimeout(() => pocket.classList.remove("reward-pocket--burst"), 1100);
+  }
+  if (reel) {
+    reel.innerHTML = `
+      <span class="reward-reel__chip reward-reel__chip--gold">+${rewardSummary.gems || 0} gems</span>
+      <span class="reward-reel__chip reward-reel__chip--mint">+${rewardSummary.heartPasses || 0} heart gift</span>
+      <span class="reward-reel__chip reward-reel__chip--sky">+${rewardSummary.crowns || 0} crowns</span>
+    `;
+  }
+}
+
 function getProgressPayload() {
   return {
     xp: progressState.xp,
@@ -290,7 +342,13 @@ function getProgressPayload() {
     exhaustedHeartTimes: progressState.exhaustedHeartTimes,
     completedLessons: progressState.completedLessons,
     vocabProgress: progressState.vocabProgress,
-    spacedRepetition: spacedRepetition.items
+    spacedRepetition: spacedRepetition.items,
+    activeLessonId: progressState.activeLessonId,
+    activeWorldId: progressState.activeWorldId,
+    activeExerciseIndex: progressState.activeExerciseIndex,
+    activeLessonCorrectCount: progressState.activeLessonCorrectCount,
+    activeLessonWrongCount: progressState.activeLessonWrongCount,
+    activeLessonXpEarned: progressState.activeLessonXpEarned
   };
 }
 
@@ -302,7 +360,13 @@ function getRemoteProgressPayload() {
     exhaustedHeartTimes: progressState.exhaustedHeartTimes,
     completedLessons: progressState.completedLessons,
     vocabProgress: progressState.vocabProgress,
-    spacedRepetition: spacedRepetition.items
+    spacedRepetition: spacedRepetition.items,
+    activeLessonId: progressState.activeLessonId,
+    activeWorldId: progressState.activeWorldId,
+    activeExerciseIndex: progressState.activeExerciseIndex,
+    activeLessonCorrectCount: progressState.activeLessonCorrectCount,
+    activeLessonWrongCount: progressState.activeLessonWrongCount,
+    activeLessonXpEarned: progressState.activeLessonXpEarned
   };
 }
 
@@ -317,11 +381,35 @@ function applyProgress(payload) {
     : [];
   progressState.completedLessons = payload.completedLessons || [];
   progressState.vocabProgress = payload.vocabProgress || {};
+  progressState.activeLessonId = payload.activeLessonId || null;
+  progressState.activeWorldId = payload.activeWorldId || null;
+  progressState.activeExerciseIndex = Number.isFinite(payload.activeExerciseIndex) ? payload.activeExerciseIndex : 0;
+  progressState.activeLessonCorrectCount = Number.isFinite(payload.activeLessonCorrectCount) ? payload.activeLessonCorrectCount : 0;
+  progressState.activeLessonWrongCount = Number.isFinite(payload.activeLessonWrongCount) ? payload.activeLessonWrongCount : 0;
+  progressState.activeLessonXpEarned = Number.isFinite(payload.activeLessonXpEarned) ? payload.activeLessonXpEarned : 0;
   spacedRepetition.items = payload.spacedRepetition || spacedRepetition.items;
   hydrateHeartRefillState();
   updateStats();
   updateProgressBar();
   renderMap(progressState);
+}
+
+function syncActiveLessonState() {
+  progressState.activeLessonId = currentLesson?.id || null;
+  progressState.activeWorldId = currentLesson?.worldId || null;
+  progressState.activeExerciseIndex = currentExerciseIndex || 0;
+  progressState.activeLessonCorrectCount = lessonCorrectCount || 0;
+  progressState.activeLessonWrongCount = lessonWrongCount || 0;
+  progressState.activeLessonXpEarned = lessonXpEarned || 0;
+}
+
+function clearActiveLessonState() {
+  progressState.activeLessonId = null;
+  progressState.activeWorldId = null;
+  progressState.activeExerciseIndex = 0;
+  progressState.activeLessonCorrectCount = 0;
+  progressState.activeLessonWrongCount = 0;
+  progressState.activeLessonXpEarned = 0;
 }
 
 function saveLocalProgress() {
@@ -373,26 +461,30 @@ function loadVocabDatabase() {
     .then((data) => (data || []).map(normalizeVocabEntry));
 }
 
-function startLesson(lesson, world) {
+function startLesson(lesson, world, options = {}) {
   if (!requireSignIn()) return;
   if (!consumeHeartIfNeeded()) return;
   currentLesson = { ...lesson, worldId: world.id };
-  currentExerciseIndex = 0;
-  lessonXpEarned = 0;
-  lessonCorrectCount = 0;
-  lessonWrongCount = 0;
+  currentExerciseIndex = Number.isFinite(options.resumeExerciseIndex) ? options.resumeExerciseIndex : 0;
+  lessonXpEarned = Number.isFinite(options.resumeLessonXpEarned) ? options.resumeLessonXpEarned : 0;
+  lessonCorrectCount = Number.isFinite(options.resumeCorrectCount) ? options.resumeCorrectCount : 0;
+  lessonWrongCount = Number.isFinite(options.resumeWrongCount) ? options.resumeWrongCount : 0;
 
-  const vocabSample = vocabDatabase.slice(0, 4);
-  currentLesson.exercises = shuffleArray(buildLessonExercises(lesson, vocabDatabase));
+  currentLesson.exercises = buildLessonExercises(lesson, vocabDatabase, lesson.id);
+  currentExerciseIndex = Math.max(0, Math.min(currentExerciseIndex, Math.max((currentLesson.exercises.length || 1) - 1, 0)));
 
   document.getElementById("lesson-title").textContent = `${world.title} · ${lesson.title}`;
   document.getElementById("lesson-type").textContent = "Lesson";
   document.getElementById("lesson-xp").textContent = `+${lesson.xp} XP`;
   setLessonActionState(false);
-  setLessonFeedback("info", `Lesson live. ${lesson.title} has ${currentLesson.exercises.length} short activities.`);
+  setLessonFeedback("info", options.resuming
+    ? `Welcome back. You resumed ${lesson.title} from your last saved state.`
+    : `Lesson live. ${lesson.title} has ${currentLesson.exercises.length} short activities.`);
+  syncActiveLessonState();
   updateLessonProgress();
   setTeacherMood("idle");
   renderExercise();
+  saveLocalProgress();
 }
 
 function skipCurrentExercise() {
@@ -411,6 +503,8 @@ function skipCurrentExercise() {
   const [skipped] = exercises.splice(currentExerciseIndex, 1);
   exercises.push(skipped);
   currentSelection = null;
+  syncActiveLessonState();
+  saveLocalProgress();
   renderExercise();
   toast("Activity moved to the end.");
 }
@@ -573,6 +667,7 @@ function renderExercise() {
   }
 
   body.appendChild(wrapper);
+  syncActiveLessonState();
   updateLessonProgress();
 }
 
@@ -666,6 +761,7 @@ function checkAnswer() {
     updateSpacedRepetition(exercise.vocab?.id, true);
     playCorrectSound();
     pulseLessonPanel("success");
+    cheerMascot("success");
     setLessonFeedback("success", "Correct. Keep the rhythm going and stack another win.");
   } else {
     lessonWrongCount += 1;
@@ -675,14 +771,18 @@ function checkAnswer() {
     updateSpacedRepetition(exercise.vocab?.id, false);
     playIncorrectSound();
     pulseLessonPanel("warning");
+    cheerMascot("warning");
     setLessonFeedback("warning", "Not quite yet. You can retry this one right away.");
   }
 
+  syncActiveLessonState();
   updateStats();
   saveLocalProgress();
 
   if (correct) {
     currentExerciseIndex += 1;
+    syncActiveLessonState();
+    saveLocalProgress();
     if (currentExerciseIndex >= currentLesson.exercises.length) {
       finishLesson();
     } else {
@@ -700,6 +800,7 @@ function checkAnswer() {
 
 const HEART_MAX = 5;
 const HEART_REFILL_MS = 5 * 60 * 1000;
+const HEART_GEM_COST = 140;
 
 function hydrateHeartRefillState() {
   if (progressState.exhaustedHeartTimes.length) {
@@ -792,6 +893,7 @@ async function finishLesson() {
 
   let awardedXp = lessonXpEarned;
   let rewardSummary = null;
+  let secureProfileApplied = false;
   if (typeof submitLessonCompletionToSocial === "function") {
     try {
       const secureResult = await submitLessonCompletionToSocial(currentLesson);
@@ -804,6 +906,7 @@ async function finishLesson() {
       if (secureResult?.alreadyAwarded) {
         toast("Lesson progress saved. XP was already counted for this lesson.");
       }
+      secureProfileApplied = !!secureResult?.user;
       completionConfirmed = !!secureResult;
     } catch (error) {
       console.error(error);
@@ -818,6 +921,7 @@ async function finishLesson() {
   if (!completionConfirmed) {
     awardedXp = 0;
   }
+  clearActiveLessonState();
 
   updateStats();
   updateProgressBar();
@@ -826,6 +930,17 @@ async function finishLesson() {
 
   if (syncError) {
     toast(syncError.message || "Lesson completed, but secure XP sync is not ready yet.");
+  }
+
+  if (rewardSummary) {
+    if (!secureProfileApplied) {
+      window.applyRewardSummaryToChrome?.(rewardSummary);
+    }
+    flashRewardPocket(rewardSummary);
+    const rewardLast = document.getElementById("reward-last");
+    if (rewardLast) {
+      rewardLast.textContent = `Last reward: +${rewardSummary.gems || 0} gems, +${rewardSummary.heartPasses || 0} heart gift, +${rewardSummary.crowns || 0} crowns`;
+    }
   }
 
   setLessonFeedback("success", `Lesson cleared. You banked ${awardedXp} XP and moved your journey forward.`);
@@ -856,9 +971,12 @@ function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
   const summaryText = modal.querySelector(".modal-summary");
   const answered = lessonCorrectCount + lessonWrongCount;
   const accuracy = answered ? Math.round((lessonCorrectCount / answered) * 100) : 0;
+  const next = currentLesson ? getNextLesson(currentLesson.id) : null;
   xpText.textContent = `You earned ${xpEarned} XP in this lesson.`;
   if (summaryText) {
-    summaryText.textContent = `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.`;
+    summaryText.textContent = next
+      ? `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy. Continue will move you straight to ${next.lesson.title}.`
+      : `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.`;
   }
   const btn = modal.querySelector("button");
   let burst = modal.querySelector(".reward-burst");
@@ -885,6 +1003,7 @@ function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
     `;
     modal.querySelector(".modal-card").insertBefore(burst, btn);
   }
+  btn.textContent = typeof onContinue === "function" ? "Continue to next lesson" : "Close";
   btn.onclick = () => {
     modal.classList.remove("show");
     if (typeof onContinue === "function") onContinue();
@@ -985,6 +1104,9 @@ function showHint() {
 function initApp() {
   loadOptions();
   registerEvents();
+  if (typeof window.gqProgressHydrated === "undefined") {
+    window.gqProgressHydrated = !isSignedIn();
+  }
   const hintBox = document.getElementById("hero-status");
   if (hintBox) hintBox.textContent = "";
   lockUI(!isSignedIn());
@@ -996,18 +1118,28 @@ function initApp() {
   loadVocabDatabase()
     .then((data) => {
       vocabDatabase = data;
+      vocabReady = true;
       initSpacedRepetition(vocabDatabase);
       loadLocalProgress();
       renderMap(progressState);
       updateStats();
       updateProgressBar();
+      if (pendingIntroResume) {
+        pendingIntroResume = false;
+        startOrResumeFromIntro();
+      }
     })
     .catch((err) => {
       console.error(err);
       toast("Failed to load vocab. Host this folder online (https://) and refresh.");
+      vocabReady = true;
       renderMap(progressState);
       updateStats();
       updateProgressBar();
+      if (pendingIntroResume) {
+        pendingIntroResume = false;
+        startOrResumeFromIntro();
+      }
     });
 
   if (heartRefillTicker) {
@@ -1017,6 +1149,12 @@ function initApp() {
 
   // Safety: never keep intro longer than 10 seconds
   setTimeout(startOrResumeFromIntro, 9000);
+  window.addEventListener("gq-progress-hydrated", () => {
+    if (pendingIntroResume) {
+      pendingIntroResume = false;
+      startOrResumeFromIntro();
+    }
+  });
 }
 
 // Startup audio intentionally removed.
@@ -1024,9 +1162,35 @@ function initApp() {
 document.addEventListener("DOMContentLoaded", initApp);
 
 function startNextUnlockedLesson() {
+  if (progressState.activeLessonId && !progressState.completedLessons.includes(progressState.activeLessonId)) {
+    startFromSavedStateOrDefault();
+    return;
+  }
   const target = findNextUnlockedLesson();
   if (!target) return;
   startLesson(target.lesson, target.world);
+}
+
+function startFromSavedStateOrDefault() {
+  const world = lessonData.worlds.find((item) => item.id === progressState.activeWorldId);
+  const savedLesson = world?.lessons.find((item) => item.id === progressState.activeLessonId);
+  if (savedLesson && !progressState.completedLessons.includes(savedLesson.id)) {
+    startLesson(savedLesson, world, {
+      resuming: true,
+      resumeExerciseIndex: progressState.activeExerciseIndex,
+      resumeCorrectCount: progressState.activeLessonCorrectCount,
+      resumeWrongCount: progressState.activeLessonWrongCount,
+      resumeLessonXpEarned: progressState.activeLessonXpEarned
+    });
+    return;
+  }
+
+  if (progressState.completedLessons.length) {
+    startNextUnlockedLesson();
+    return;
+  }
+
+  startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]);
 }
 
 function getNextLesson(currentId) {
@@ -1277,6 +1441,7 @@ function updateLessonProgress() {
   const bar = document.getElementById("lesson-progress-bar");
   const text = document.getElementById("lesson-progress-text");
   const cat = document.getElementById("lesson-category");
+  const earnedXpEl = document.getElementById("lesson-earned-xp");
   const stepCount = document.getElementById("lesson-step-count");
   const stepNote = document.getElementById("lesson-step-note");
   const accuracyEl = document.getElementById("lesson-accuracy");
@@ -1286,6 +1451,7 @@ function updateLessonProgress() {
     bar.style.width = "0%";
     text.textContent = "Lesson: -";
     cat.textContent = "Category: -";
+    if (earnedXpEl) earnedXpEl.textContent = "XP this lesson: 0";
     if (stepCount) stepCount.textContent = "0 / 0";
     if (stepNote) stepNote.textContent = "Choose a lesson to begin.";
     if (accuracyEl) accuracyEl.textContent = "0%";
@@ -1293,13 +1459,19 @@ function updateLessonProgress() {
     return;
   }
   const total = currentLesson.exercises.length || 1;
-  const pct = Math.min(100, Math.floor((currentExerciseIndex / total) * 100));
   const answered = lessonCorrectCount + lessonWrongCount;
   const accuracy = answered ? Math.round((lessonCorrectCount / answered) * 100) : 0;
-  bar.style.width = `${pct}%`;
+  const displayPct = answered ? accuracy : Math.min(100, Math.floor((currentExerciseIndex / total) * 100));
+  bar.style.width = `${displayPct}%`;
+  bar.style.background = accuracy >= 80
+    ? "linear-gradient(90deg, #43d17c, #b9f671)"
+    : accuracy >= 50
+      ? "linear-gradient(90deg, #ffb44d, #ffd45c)"
+      : "linear-gradient(90deg, #ff7a59, #ffcf5a, #71d8ff)";
   text.textContent = `Lesson: ${currentLesson.title}`;
   const world = lessonData.worlds.find((w) => w.id === currentLesson.worldId);
   cat.textContent = `Category: ${world ? world.title.replace(/World\\s\\d+\\:\\s*/i, "") : "Lesson"}`;
+  if (earnedXpEl) earnedXpEl.textContent = `XP this lesson: ${lessonXpEarned}`;
   if (stepCount) stepCount.textContent = `${Math.min(currentExerciseIndex + 1, total)} / ${total}`;
   if (stepNote) stepNote.textContent = `${Math.max(total - currentExerciseIndex, 0)} quick steps left in this lesson.`;
   if (accuracyEl) accuracyEl.textContent = `${accuracy}%`;
@@ -1518,12 +1690,16 @@ function hideIntro() {
 function startOrResumeFromIntro() {
   const intro = document.getElementById("intro-overlay");
   if (!intro || intro.classList.contains("hide")) return;
+  if (!vocabReady) {
+    pendingIntroResume = true;
+    return;
+  }
+  if (isSignedIn() && window.gqProgressHydrated === false) {
+    pendingIntroResume = true;
+    return;
+  }
   if (requireSignIn()) {
-    if (progressState.completedLessons.length) {
-      startNextUnlockedLesson();
-    } else {
-      startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]);
-    }
+    startFromSavedStateOrDefault();
   }
   hideIntro();
 }

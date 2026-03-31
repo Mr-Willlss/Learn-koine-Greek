@@ -4,6 +4,7 @@ const socialState = {
   friendships: [],
   incomingRequests: [],
   outgoingRequests: [],
+  suggestions: [],
   gifts: {
     received: [],
     sent: []
@@ -37,6 +38,10 @@ const LEAGUE_TIERS = [
   { minXp: 450, label: "Ruby" },
   { minXp: 700, label: "Diamond" }
 ];
+
+const SOCIAL_LESSON_GEM_REWARD = 250;
+const SOCIAL_HEART_GEM_COST = 140;
+const SOCIAL_HEART_MAX = 5;
 
 function getCurrentSocialUser() {
   if (typeof authState !== "undefined" && authState.user) return authState.user;
@@ -187,6 +192,21 @@ function applySocialProfile(profile) {
   updateSocialChrome();
 }
 
+function applyRewardSummaryToChrome(rewardSummary) {
+  if (!rewardSummary) return;
+  const baseProfile = socialState.profile || createFallbackProfile();
+  const profile = {
+    ...baseProfile,
+    rewards: {
+      gems: (baseProfile.rewards?.gems || 0) + (rewardSummary.gems || 0),
+      heartPasses: (baseProfile.rewards?.heartPasses || 0) + (rewardSummary.heartPasses || 0),
+      crowns: (baseProfile.rewards?.crowns || 0) + (rewardSummary.crowns || 0)
+    }
+  };
+  socialState.profile = profile;
+  updateSocialChrome();
+}
+
 function updateSocialChrome() {
   const profile = socialState.profile || createFallbackProfile();
   const rankEl = document.getElementById("stat-rank");
@@ -236,16 +256,510 @@ function clearWideModal() {
   if (card) card.classList.remove("modal-card--wide");
 }
 
-function socialCall(name, payload = {}) {
-  if (!functions) {
-    return Promise.reject(new Error("Cloud Functions are not initialized yet."));
+function getFieldValue() {
+  return window.firebase?.firestore?.FieldValue || null;
+}
+
+function serverTimestamp() {
+  return getFieldValue()?.serverTimestamp?.() || new Date();
+}
+
+function arrayUnion(...values) {
+  return getFieldValue()?.arrayUnion?.(...values);
+}
+
+function arrayRemove(...values) {
+  return getFieldValue()?.arrayRemove?.(...values);
+}
+
+function friendshipIdFor(a, b) {
+  return [a, b].sort().join("__");
+}
+
+function friendRequestIdFor(fromUid, toUid) {
+  return `${fromUid}__${toUid}`;
+}
+
+function getLessonMeta(lessonId) {
+  if (!window.lessonData?.worlds) return null;
+  for (const world of lessonData.worlds) {
+    const lesson = world.lessons.find((item) => item.id === lessonId);
+    if (lesson) {
+      return { world, lesson, title: `${world.title} - ${lesson.title}` };
+    }
   }
-  return functions.httpsCallable(name)(payload).then((result) => result.data || {});
+  return null;
+}
+
+async function ensureFallbackUserDocument(user = getCurrentSocialUser()) {
+  if (!db || !user) return createFallbackProfile(user);
+  const userRef = db.collection("users").doc(user.uid);
+  return db.runTransaction(async (transaction) => {
+    const userDoc = await transaction.get(userRef);
+    const existing = userDoc.exists ? normalizeSocialDocData(user.uid, userDoc.data()) : createFallbackProfile(user);
+    const username = existing.profile.username || buildUsernameSeed(user);
+    const usernameRef = db.collection("usernames").doc(username.toLowerCase());
+    const usernameDoc = await transaction.get(usernameRef);
+
+    const merged = {
+      uid: user.uid,
+      profile: {
+        ...existing.profile,
+        displayName: user.displayName || existing.profile.displayName,
+        username,
+        usernameLower: username.toLowerCase(),
+        photoURL: user.photoURL || existing.profile.photoURL,
+        isProfilePublic: existing.profile.isProfilePublic !== false
+      },
+      stats: {
+        ...existing.stats,
+        totalXp: progressState?.xp ?? existing.stats.totalXp,
+        level: progressState?.level ?? existing.stats.level,
+        totalLessonsCompleted: progressState?.completedLessons?.length ?? existing.stats.totalLessonsCompleted,
+        progressPercent: totalLessonCount()
+          ? Math.round(((progressState?.completedLessons?.length ?? existing.stats.totalLessonsCompleted) / totalLessonCount()) * 100)
+          : existing.stats.progressPercent
+      },
+      social: {
+        ...existing.social,
+        rankTitle: getRankLabel(progressState?.xp ?? existing.stats.totalXp),
+        league: existing.social.league || getLeagueLabel(existing.social.weeklyXp || 0)
+      },
+      rewards: {
+        gems: existing.rewards?.gems || 0,
+        heartPasses: existing.rewards?.heartPasses || 0,
+        crowns: existing.rewards?.crowns || 0
+      },
+      updatedAt: serverTimestamp()
+    };
+
+    transaction.set(userRef, merged, { merge: true });
+    if (!usernameDoc.exists || usernameDoc.data()?.uid === user.uid) {
+      transaction.set(usernameRef, { uid: user.uid, username, updatedAt: serverTimestamp() }, { merge: true });
+    }
+    return merged;
+  });
+}
+
+async function fallbackSyncUserProfile(payload = {}) {
+  const user = getCurrentSocialUser();
+  if (!user || !db) throw new Error("Sign in to sync your social profile.");
+  const merged = await ensureFallbackUserDocument({
+    ...user,
+    displayName: payload.displayName || user.displayName,
+    photoURL: payload.photoURL || user.photoURL
+  });
+  return { user: merged };
+}
+
+async function fallbackUpdateUserProfile(payload = {}) {
+  const user = getCurrentSocialUser();
+  if (!user || !db) throw new Error("Sign in to save your profile.");
+  const userRef = db.collection("users").doc(user.uid);
+
+  const merged = await db.runTransaction(async (transaction) => {
+    const userDoc = await transaction.get(userRef);
+    const current = userDoc.exists ? normalizeSocialDocData(user.uid, userDoc.data()) : createFallbackProfile(user);
+    const desiredUsername = (payload.username || current.profile.username || buildUsernameSeed(user)).trim().toLowerCase();
+    const nextUsername = desiredUsername.replace(/[^a-z0-9]+/g, "").slice(0, 20) || current.profile.username;
+    const currentUsername = current.profile.usernameLower || current.profile.username.toLowerCase();
+    const newUsernameRef = db.collection("usernames").doc(nextUsername);
+    const newUsernameDoc = await transaction.get(newUsernameRef);
+    if (newUsernameDoc.exists && newUsernameDoc.data()?.uid !== user.uid) {
+      throw new Error("That username is already taken.");
+    }
+
+    const mergedProfile = {
+      ...current,
+      profile: {
+        ...current.profile,
+        displayName: (payload.displayName || current.profile.displayName).trim().slice(0, 40),
+        username: nextUsername,
+        usernameLower: nextUsername,
+        bio: (payload.bio || "").trim().slice(0, 180),
+        isProfilePublic: typeof payload.isProfilePublic === "boolean" ? payload.isProfilePublic : current.profile.isProfilePublic,
+        photoURL: current.profile.photoURL || user.photoURL || ""
+      },
+      updatedAt: serverTimestamp()
+    };
+
+    transaction.set(userRef, mergedProfile, { merge: true });
+    transaction.set(newUsernameRef, { uid: user.uid, username: nextUsername, updatedAt: serverTimestamp() }, { merge: true });
+    if (currentUsername !== nextUsername) {
+      transaction.delete(db.collection("usernames").doc(currentUsername));
+    }
+    return mergedProfile;
+  });
+
+  return { user: merged };
+}
+
+async function fallbackSendFriendRequest(payload = {}) {
+  const user = getCurrentSocialUser();
+  const targetUid = String(payload.targetUid || "").trim();
+  if (!user || !db || !targetUid || targetUid === user.uid) throw new Error("Choose another learner.");
+
+  const requestRef = db.collection("friendRequests").doc(friendRequestIdFor(user.uid, targetUid));
+  const reverseRef = db.collection("friendRequests").doc(friendRequestIdFor(targetUid, user.uid));
+  const friendshipRef = db.collection("friendships").doc(friendshipIdFor(user.uid, targetUid));
+
+  await db.runTransaction(async (transaction) => {
+    const [requestDoc, reverseDoc, friendshipDoc, selfUserDoc, targetUserDoc] = await Promise.all([
+      transaction.get(requestRef),
+      transaction.get(reverseRef),
+      transaction.get(friendshipRef),
+      transaction.get(db.collection("users").doc(user.uid)),
+      transaction.get(db.collection("users").doc(targetUid))
+    ]);
+    if (friendshipDoc.exists) return;
+    if (reverseDoc.exists && reverseDoc.data()?.status === "pending") {
+      const selfUser = selfUserDoc.exists ? normalizeSocialDocData(user.uid, selfUserDoc.data()) : createFallbackProfile(user);
+      const targetUser = targetUserDoc.exists ? normalizeSocialDocData(targetUid, targetUserDoc.data()) : createFallbackProfile({ uid: targetUid });
+      transaction.delete(reverseRef);
+      transaction.set(friendshipRef, {
+        members: [user.uid, targetUid].sort(),
+        createdAt: serverTimestamp()
+      });
+      transaction.set(db.collection("users").doc(user.uid), { "stats.totalFriends": (selfUser.stats.totalFriends || 0) + 1 }, { merge: true });
+      transaction.set(db.collection("users").doc(targetUid), { "stats.totalFriends": (targetUser.stats.totalFriends || 0) + 1 }, { merge: true });
+      return;
+    }
+    if (requestDoc.exists) return;
+    transaction.set(requestRef, {
+      fromUid: user.uid,
+      toUid: targetUid,
+      status: "pending",
+      createdAt: serverTimestamp()
+    });
+  });
+  return { ok: true };
+}
+
+async function fallbackRespondToFriendRequest(payload = {}) {
+  const user = getCurrentSocialUser();
+  const requestId = String(payload.requestId || "").trim();
+  const action = String(payload.action || "").trim();
+  if (!user || !db || !requestId) throw new Error("Choose a request first.");
+  const requestRef = db.collection("friendRequests").doc(requestId);
+
+  await db.runTransaction(async (transaction) => {
+    const requestDoc = await transaction.get(requestRef);
+    if (!requestDoc.exists) return;
+    const request = requestDoc.data();
+    if (![request.fromUid, request.toUid].includes(user.uid)) throw new Error("You cannot change that request.");
+    if (action === "accept") {
+      const friendshipRef = db.collection("friendships").doc(friendshipIdFor(request.fromUid, request.toUid));
+      const [selfUserDoc, otherUserDoc] = await Promise.all([
+        transaction.get(db.collection("users").doc(request.toUid)),
+        transaction.get(db.collection("users").doc(request.fromUid))
+      ]);
+      const selfUser = selfUserDoc.exists ? normalizeSocialDocData(request.toUid, selfUserDoc.data()) : createFallbackProfile({ uid: request.toUid });
+      const otherUser = otherUserDoc.exists ? normalizeSocialDocData(request.fromUid, otherUserDoc.data()) : createFallbackProfile({ uid: request.fromUid });
+      transaction.set(friendshipRef, {
+        members: [request.fromUid, request.toUid].sort(),
+        createdAt: serverTimestamp()
+      });
+      transaction.set(db.collection("users").doc(request.toUid), { "stats.totalFriends": (selfUser.stats.totalFriends || 0) + 1 }, { merge: true });
+      transaction.set(db.collection("users").doc(request.fromUid), { "stats.totalFriends": (otherUser.stats.totalFriends || 0) + 1 }, { merge: true });
+      transaction.delete(requestRef);
+      return;
+    }
+    transaction.delete(requestRef);
+  });
+  return { ok: true };
+}
+
+async function fallbackRemoveFriend(payload = {}) {
+  const user = getCurrentSocialUser();
+  const targetUid = String(payload.targetUid || "").trim();
+  if (!user || !db || !targetUid) throw new Error("Choose a friend first.");
+  const friendshipRef = db.collection("friendships").doc(friendshipIdFor(user.uid, targetUid));
+
+  await db.runTransaction(async (transaction) => {
+    const [friendshipDoc, selfUserDoc, targetUserDoc] = await Promise.all([
+      transaction.get(friendshipRef),
+      transaction.get(db.collection("users").doc(user.uid)),
+      transaction.get(db.collection("users").doc(targetUid))
+    ]);
+    if (!friendshipDoc.exists) return;
+    const selfUser = selfUserDoc.exists ? normalizeSocialDocData(user.uid, selfUserDoc.data()) : createFallbackProfile(user);
+    const targetUser = targetUserDoc.exists ? normalizeSocialDocData(targetUid, targetUserDoc.data()) : createFallbackProfile({ uid: targetUid });
+    transaction.delete(friendshipRef);
+    transaction.set(db.collection("users").doc(user.uid), { "stats.totalFriends": Math.max(0, (selfUser.stats.totalFriends || 1) - 1) }, { merge: true });
+    transaction.set(db.collection("users").doc(targetUid), { "stats.totalFriends": Math.max(0, (targetUser.stats.totalFriends || 1) - 1) }, { merge: true });
+  });
+  return { ok: true };
+}
+
+async function fallbackSendGift(payload = {}) {
+  const user = getCurrentSocialUser();
+  const targetUid = String(payload.targetUid || "").trim();
+  const giftType = String(payload.giftType || "").trim();
+  if (!user || !db || !targetUid || !["heart", "gems"].includes(giftType)) throw new Error("Choose a valid gift.");
+
+  const result = await db.runTransaction(async (transaction) => {
+    const friendshipRef = db.collection("friendships").doc(friendshipIdFor(user.uid, targetUid));
+    const giftRef = db.collection("gifts").doc();
+    const [friendshipDoc, senderDoc, recipientDoc] = await Promise.all([
+      transaction.get(friendshipRef),
+      transaction.get(db.collection("users").doc(user.uid)),
+      transaction.get(db.collection("users").doc(targetUid))
+    ]);
+    if (!friendshipDoc.exists) throw new Error("Add this learner as a friend first.");
+    const sender = senderDoc.exists ? normalizeSocialDocData(user.uid, senderDoc.data()) : createFallbackProfile(user);
+    const recipient = recipientDoc.exists ? normalizeSocialDocData(targetUid, recipientDoc.data()) : createFallbackProfile({ uid: targetUid });
+    const nextSenderRewards = { ...sender.rewards };
+    const nextRecipientRewards = { ...recipient.rewards };
+    let giftLabel = "Gem Pack";
+    let message = `${sender.profile.displayName} sent you a study boost.`;
+
+    if (giftType === "heart") {
+      if ((sender.rewards?.gems || 0) < SOCIAL_HEART_GEM_COST) throw new Error(`You need ${SOCIAL_HEART_GEM_COST} gems to send a heart gift.`);
+      nextSenderRewards.gems -= SOCIAL_HEART_GEM_COST;
+      nextRecipientRewards.heartPasses += 1;
+      giftLabel = "Heart Gift";
+      message = `${sender.profile.displayName} sent you a heart refill gift.`;
+    } else {
+      if ((sender.rewards?.gems || 0) < SOCIAL_HEART_GEM_COST) throw new Error(`You need ${SOCIAL_HEART_GEM_COST} gems to send a gem pack.`);
+      nextSenderRewards.gems -= SOCIAL_HEART_GEM_COST;
+      nextRecipientRewards.gems += SOCIAL_HEART_GEM_COST;
+      message = `${sender.profile.displayName} sent you ${SOCIAL_HEART_GEM_COST} gems.`;
+    }
+
+    transaction.set(db.collection("users").doc(user.uid), { rewards: nextSenderRewards, updatedAt: serverTimestamp() }, { merge: true });
+    transaction.set(db.collection("users").doc(targetUid), { rewards: nextRecipientRewards, updatedAt: serverTimestamp() }, { merge: true });
+    transaction.set(giftRef, {
+      senderUid: user.uid,
+      senderDisplayName: sender.profile.displayName,
+      recipientUid: targetUid,
+      recipientDisplayName: recipient.profile.displayName,
+      giftType,
+      giftLabel,
+      message,
+      createdAt: serverTimestamp()
+    });
+    return { ...sender, rewards: nextSenderRewards };
+  });
+
+  return { ok: true, user: result };
+}
+
+async function fallbackRedeemHeartPass() {
+  const user = getCurrentSocialUser();
+  if (!user || !db) throw new Error("Sign in to use a heart gift.");
+  const merged = await db.runTransaction(async (transaction) => {
+    const userRef = db.collection("users").doc(user.uid);
+    const userDoc = await transaction.get(userRef);
+    const current = userDoc.exists ? normalizeSocialDocData(user.uid, userDoc.data()) : createFallbackProfile(user);
+    if ((current.rewards?.heartPasses || 0) <= 0) throw new Error("You do not have a heart gift to use.");
+    const nextRewards = { ...current.rewards, heartPasses: Math.max(0, (current.rewards?.heartPasses || 0) - 1) };
+    const mergedProfile = { ...current, rewards: nextRewards, updatedAt: serverTimestamp() };
+    transaction.set(userRef, mergedProfile, { merge: true });
+    return mergedProfile;
+  });
+  return { ok: true, user: merged };
+}
+
+async function fallbackBuyHeartsWithGems(payload = {}) {
+  const user = getCurrentSocialUser();
+  const heartCount = Math.max(1, Math.min(SOCIAL_HEART_MAX, Number(payload.heartCount) || 1));
+  if (!user || !db) throw new Error("Sign in to buy hearts.");
+  const merged = await db.runTransaction(async (transaction) => {
+    const userRef = db.collection("users").doc(user.uid);
+    const userDoc = await transaction.get(userRef);
+    const current = userDoc.exists ? normalizeSocialDocData(user.uid, userDoc.data()) : createFallbackProfile(user);
+    const gemCost = heartCount * SOCIAL_HEART_GEM_COST;
+    if ((current.rewards?.gems || 0) < gemCost) throw new Error(`You need ${gemCost} gems for ${heartCount} heart${heartCount === 1 ? "" : "s"}.`);
+    const nextRewards = { ...current.rewards, gems: (current.rewards?.gems || 0) - gemCost };
+    const mergedProfile = { ...current, rewards: nextRewards, updatedAt: serverTimestamp() };
+    transaction.set(userRef, mergedProfile, { merge: true });
+    return mergedProfile;
+  });
+  return { ok: true, spentGems: heartCount * SOCIAL_HEART_GEM_COST, purchasedHearts: heartCount, user: merged };
+}
+
+async function fallbackCreateStudyRoom(payload = {}) {
+  const user = getCurrentSocialUser();
+  const lessonId = String(payload.lessonId || "").trim();
+  const invitedUid = String(payload.invitedUid || "").trim();
+  if (!user || !db || !lessonId) throw new Error("Choose a lesson first.");
+  const lessonMeta = getLessonMeta(lessonId);
+  const roomRef = db.collection("studyRooms").doc();
+  const hostProfile = socialState.profile || (await ensureFallbackUserDocument(user));
+  await roomRef.set({
+    hostUid: user.uid,
+    hostDisplayName: hostProfile.profile.displayName,
+    lessonId,
+    lessonTitle: lessonMeta?.title || lessonId,
+    memberUids: [user.uid],
+    invitedUids: invitedUid ? [invitedUid] : [],
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+  return { ok: true, roomId: roomRef.id };
+}
+
+async function fallbackJoinStudyRoom(payload = {}) {
+  const user = getCurrentSocialUser();
+  const roomId = String(payload.roomId || "").trim();
+  if (!user || !db || !roomId) throw new Error("Choose a room first.");
+  const roomRef = db.collection("studyRooms").doc(roomId);
+  await roomRef.set({
+    memberUids: arrayUnion(user.uid) || [user.uid],
+    invitedUids: arrayRemove(user.uid) || [],
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  return { ok: true };
+}
+
+async function fallbackSendStudyMessage(payload = {}) {
+  const user = getCurrentSocialUser();
+  const roomId = String(payload.roomId || "").trim();
+  const text = String(payload.text || "").trim();
+  const kind = String(payload.kind || "note").trim();
+  if (!user || !db || !roomId || !text) throw new Error("Write a message first.");
+  const roomRef = db.collection("studyRooms").doc(roomId);
+  const roomDoc = await roomRef.get();
+  if (!roomDoc.exists) throw new Error("That study room no longer exists.");
+  const room = roomDoc.data();
+  const allowed = (room.memberUids || []).includes(user.uid) || (room.invitedUids || []).includes(user.uid);
+  if (!allowed) throw new Error("You are not part of that study room yet.");
+  const profile = socialState.profile || (await ensureFallbackUserDocument(user));
+  await roomRef.collection("messages").add({
+    authorUid: user.uid,
+    authorName: profile.profile.displayName,
+    text,
+    kind,
+    createdAt: serverTimestamp()
+  });
+  await roomRef.set({
+    memberUids: arrayUnion(user.uid) || [user.uid],
+    invitedUids: arrayRemove(user.uid) || [],
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  return { ok: true };
+}
+
+async function fallbackSubmitLessonCompletion(payload = {}) {
+  const user = getCurrentSocialUser();
+  const lessonId = String(payload.lessonId || "").trim();
+  if (!user || !db || !lessonId) return null;
+  const userRef = db.collection("users").doc(user.uid);
+  const completionRef = userRef.collection("lessonCompletions").doc(lessonId);
+  const activityRef = db.collection("activities").doc();
+
+  const result = await db.runTransaction(async (transaction) => {
+    const [userDoc, completionDoc] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(completionRef)
+    ]);
+    const current = userDoc.exists ? normalizeSocialDocData(user.uid, userDoc.data()) : createFallbackProfile(user);
+    if (completionDoc.exists) {
+      return { alreadyAwarded: true, awardedXp: 0, rewardSummary: null, user: current };
+    }
+
+    const awardedXp = typeof lessonXpEarned !== "undefined" && Number.isFinite(lessonXpEarned)
+      ? lessonXpEarned
+      : (getLessonMeta(lessonId)?.lesson?.xp || 0);
+    const rewardSummary = {
+      gems: SOCIAL_LESSON_GEM_REWARD,
+      heartPasses: 0,
+      crowns: ((progressState?.completedLessons?.length || 0) + 1) % 5 === 0 ? 1 : 0
+    };
+    const completedCount = new Set([...(progressState?.completedLessons || []), lessonId]).size;
+    const totalXp = (current.stats.totalXp || 0) + awardedXp;
+    const weeklyXp = (current.social.weeklyXp || 0) + awardedXp;
+    const merged = {
+      ...current,
+      stats: {
+        ...current.stats,
+        totalXp,
+        level: Math.max(1, Math.floor(totalXp / 50) + 1),
+        totalLessonsCompleted: completedCount,
+        progressPercent: totalLessonCount() ? Math.round((completedCount / totalLessonCount()) * 100) : 0
+      },
+      social: {
+        ...current.social,
+        weeklyXp,
+        league: getLeagueLabel(weeklyXp),
+        rankTitle: getRankLabel(totalXp),
+        lastLessonCompletedAt: serverTimestamp()
+      },
+      rewards: {
+        gems: (current.rewards?.gems || 0) + rewardSummary.gems,
+        heartPasses: (current.rewards?.heartPasses || 0) + rewardSummary.heartPasses,
+        crowns: (current.rewards?.crowns || 0) + rewardSummary.crowns
+      },
+      updatedAt: serverTimestamp()
+    };
+
+    transaction.set(userRef, merged, { merge: true });
+    transaction.set(completionRef, { lessonId, awardedXp, createdAt: serverTimestamp() });
+    transaction.set(activityRef, {
+      actorUid: user.uid,
+      visibility: merged.profile.isProfilePublic ? "public" : "private",
+      title: `Completed ${lessonId.toUpperCase()}`,
+      message: `Earned ${awardedXp} XP, ${rewardSummary.gems} gems, and reached ${merged.social.rankTitle}.`,
+      lessonId,
+      awardedXp,
+      createdAt: serverTimestamp()
+    });
+    return { alreadyAwarded: false, awardedXp, rewardSummary, user: merged };
+  });
+
+  return result;
+}
+
+async function socialFallbackCall(name, payload = {}) {
+  switch (name) {
+    case "syncUserProfile":
+      return fallbackSyncUserProfile(payload);
+    case "updateUserProfile":
+      return fallbackUpdateUserProfile(payload);
+    case "sendFriendRequest":
+      return fallbackSendFriendRequest(payload);
+    case "respondToFriendRequest":
+      return fallbackRespondToFriendRequest(payload);
+    case "removeFriend":
+      return fallbackRemoveFriend(payload);
+    case "sendGift":
+      return fallbackSendGift(payload);
+    case "redeemHeartPass":
+      return fallbackRedeemHeartPass(payload);
+    case "buyHeartsWithGems":
+      return fallbackBuyHeartsWithGems(payload);
+    case "createStudyRoom":
+      return fallbackCreateStudyRoom(payload);
+    case "joinStudyRoom":
+      return fallbackJoinStudyRoom(payload);
+    case "sendStudyMessage":
+      return fallbackSendStudyMessage(payload);
+    case "submitLessonCompletion":
+      return fallbackSubmitLessonCompletion(payload);
+    default:
+      throw new Error("This feature still needs Cloud Functions.");
+  }
+}
+
+function socialCall(name, payload = {}) {
+  if (functions) {
+    return functions.httpsCallable(name)(payload)
+      .then((result) => result.data || {})
+      .catch((error) => {
+        const code = String(error?.code || "");
+        const shouldFallback = code.includes("not-found") || code.includes("unimplemented") || code.includes("unavailable") || code.includes("failed-precondition");
+        if (shouldFallback) {
+          return socialFallbackCall(name, payload);
+        }
+        throw error;
+      });
+  }
+  return socialFallbackCall(name, payload);
 }
 
 async function syncSocialAuthProfile() {
   const user = getCurrentSocialUser();
-  if (!user || !functions) {
+  if (!user || !db) {
     applySocialProfile(createFallbackProfile(user));
     return socialState.profile;
   }
@@ -279,10 +793,6 @@ async function loadOwnSocialProfile() {
 
   const doc = await db.collection("users").doc(user.uid).get();
   if (!doc.exists) {
-    if (!functions) {
-      applySocialProfile(createFallbackProfile(user));
-      return socialState.profile;
-    }
     return syncSocialAuthProfile();
   }
 
@@ -450,6 +960,81 @@ async function loadLeaderboards() {
   return socialState.leaderboard;
 }
 
+function buildSuggestionReason(profile, currentProfile) {
+  if (!currentProfile) return "Public learner on the same platform";
+  if (profile.social.league === currentProfile.social.league) {
+    return `Also in ${profile.social.league} League`;
+  }
+  if (Math.abs((profile.stats.totalXp || 0) - (currentProfile.stats.totalXp || 0)) <= 150) {
+    return "Very close to your XP level";
+  }
+  if (Math.abs((profile.stats.progressPercent || 0) - (currentProfile.stats.progressPercent || 0)) <= 10) {
+    return "On a similar lesson path";
+  }
+  if ((profile.stats.streakDays || 0) >= 3) {
+    return "Keeps an active learning streak";
+  }
+  return "Good learner to add to your study circle";
+}
+
+function scoreSuggestedProfile(profile, currentProfile) {
+  if (!currentProfile) return 0;
+  let score = 0;
+  if (profile.social.league === currentProfile.social.league) score += 45;
+  score += Math.max(0, 40 - Math.abs((profile.stats.totalXp || 0) - (currentProfile.stats.totalXp || 0)) / 12);
+  score += Math.max(0, 25 - Math.abs((profile.stats.progressPercent || 0) - (currentProfile.stats.progressPercent || 0)));
+  score += Math.min(12, profile.stats.streakDays || 0);
+  return score;
+}
+
+async function loadSuggestedFriends() {
+  const user = getCurrentSocialUser();
+  if (!db) {
+    socialState.suggestions = [];
+    return [];
+  }
+
+  const [xpSnap, progressSnap] = await Promise.all([
+    db.collection("users")
+      .where("profile.isProfilePublic", "==", true)
+      .orderBy("stats.totalXp", "desc")
+      .limit(18)
+      .get(),
+    db.collection("users")
+      .where("profile.isProfilePublic", "==", true)
+      .orderBy("stats.progressPercent", "desc")
+      .limit(18)
+      .get()
+  ]);
+
+  const blockedIds = new Set([
+    user?.uid,
+    ...socialState.friendships.map((friend) => friend.uid),
+    ...socialState.incomingRequests.map((request) => request.fromUid),
+    ...socialState.outgoingRequests.map((request) => request.toUid)
+  ]);
+
+  const seen = new Map();
+  [...xpSnap.docs, ...progressSnap.docs].forEach((doc) => {
+    if (blockedIds.has(doc.id)) return;
+    if (!seen.has(doc.id)) {
+      seen.set(doc.id, normalizeSocialDocData(doc.id, doc.data()));
+    }
+  });
+
+  const currentProfile = socialState.profile || createFallbackProfile(user);
+  socialState.suggestions = [...seen.values()]
+    .map((profile) => ({
+      ...profile,
+      suggestionReason: buildSuggestionReason(profile, currentProfile),
+      suggestionScore: scoreSuggestedProfile(profile, currentProfile)
+    }))
+    .sort((a, b) => b.suggestionScore - a.suggestionScore)
+    .slice(0, 6);
+
+  return socialState.suggestions;
+}
+
 async function searchPlayers(term) {
   const user = getCurrentSocialUser();
   if (!db || !term.trim()) return [];
@@ -532,6 +1117,28 @@ function friendshipRowsMarkup() {
     .join("");
 }
 
+function suggestedFriendRowsMarkup() {
+  if (!socialState.suggestions.length) {
+    return `<p class="muted">No suggestions yet. As more learners sign in, this list will start filling up.</p>`;
+  }
+
+  return socialState.suggestions
+    .map((profile) => `
+      <div class="social-list-row social-list-row--suggested">
+        <div>
+          <strong>${escapeHtml(profile.profile.displayName)}</strong>
+          <p class="muted">@${escapeHtml(profile.profile.username)} - ${escapeHtml(profile.social.rankTitle)} - ${profile.stats.totalXp} XP</p>
+          <p class="social-reason">${escapeHtml(profile.suggestionReason || "Good learner to add to your study circle")}</p>
+        </div>
+        <div class="social-actions">
+          <button class="btn ghost" data-view-profile="${escapeHtml(profile.uid)}" type="button">View</button>
+          <button class="btn" data-send-request="${escapeHtml(profile.uid)}" type="button">Add friend</button>
+        </div>
+      </div>
+    `)
+    .join("");
+}
+
 function requestRowsMarkup(items, kind) {
   if (!items.length) return `<p class="muted">No ${kind} requests right now.</p>`;
 
@@ -601,8 +1208,8 @@ function friendGiftOptionsMarkup() {
           <p class="muted">@${escapeHtml(friend.profile.profile.username)} - ${escapeHtml(friend.profile.social.rankTitle)}</p>
         </div>
         <div class="social-actions">
-          <button class="btn btn--mint" data-send-heart="${escapeHtml(friend.uid)}" type="button">Send heart</button>
-          <button class="btn btn--sky" data-send-gems="${escapeHtml(friend.uid)}" type="button">Send gems</button>
+          <button class="btn btn--mint" data-send-heart="${escapeHtml(friend.uid)}" type="button">Send heart (140)</button>
+          <button class="btn btn--sky" data-send-gems="${escapeHtml(friend.uid)}" type="button">Send gems (140)</button>
         </div>
       </div>
     `)
@@ -683,7 +1290,17 @@ async function openPublicProfileModal(uid) {
 
 async function refreshFriendsModal(wrap) {
   await loadFriendsState();
+  await loadSuggestedFriends().catch(() => {
+    socialState.suggestions = [];
+  });
   wrap.innerHTML = `
+    <div class="social-section">
+      <div class="social-section__head">
+        <h4>Suggested study partners</h4>
+        <span class="social-meta">Based on XP, league, and progress</span>
+      </div>
+      ${suggestedFriendRowsMarkup()}
+    </div>
     <div class="social-section">
       <div class="social-section__head">
         <h4>Find friends</h4>
@@ -839,10 +1456,35 @@ async function openInviteModal() {
   const wrap = document.createElement("div");
   wrap.className = "social-modal";
   const shareUrl = buildShareUrl();
+  const profile = socialState.profile || createFallbackProfile(getCurrentSocialUser());
   wrap.innerHTML = `
     <div class="social-card-callout">
       <h4>Invite friends safely</h4>
       <p>Share your invite link, post your progress card, or send the link directly. Google contacts matching is intentionally not automatic here because it needs an extra People API permission and Google app verification.</p>
+    </div>
+    <div class="social-inline-grid">
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Your share card</h4>
+          <span class="social-meta">Easy for classmates to find</span>
+        </div>
+        <div class="invite-badge-stack">
+          <span class="invite-badge">Username: @${escapeHtml(profile.profile.username)}</span>
+          <span class="invite-badge">League: ${escapeHtml(profile.social.league)}</span>
+          <span class="invite-badge">XP: ${escapeHtml(String(profile.stats.totalXp || 0))}</span>
+        </div>
+      </div>
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Best school demo flow</h4>
+          <span class="social-meta">No contacts needed</span>
+        </div>
+        <div class="invite-checklist">
+          <p>1. Share your username with classmates</p>
+          <p>2. Share your invite link in WhatsApp or class group</p>
+          <p>3. Let them search you by username and send a request</p>
+        </div>
+      </div>
     </div>
     <div class="social-section">
       <div class="social-section__head">
@@ -891,6 +1533,11 @@ async function openGiftsModal() {
   try {
     await Promise.all([loadOwnSocialProfile(), loadFriendsState(), loadGiftsState()]);
     const profile = socialState.profile || createFallbackProfile();
+    const heartsNow = typeof progressState !== "undefined" ? progressState.hearts : SOCIAL_HEART_MAX;
+    const missingHearts = Math.max(0, SOCIAL_HEART_MAX - heartsNow);
+    const recommendedHearts = heartsNow <= 3 ? Math.min(2, missingHearts) : 1;
+    const fullRefillCost = missingHearts * SOCIAL_HEART_GEM_COST;
+    const recommendedCost = recommendedHearts * SOCIAL_HEART_GEM_COST;
     wrap.innerHTML = `
       <div class="gift-wallet">
         <div class="gift-wallet__item">
@@ -906,8 +1553,16 @@ async function openGiftsModal() {
           <strong>${profile.rewards.crowns || 0}</strong>
         </div>
       </div>
+      <div class="social-card-callout">
+        <h4>Heart shop</h4>
+        <p>${heartsNow <= 3
+          ? `You are down to ${heartsNow} hearts. We recommend buying ${recommendedHearts} heart${recommendedHearts === 1 ? "" : "s"} for ${recommendedCost} gems so you can keep playing.`
+          : `Each heart costs ${SOCIAL_HEART_GEM_COST} gems. Every completed lesson adds ${SOCIAL_LESSON_GEM_REWARD} gems to your reward pocket.`}</p>
+      </div>
       <div class="social-actions">
         <button class="btn btn--mint" id="redeem-heart-pass-btn" type="button" ${profile.rewards.heartPasses ? "" : "disabled"}>Use one heart gift</button>
+        <button class="btn btn--sky" id="buy-recommended-hearts-btn" type="button" ${!recommendedHearts || (profile.rewards.gems || 0) < recommendedCost ? "disabled" : ""}>Buy ${recommendedHearts} heart${recommendedHearts === 1 ? "" : "s"} (${recommendedCost} gems)</button>
+        <button class="btn ghost" id="buy-full-hearts-btn" type="button" ${!missingHearts || (profile.rewards.gems || 0) < fullRefillCost ? "disabled" : ""}>Full refill (${fullRefillCost} gems)</button>
       </div>
       <div class="social-section">
         <div class="social-section__head">
@@ -941,7 +1596,7 @@ async function openGiftsModal() {
           const data = await socialCall("redeemHeartPass");
           if (data.user) applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
           if (typeof progressState !== "undefined") {
-            progressState.hearts = HEART_MAX;
+            progressState.hearts = SOCIAL_HEART_MAX;
             progressState.heartsUpdatedAt = Date.now();
             progressState.exhaustedHeartTimes = [];
             if (typeof updateStats === "function") updateStats();
@@ -952,6 +1607,59 @@ async function openGiftsModal() {
         } catch (error) {
           console.error(error);
           toast(error.message || "Could not use the heart gift.");
+        }
+      });
+    }
+
+    const buyRecommendedBtn = wrap.querySelector("#buy-recommended-hearts-btn");
+    if (buyRecommendedBtn) {
+      buyRecommendedBtn.addEventListener("click", async () => {
+        try {
+          const data = await socialCall("buyHeartsWithGems", { heartCount: recommendedHearts });
+          if (data.user) applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
+          if (typeof progressState !== "undefined") {
+            progressState.hearts = Math.min(SOCIAL_HEART_MAX, progressState.hearts + (data.purchasedHearts || recommendedHearts));
+            progressState.heartsUpdatedAt = Date.now();
+            const missingAfterPurchase = Math.max(0, SOCIAL_HEART_MAX - progressState.hearts);
+            progressState.exhaustedHeartTimes = progressState.exhaustedHeartTimes
+              .sort((a, b) => a - b)
+              .slice(-missingAfterPurchase);
+            if (typeof updateStats === "function") updateStats();
+            if (typeof saveLocalProgress === "function") saveLocalProgress();
+            if (progressState.hearts > 0 && typeof currentLesson !== "undefined" && currentLesson && typeof renderExercise === "function") {
+              renderExercise();
+            }
+          }
+          toast(`Bought ${data.purchasedHearts || recommendedHearts} heart${(data.purchasedHearts || recommendedHearts) === 1 ? "" : "s"} for ${data.spentGems || recommendedCost} gems.`);
+          openGiftsModal();
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Could not buy hearts with gems.");
+        }
+      });
+    }
+
+    const buyFullBtn = wrap.querySelector("#buy-full-hearts-btn");
+    if (buyFullBtn) {
+      buyFullBtn.addEventListener("click", async () => {
+        try {
+          const data = await socialCall("buyHeartsWithGems", { heartCount: missingHearts });
+          if (data.user) applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
+          if (typeof progressState !== "undefined") {
+            progressState.hearts = SOCIAL_HEART_MAX;
+            progressState.heartsUpdatedAt = Date.now();
+            progressState.exhaustedHeartTimes = [];
+            if (typeof updateStats === "function") updateStats();
+            if (typeof saveLocalProgress === "function") saveLocalProgress();
+            if (progressState.hearts > 0 && typeof currentLesson !== "undefined" && currentLesson && typeof renderExercise === "function") {
+              renderExercise();
+            }
+          }
+          toast(`Full heart refill purchased for ${data.spentGems || fullRefillCost} gems.`);
+          openGiftsModal();
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Could not buy the full heart refill.");
         }
       });
     }
@@ -1338,7 +2046,7 @@ async function openProfileModal() {
 
 async function submitLessonCompletionToSocial(lesson) {
   const user = getCurrentSocialUser();
-  if (!user || !functions || !lesson) return null;
+  if (!user || !lesson) return null;
 
   const data = await socialCall("submitLessonCompletion", {
     lessonId: lesson.id
@@ -1361,6 +2069,7 @@ function resetSocialState() {
   socialState.friendships = [];
   socialState.incomingRequests = [];
   socialState.outgoingRequests = [];
+  socialState.suggestions = [];
   socialState.gifts.received = [];
   socialState.gifts.sent = [];
   socialState.studyRooms = [];
@@ -1379,6 +2088,7 @@ window.openStudyTogetherModal = openStudyTogetherModal;
 window.openAskLessonQuestionModal = openAskLessonQuestionModal;
 window.syncSocialAuthProfile = syncSocialAuthProfile;
 window.loadOwnSocialProfile = loadOwnSocialProfile;
+window.applyRewardSummaryToChrome = applyRewardSummaryToChrome;
 window.submitLessonCompletionToSocial = submitLessonCompletionToSocial;
 window.loadFriendsState = loadFriendsState;
 window.loadLeaderboards = loadLeaderboards;

@@ -77,6 +77,37 @@ function shuffleItems(items) {
   return copy;
 }
 
+function seedFromValue(value) {
+  const text = String(value || "lesson");
+  let seed = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    seed = (seed * 31 + text.charCodeAt(i)) >>> 0;
+  }
+  return seed || 1;
+}
+
+function seededRandom(seed) {
+  let value = seed >>> 0;
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 4294967296;
+  };
+}
+
+function seededShuffleItems(items, seedKey) {
+  const copy = [...items];
+  const next = seededRandom(seedFromValue(seedKey));
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function seededShuffleTokens(tokens, seedKey) {
+  return seededShuffleItems(tokens, seedKey);
+}
+
 function getLessonVocab(lessonNum, vocab, count) {
   const pool = (vocab || []).filter((v) => !lessonNum || v.lesson === lessonNum);
   const pick = pool.length ? pool : (vocab || []);
@@ -93,7 +124,7 @@ function getLessonVocab(lessonNum, vocab, count) {
   return result;
 }
 
-function buildSentenceExercise(lessonNum, vocab) {
+function buildSentenceExercise(lessonNum, vocab, seedKey = "") {
   const pool = (vocab || []).filter((v) => !lessonNum || v.lesson === lessonNum);
   const reviewPool = (vocab || []).filter((v) => lessonNum > 1 && v.lesson === lessonNum - 1);
   const pick = pool.length ? pool : (vocab || []);
@@ -124,11 +155,11 @@ function buildSentenceExercise(lessonNum, vocab) {
     type: "sentence-builder",
     prompt: "Build the sentence (tap the words in order).",
     sentence: sentenceWords.join(" "),
-    tokens: shuffleTokens(sentenceWords)
+    tokens: seedKey ? seededShuffleTokens(sentenceWords, `${seedKey}-sentence`) : shuffleTokens(sentenceWords)
   };
 }
 
-function buildLessonExercises(lesson, vocab) {
+function buildLessonExercises(lesson, vocab, seedKey = "") {
   const lessonNum = parseInt((lesson.id || "").replace(/\D/g, ""), 10);
   const sample = getLessonVocab(lessonNum, vocab, 4);
   const reviewSample = getLessonVocab(Math.max(1, lessonNum - 1), vocab, 3);
@@ -138,7 +169,7 @@ function buildLessonExercises(lesson, vocab) {
     { type: "vocab-recognition", prompt: "Listen and choose the correct meaning.", vocab: sample[0] },
     { type: "listening", prompt: "What did you hear?", vocab: sample[1] },
     { type: "pronunciation", prompt: "Speak the Greek word.", vocab: sample[2] },
-    buildSentenceExercise(lessonNum, vocab),
+    buildSentenceExercise(lessonNum, vocab, seedKey || lesson.id),
     { type: "translation", prompt: "Translate to English.", vocab: sample[3] },
     // Review from previous lesson (builds on prior words)
     { type: "vocab-recognition", prompt: "Review: choose the meaning.", vocab: reviewSample[0] },
@@ -146,7 +177,7 @@ function buildLessonExercises(lesson, vocab) {
     { type: "translation", prompt: "Review: translate to English.", vocab: reviewSample[2] }
   ];
 
-  return shuffleItems(exercises);
+  return seedKey ? seededShuffleItems(exercises, seedKey) : shuffleItems(exercises);
 }
 
 

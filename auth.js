@@ -108,12 +108,14 @@ function observeAuth() {
       auth.onAuthStateChanged((user) => {
         authState.user = user || null;
         if (user) {
+          window.gqProgressHydrated = false;
           toast(`Signed in as ${user.displayName || user.email}`);
           loadRemoteProgress(user.uid);
           if (typeof syncSocialAuthProfile === "function") {
             syncSocialAuthProfile().catch((error) => console.error("Social profile sync failed", error));
           }
         } else {
+          window.gqProgressHydrated = true;
           toast("Not signed in. Progress will stay on this device.");
           if (typeof resetSocialState === "function") {
             resetSocialState();
@@ -135,6 +137,7 @@ function observeAuth() {
 
 function loadRemoteProgress(uid) {
   if (!db) {
+    window.gqProgressHydrated = true;
     return;
   }
   db.collection("users")
@@ -157,6 +160,8 @@ function loadRemoteProgress(uid) {
         const remoteUpdatedAt = Number.isFinite(remoteData.updatedAt) ? remoteData.updatedAt : 0;
         if (localUpdatedAt > remoteUpdatedAt) {
           saveRemoteProgress(uid);
+          window.gqProgressHydrated = true;
+          window.dispatchEvent(new CustomEvent("gq-progress-hydrated"));
           return;
         }
         applyProgress(remoteData);
@@ -167,6 +172,12 @@ function loadRemoteProgress(uid) {
       } else {
         saveRemoteProgress(uid);
       }
+      window.gqProgressHydrated = true;
+      window.dispatchEvent(new CustomEvent("gq-progress-hydrated"));
+    })
+    .catch(() => {
+      window.gqProgressHydrated = true;
+      window.dispatchEvent(new CustomEvent("gq-progress-hydrated"));
     });
 }
 
