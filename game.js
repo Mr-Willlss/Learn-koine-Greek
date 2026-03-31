@@ -130,6 +130,7 @@ function updateStats() {
   const heartEl = document.getElementById("lesson-hearts");
   if (heartEl) heartEl.textContent = `Hearts: ${progressState.hearts}`;
   renderHeartDiagram("lesson-hearts-diagram");
+  updateFocusStrip();
 }
 
 function setLessonActionState(disabled) {
@@ -145,6 +146,7 @@ function showOutOfHeartsState() {
   const body = document.getElementById("lesson-body");
   const hintBox = document.getElementById("hero-status");
   if (hintBox) hintBox.textContent = "Out of hearts. One heart refills every 5 minutes.";
+  setLessonFeedback("warning", "You are out of hearts. Take a short break while one heart refills.");
   if (!body) return;
 
   body.innerHTML = `
@@ -165,10 +167,124 @@ function updateProgressBar() {
   document.getElementById("progress-text").textContent = `${pct}% complete`;
 }
 
+function findNextUnlockedLesson() {
+  if (!window.lessonData || !Array.isArray(lessonData.worlds)) return null;
+  const flat = [];
+  lessonData.worlds.forEach((world) => world.lessons.forEach((lesson) => flat.push({ lesson, world })));
+  const completed = new Set(progressState.completedLessons);
+  let target = flat.find((entry, index) => {
+    const previous = flat[index - 1];
+    const unlocked = index === 0 || completed.has(previous.lesson.id);
+    return unlocked && !completed.has(entry.lesson.id);
+  });
+  if (!target) target = flat[0] || null;
+  return target;
+}
+
+function updateFocusStrip() {
+  const totalLessons = window.lessonData?.worlds?.reduce((sum, world) => sum + world.lessons.length, 0) || 0;
+  const completedCount = progressState.completedLessons.length;
+  const nextLesson = findNextUnlockedLesson();
+  const progressValue = document.getElementById("focus-progress-value");
+  const progressNote = document.getElementById("focus-progress-note");
+  const nextValue = document.getElementById("focus-next-value");
+  const nextNote = document.getElementById("focus-next-note");
+  const syncBadge = document.getElementById("hero-sync-badge");
+
+  if (progressValue) progressValue.textContent = `${completedCount} / ${totalLessons || 25}`;
+  if (progressNote) {
+    const pct = totalLessons ? Math.round((completedCount / totalLessons) * 100) : 0;
+    progressNote.textContent = completedCount ? `${pct}% of the path completed.` : "Your path starts at Level 1.";
+  }
+  if (nextValue) {
+    nextValue.textContent = nextLesson ? nextLesson.lesson.title : "All lessons cleared";
+  }
+  if (nextNote) {
+    nextNote.textContent = nextLesson
+      ? `${nextLesson.world.title}`
+      : "Replay any lesson to sharpen your memory.";
+  }
+  if (syncBadge) {
+    syncBadge.textContent = isSignedIn() ? "Cloud sync on" : "Device only";
+  }
+}
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getDailyQuestState() {
+  const today = getTodayKey();
+  const raw = localStorage.getItem("gqDailyQuest");
+  if (!raw) return { day: today, completed: false };
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed?.day === today) return { day: today, completed: !!parsed.completed };
+  } catch (error) {
+    console.error("Could not parse daily quest state", error);
+  }
+  return { day: today, completed: false };
+}
+
+function saveDailyQuestState(state) {
+  localStorage.setItem("gqDailyQuest", JSON.stringify(state));
+}
+
+function markDailyQuestComplete() {
+  saveDailyQuestState({ day: getTodayKey(), completed: true });
+  updateDailyGoalUI();
+}
+
+function updateDailyGoalUI() {
+  const value = document.getElementById("daily-goal-value");
+  const note = document.getElementById("daily-goal-note");
+  if (!value || !note) return;
+  const quest = getDailyQuestState();
+  if (quest.completed) {
+    value.textContent = "Complete";
+    note.textContent = "Nice work. Your streak momentum is alive for today.";
+    return;
+  }
+  value.textContent = "1 lesson";
+  note.textContent = "Complete one lesson today to keep momentum.";
+}
+
+function setLessonFeedback(mode, message) {
+  const wrap = document.getElementById("lesson-feedback");
+  const text = document.getElementById("lesson-feedback-text");
+  const badge = wrap?.querySelector(".lesson-feedback__badge");
+  if (!wrap || !text || !badge) return;
+
+  wrap.classList.remove("is-success", "is-warning", "is-info");
+  if (mode === "success") {
+    wrap.classList.add("is-success");
+    badge.textContent = "Great";
+  } else if (mode === "warning") {
+    wrap.classList.add("is-warning");
+    badge.textContent = "Try again";
+  } else {
+    wrap.classList.add("is-info");
+    badge.textContent = "Ready";
+  }
+
+  text.textContent = message;
+}
+
+function pulseLessonPanel(kind = "success") {
+  const panel = document.getElementById("lesson-panel");
+  if (!panel) return;
+  panel.classList.remove("lesson-panel--success", "lesson-panel--warning");
+  panel.classList.add(kind === "warning" ? "lesson-panel--warning" : "lesson-panel--success");
+  setTimeout(() => {
+    panel.classList.remove("lesson-panel--success", "lesson-panel--warning");
+  }, 520);
+}
+
 function getProgressPayload() {
   return {
     xp: progressState.xp,
     level: progressState.level,
+    updatedAt: Date.now(),
     hearts: progressState.hearts,
     heartsUpdatedAt: progressState.heartsUpdatedAt,
     exhaustedHeartTimes: progressState.exhaustedHeartTimes,
@@ -180,6 +296,7 @@ function getProgressPayload() {
 
 function getRemoteProgressPayload() {
   return {
+    updatedAt: Date.now(),
     hearts: progressState.hearts,
     heartsUpdatedAt: progressState.heartsUpdatedAt,
     exhaustedHeartTimes: progressState.exhaustedHeartTimes,
@@ -252,6 +369,7 @@ function startLesson(lesson, world) {
   document.getElementById("lesson-type").textContent = "Lesson";
   document.getElementById("lesson-xp").textContent = `+${lesson.xp} XP`;
   setLessonActionState(false);
+  setLessonFeedback("info", `Lesson live. ${lesson.title} has ${currentLesson.exercises.length} short activities.`);
   updateLessonProgress();
   setTeacherMood("idle");
   renderExercise();
@@ -521,6 +639,8 @@ function checkAnswer() {
     teacherSpeak("Great job!");
     updateSpacedRepetition(exercise.vocab?.id, true);
     playCorrectSound();
+    pulseLessonPanel("success");
+    setLessonFeedback("success", "Correct. Keep the rhythm going and stack another win.");
   } else {
     lessonWrongCount += 1;
     loseHeart();
@@ -528,6 +648,8 @@ function checkAnswer() {
     teacherSpeak("Try again!");
     updateSpacedRepetition(exercise.vocab?.id, false);
     playIncorrectSound();
+    pulseLessonPanel("warning");
+    setLessonFeedback("warning", "Not quite yet. You can retry this one right away.");
   }
 
   updateStats();
@@ -661,6 +783,7 @@ async function finishLesson() {
 
   if (completionConfirmed && firstLocalCompletion) {
     progressState.completedLessons.push(currentLesson.id);
+    markDailyQuestComplete();
   }
   if (!completionConfirmed) {
     awardedXp = 0;
@@ -674,6 +797,8 @@ async function finishLesson() {
   if (syncError) {
     toast(syncError.message || "Lesson completed, but secure XP sync is not ready yet.");
   }
+
+  setLessonFeedback("success", `Lesson cleared. You banked ${awardedXp} XP and moved your journey forward.`);
 
   const next = getNextLesson(currentLesson.id);
   showLessonCompleteModal(awardedXp, () => {
@@ -691,13 +816,20 @@ function showLessonCompleteModal(xpEarned, onContinue) {
       <div class="modal-card">
         <h3>Lesson Complete!</h3>
         <p class="modal-xp"></p>
+        <p class="modal-summary"></p>
         <button class="btn">Continue</button>
       </div>
     `;
     document.body.appendChild(modal);
   }
   const xpText = modal.querySelector(".modal-xp");
+  const summaryText = modal.querySelector(".modal-summary");
+  const answered = lessonCorrectCount + lessonWrongCount;
+  const accuracy = answered ? Math.round((lessonCorrectCount / answered) * 100) : 0;
   xpText.textContent = `You earned ${xpEarned} XP in this lesson.`;
+  if (summaryText) {
+    summaryText.textContent = `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.`;
+  }
   const btn = modal.querySelector("button");
   btn.onclick = () => {
     modal.classList.remove("show");
@@ -740,6 +872,8 @@ function registerEvents() {
   if (contactBtn) contactBtn.addEventListener("click", openContactModal);
   const aboutBtn = document.getElementById("about-btn");
   if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
+  const continueBtn = document.getElementById("continue-btn");
+  if (continueBtn) continueBtn.addEventListener("click", startNextUnlockedLesson);
   const sidebarToggle = document.getElementById("sidebar-toggle");
   if (sidebarToggle) sidebarToggle.addEventListener("click", toggleSidebar);
   const sidebarToggleFloating = document.getElementById("sidebar-toggle-floating");
@@ -789,6 +923,9 @@ function initApp() {
   if (hintBox) hintBox.textContent = "";
   lockUI(!isSignedIn());
   handleAuthChange();
+  updateDailyGoalUI();
+  updateFocusStrip();
+  setLessonFeedback("info", "Start a lesson and let's build your streak with small wins.");
 
   loadVocabDatabase()
     .then((data) => {
@@ -821,16 +958,9 @@ function initApp() {
 document.addEventListener("DOMContentLoaded", initApp);
 
 function startNextUnlockedLesson() {
-  const flat = [];
-  lessonData.worlds.forEach((w) => w.lessons.forEach((l) => flat.push({ ...l, world: w })));
-  const completed = new Set(progressState.completedLessons);
-  let target = flat.find((l, idx) => {
-    const prev = flat[idx - 1];
-    const unlocked = idx === 0 || completed.has(prev.id);
-    return unlocked && !completed.has(l.id);
-  });
-  if (!target) target = flat[0];
-  startLesson(target, target.world);
+  const target = findNextUnlockedLesson();
+  if (!target) return;
+  startLesson(target.lesson, target.world);
 }
 
 function getNextLesson(currentId) {
@@ -888,7 +1018,7 @@ function requireSignIn() {
 }
 
 function lockUI(locked) {
-  const ids = ["check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn","options-btn","contact-btn","about-btn"];
+  const ids = ["check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn","options-btn","contact-btn","about-btn","continue-btn"];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.disabled = locked;
@@ -1077,19 +1207,37 @@ function updateLessonProgress() {
   const bar = document.getElementById("lesson-progress-bar");
   const text = document.getElementById("lesson-progress-text");
   const cat = document.getElementById("lesson-category");
+  const stepCount = document.getElementById("lesson-step-count");
+  const stepNote = document.getElementById("lesson-step-note");
+  const accuracyEl = document.getElementById("lesson-accuracy");
+  const accuracyNote = document.getElementById("lesson-accuracy-note");
   if (!bar || !text || !cat) return;
   if (!currentLesson) {
     bar.style.width = "0%";
-    text.textContent = "Lesson: —";
-    cat.textContent = "Category: —";
+    text.textContent = "Lesson: -";
+    cat.textContent = "Category: -";
+    if (stepCount) stepCount.textContent = "0 / 0";
+    if (stepNote) stepNote.textContent = "Choose a lesson to begin.";
+    if (accuracyEl) accuracyEl.textContent = "0%";
+    if (accuracyNote) accuracyNote.textContent = "Warm up with your first answer.";
     return;
   }
   const total = currentLesson.exercises.length || 1;
   const pct = Math.min(100, Math.floor((currentExerciseIndex / total) * 100));
+  const answered = lessonCorrectCount + lessonWrongCount;
+  const accuracy = answered ? Math.round((lessonCorrectCount / answered) * 100) : 0;
   bar.style.width = `${pct}%`;
   text.textContent = `Lesson: ${currentLesson.title}`;
   const world = lessonData.worlds.find((w) => w.id === currentLesson.worldId);
   cat.textContent = `Category: ${world ? world.title.replace(/World\\s\\d+\\:\\s*/i, "") : "Lesson"}`;
+  if (stepCount) stepCount.textContent = `${Math.min(currentExerciseIndex + 1, total)} / ${total}`;
+  if (stepNote) stepNote.textContent = `${Math.max(total - currentExerciseIndex, 0)} quick steps left in this lesson.`;
+  if (accuracyEl) accuracyEl.textContent = `${accuracy}%`;
+  if (accuracyNote) {
+    accuracyNote.textContent = answered
+      ? `${lessonCorrectCount} correct, ${lessonWrongCount} missed so far.`
+      : "Warm up with your first answer.";
+  }
 }
 
 function openContactModal() {

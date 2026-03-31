@@ -144,7 +144,26 @@ function loadRemoteProgress(uid) {
     .get()
     .then((doc) => {
       if (doc.exists) {
-        applyProgress(doc.data());
+        const remoteData = doc.data() || {};
+        const localRaw = localStorage.getItem("greekQuestProgress");
+        let localUpdatedAt = 0;
+        if (localRaw) {
+          try {
+            localUpdatedAt = JSON.parse(localRaw)?.updatedAt || 0;
+          } catch (error) {
+            console.error("Could not parse local progress timestamp", error);
+          }
+        }
+        const remoteUpdatedAt = Number.isFinite(remoteData.updatedAt) ? remoteData.updatedAt : 0;
+        if (localUpdatedAt > remoteUpdatedAt) {
+          saveRemoteProgress(uid);
+          return;
+        }
+        applyProgress(remoteData);
+        localStorage.setItem("greekQuestProgress", JSON.stringify({
+          ...(typeof getProgressPayload === "function" ? getProgressPayload() : {}),
+          ...remoteData
+        }));
       } else {
         saveRemoteProgress(uid);
       }
@@ -175,6 +194,12 @@ function signOutUser() {
 
 document.addEventListener("DOMContentLoaded", () => {
   updateAuthButton();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      syncProgress();
+    }
+  });
+  window.addEventListener("pagehide", syncProgress);
 });
 
 observeAuth();

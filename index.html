@@ -66,13 +66,42 @@
 
     <div class="content">
       <header class="hero">
-        <div>
-          <p class="eyebrow">Welcome back</p>
+        <div class="hero-copy">
+          <div class="hero-copy__top">
+            <p class="eyebrow">Welcome back</p>
+            <div class="hero-badges">
+              <span id="hero-rank-badge" class="hero-badge">Novice Scribe</span>
+              <span id="hero-sync-badge" class="hero-badge hero-badge--muted">Device only</span>
+            </div>
+          </div>
           <h2>Learn Koine Greek</h2>
+          <p class="hero-tagline">Small wins, ancient words, and a clear path forward.</p>
+          <div class="hero-chip">
+            <p class="eyebrow">Today&apos;s focus</p>
+            <p id="hero-status"></p>
+          </div>
         </div>
-        <div class="hero-chip">
-          <p class="eyebrow">Hint / Status</p>
-          <p id="hero-status"></p>
+        <div class="hero-panel">
+          <div class="focus-strip">
+            <div class="focus-card">
+              <span class="eyebrow">Progress</span>
+              <strong id="focus-progress-value">0 / 25</strong>
+              <p id="focus-progress-note" class="muted">Your path starts at Level 1.</p>
+            </div>
+            <div class="focus-card">
+              <span class="eyebrow">Streak</span>
+              <strong id="focus-streak-value">0 days</strong>
+              <p id="focus-league-note" class="muted">Bronze League</p>
+            </div>
+            <div class="focus-card focus-card--accent">
+              <span class="eyebrow">Next Up</span>
+              <strong id="focus-next-value">Level 1</strong>
+              <p id="focus-next-note" class="muted">Tap continue to keep climbing.</p>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button id="continue-btn" class="btn" type="button">Continue path</button>
+          </div>
         </div>
       </header>
 
@@ -101,6 +130,29 @@
             <h3 id="lesson-title">Welcome</h3>
           </div>
           <span id="lesson-xp" class="pill">+0 XP</span>
+        </div>
+
+        <div class="lesson-hud">
+          <div class="lesson-hud__card">
+            <span class="eyebrow">Activity</span>
+            <strong id="lesson-step-count">0 / 0</strong>
+            <p id="lesson-step-note" class="muted">Choose a lesson to begin.</p>
+          </div>
+          <div class="lesson-hud__card">
+            <span class="eyebrow">Accuracy</span>
+            <strong id="lesson-accuracy">0%</strong>
+            <p id="lesson-accuracy-note" class="muted">Warm up with your first answer.</p>
+          </div>
+          <div class="lesson-hud__card lesson-hud__card--quest">
+            <span class="eyebrow">Daily goal</span>
+            <strong id="daily-goal-value">1 lesson</strong>
+            <p id="daily-goal-note" class="muted">Complete one lesson today to keep momentum.</p>
+          </div>
+        </div>
+
+        <div id="lesson-feedback" class="lesson-feedback" aria-live="polite">
+          <span class="lesson-feedback__badge">Ready</span>
+          <p id="lesson-feedback-text">Start a lesson and let&apos;s build your streak with small wins.</p>
         </div>
 
         <div class="teacher" id="teacher" aria-hidden="true"></div>

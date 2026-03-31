@@ -177,16 +177,22 @@ function updateSocialChrome() {
   const leagueEl = document.getElementById("stat-league");
   const streakEl = document.getElementById("stat-streak");
   const heroStatus = document.getElementById("hero-status");
+  const heroRankBadge = document.getElementById("hero-rank-badge");
+  const focusStreak = document.getElementById("focus-streak-value");
+  const focusLeagueNote = document.getElementById("focus-league-note");
 
   if (rankEl) rankEl.textContent = `Rank ${profile.social.rankTitle}`;
   if (leagueEl) leagueEl.textContent = `League ${profile.social.league}`;
   if (streakEl) streakEl.textContent = `Streak ${profile.stats.streakDays || 0}`;
+  if (heroRankBadge) heroRankBadge.textContent = profile.social.rankTitle;
+  if (focusStreak) focusStreak.textContent = `${profile.stats.streakDays || 0} days`;
+  if (focusLeagueNote) focusLeagueNote.textContent = `${profile.social.league} League`;
 
   if (heroStatus) {
     if (getCurrentSocialUser()) {
-      heroStatus.textContent = `${profile.profile.displayName} is in the ${profile.social.league} league with ${profile.stats.totalXp} total XP.`;
+      heroStatus.textContent = `${profile.profile.displayName} is in the ${profile.social.league} League with ${profile.stats.totalXp} XP. Keep the streak alive with one solid lesson today.`;
     } else {
-      heroStatus.textContent = "Sign in to join leagues, add friends, and compare your Greek journey.";
+      heroStatus.textContent = "Sign in to unlock leagues, friends, and cloud-synced progress across your devices.";
     }
   }
 }
