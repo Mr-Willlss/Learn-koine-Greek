@@ -344,6 +344,26 @@ function normalizeVocabEntry(item) {
   return { ...item, english, transliteration };
 }
 
+function buildVocabIllustrationCard(vocab) {
+  if (!window.findVocabIllustration || !vocab) return null;
+  const illustration = findVocabIllustration(vocab);
+  if (!illustration) return null;
+
+  const card = document.createElement("div");
+  card.className = "exercise-visual";
+  card.innerHTML = `
+    <div class="exercise-visual__copy">
+      <span class="exercise-visual__badge">Visual clue</span>
+      <strong>${illustration.label}</strong>
+      <p>This word can be pictured clearly, so you get a visual anchor while you learn the Greek form.</p>
+    </div>
+    <div class="exercise-visual__art">
+      <img src="${illustration.src}" alt="${illustration.alt}">
+    </div>
+  `;
+  return card;
+}
+
 function loadVocabDatabase() {
   return fetch("vocabDatabase.json", { cache: "force-cache" })
     .then((res) => {
@@ -419,6 +439,8 @@ function renderExercise() {
   if (exercise.type === "vocab-recognition" || exercise.type === "listening") {
     const vocab = exercise.vocab || vocabDatabase[0];
     if (!vocab) { body.textContent = "No vocab loaded."; return; }
+    const visualCard = buildVocabIllustrationCard(vocab);
+    if (visualCard) wrapper.appendChild(visualCard);
     const word = document.createElement("p");
     word.className = "prompt-word";
     word.textContent = `Greek: ${vocab.greek || "—"}`;
@@ -450,6 +472,8 @@ function renderExercise() {
   if (exercise.type === "pronunciation") {
     const vocab = exercise.vocab || vocabDatabase[0];
     if (!vocab) { body.textContent = "No vocab loaded."; return; }
+    const visualCard = buildVocabIllustrationCard(vocab);
+    if (visualCard) wrapper.appendChild(visualCard);
     const expected = [
       vocab.transliteration,
       buildGreekSpeechText(vocab.greek || "", vocab.transliteration || ""),
@@ -534,6 +558,8 @@ function renderExercise() {
   if (exercise.type === "translation") {
     const vocab = exercise.vocab || vocabDatabase[0];
     if (!vocab) { body.textContent = "No vocab loaded."; return; }
+    const visualCard = buildVocabIllustrationCard(vocab);
+    if (visualCard) wrapper.appendChild(visualCard);
     const text = document.createElement("p");
     text.textContent = `Greek: ${vocab.greek}`;
     const input = document.createElement("input");
@@ -765,12 +791,16 @@ async function finishLesson() {
   let syncError = null;
 
   let awardedXp = lessonXpEarned;
+  let rewardSummary = null;
   if (typeof submitLessonCompletionToSocial === "function") {
     try {
       const secureResult = await submitLessonCompletionToSocial(currentLesson);
       if (secureResult && Number.isFinite(secureResult.awardedXp)) {
         awardedXp = secureResult.awardedXp;
       }
+      rewardSummary = secureResult?.alreadyAwarded
+        ? null
+        : (secureResult?.rewardSummary || null);
       if (secureResult?.alreadyAwarded) {
         toast("Lesson progress saved. XP was already counted for this lesson.");
       }
@@ -803,10 +833,10 @@ async function finishLesson() {
   const next = getNextLesson(currentLesson.id);
   showLessonCompleteModal(awardedXp, () => {
     if (next && completionConfirmed) startLesson(next.lesson, next.world);
-  });
+  }, rewardSummary);
 }
 
-function showLessonCompleteModal(xpEarned, onContinue) {
+function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
   let modal = document.getElementById("lesson-complete-modal");
   if (!modal) {
     modal = document.createElement("div");
@@ -831,6 +861,30 @@ function showLessonCompleteModal(xpEarned, onContinue) {
     summaryText.textContent = `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.`;
   }
   const btn = modal.querySelector("button");
+  let burst = modal.querySelector(".reward-burst");
+  if (burst) burst.remove();
+  if (rewardSummary) {
+    burst = document.createElement("div");
+    burst.className = "reward-burst";
+    burst.innerHTML = `
+      <strong>Lesson rewards</strong>
+      <div class="reward-burst__grid">
+        <div class="reward-burst__card">
+          <strong>${rewardSummary.gems || 0}</strong>
+          <span>Gems earned</span>
+        </div>
+        <div class="reward-burst__card">
+          <strong>${rewardSummary.heartPasses || 0}</strong>
+          <span>Heart gifts</span>
+        </div>
+        <div class="reward-burst__card">
+          <strong>${rewardSummary.crowns || 0}</strong>
+          <span>Crowns</span>
+        </div>
+      </div>
+    `;
+    modal.querySelector(".modal-card").insertBefore(burst, btn);
+  }
   btn.onclick = () => {
     modal.classList.remove("show");
     if (typeof onContinue === "function") onContinue();
@@ -874,6 +928,18 @@ function registerEvents() {
   if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
   const continueBtn = document.getElementById("continue-btn");
   if (continueBtn) continueBtn.addEventListener("click", startNextUnlockedLesson);
+  const giftsBtn = document.getElementById("gifts-btn");
+  if (giftsBtn) giftsBtn.addEventListener("click", () => window.openGiftsModal?.());
+  const studyBtn = document.getElementById("study-btn");
+  if (studyBtn) studyBtn.addEventListener("click", () => window.openStudyTogetherModal?.());
+  const questionBtn = document.getElementById("question-btn");
+  if (questionBtn) questionBtn.addEventListener("click", () => window.openAskLessonQuestionModal?.(currentLesson, currentLesson?.exercises?.[currentExerciseIndex]));
+  const inviteBtn = document.getElementById("invite-btn");
+  if (inviteBtn) inviteBtn.addEventListener("click", () => window.openInviteModal?.());
+  const lessonAskBtn = document.getElementById("lesson-ask-btn");
+  if (lessonAskBtn) lessonAskBtn.addEventListener("click", () => window.openAskLessonQuestionModal?.(currentLesson, currentLesson?.exercises?.[currentExerciseIndex]));
+  const lessonStudyBtn = document.getElementById("lesson-study-btn");
+  if (lessonStudyBtn) lessonStudyBtn.addEventListener("click", () => window.openStudyTogetherModal?.(currentLesson));
   const sidebarToggle = document.getElementById("sidebar-toggle");
   if (sidebarToggle) sidebarToggle.addEventListener("click", toggleSidebar);
   const sidebarToggleFloating = document.getElementById("sidebar-toggle-floating");
@@ -1018,7 +1084,11 @@ function requireSignIn() {
 }
 
 function lockUI(locked) {
-  const ids = ["check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn","options-btn","contact-btn","about-btn","continue-btn"];
+  const ids = [
+    "check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn",
+    "options-btn","contact-btn","about-btn","continue-btn","gifts-btn","study-btn","question-btn",
+    "invite-btn","lesson-ask-btn","lesson-study-btn"
+  ];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.disabled = locked;

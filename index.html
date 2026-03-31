@@ -105,6 +105,64 @@
         </div>
       </header>
 
+      <section class="momentum-board" aria-label="Momentum and social features">
+        <div class="reward-pocket">
+          <div class="reward-pocket__header">
+            <div>
+              <p class="eyebrow">Reward pocket</p>
+              <h3>Wins you can feel</h3>
+            </div>
+            <span id="reward-last" class="reward-pocket__status">Next reward: finish a lesson</span>
+          </div>
+          <div class="reward-pocket__grid">
+            <div class="reward-chip reward-chip--gold">
+              <span class="reward-chip__icon">◆</span>
+              <div>
+                <strong id="reward-gems">0</strong>
+                <p>Gems</p>
+              </div>
+            </div>
+            <div class="reward-chip reward-chip--mint">
+              <span class="reward-chip__icon">♥</span>
+              <div>
+                <strong id="reward-heart-passes">0</strong>
+                <p>Heart gifts</p>
+              </div>
+            </div>
+            <div class="reward-chip reward-chip--sky">
+              <span class="reward-chip__icon">★</span>
+              <div>
+                <strong id="reward-crowns">0</strong>
+                <p>Crowns</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="social-rack">
+          <article class="social-card social-card--sun">
+            <p class="eyebrow">Invite</p>
+            <h3>Grow your study circle</h3>
+            <p>Share your link, bring in friends, and keep your leaderboard active.</p>
+            <button id="invite-btn" class="btn btn--sky" type="button">Invite friends</button>
+          </article>
+          <article class="social-card social-card--mint">
+            <p class="eyebrow">Gifts</p>
+            <h3>Send energy boosts</h3>
+            <p>Trade gems and heart gifts so friends can stay in the lesson longer.</p>
+            <button id="gifts-btn" class="btn btn--mint" type="button">Open gifts</button>
+          </article>
+          <article class="social-card social-card--berry">
+            <p class="eyebrow">Study together</p>
+            <h3>Play and ask for help</h3>
+            <p>Start a room, invite a friend, or drop a question when a lesson gets tough.</p>
+            <div class="social-card__actions">
+              <button id="study-btn" class="btn btn--berry" type="button">Study room</button>
+              <button id="question-btn" class="btn ghost" type="button">Ask a friend</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="map-shell" aria-label="World map">
         <div class="section-head">
           <h3>Worlds & Levels</h3>
@@ -155,6 +213,18 @@
           <p id="lesson-feedback-text">Start a lesson and let&apos;s build your streak with small wins.</p>
         </div>
 
+        <div class="lesson-support-rail">
+          <div class="lesson-support-rail__copy">
+            <p class="eyebrow">Lesson support</p>
+            <strong>Need help or want company?</strong>
+            <span class="muted">Ask a friend about this step or open a shared study room for the lesson.</span>
+          </div>
+          <div class="lesson-support-rail__actions">
+            <button id="lesson-ask-btn" class="btn ghost" type="button">Ask friends</button>
+            <button id="lesson-study-btn" class="btn btn--berry" type="button">Study together</button>
+          </div>
+        </div>
+
         <div class="teacher" id="teacher" aria-hidden="true"></div>
         <div class="mascot-cheer" aria-hidden="true">
           <img src="assets/images/mascot-logo.svg" alt="" />
@@ -162,7 +232,7 @@
 
         <div class="lesson-body" id="lesson-body">
           <div class="welcome">
-            <h4>Tap a lesson chip to start.</h4>
+            <h4>Tap a lesson node to start.</h4>
             <p>Connect to the internet for speech and sync. Last saved state will pop in automatically.</p>
           </div>
         </div>
@@ -222,6 +292,7 @@
   <script src="speech.js"></script>
   <script src="teacherCharacter.js"></script>
   <script src="lessons.js"></script>
+  <script src="vocabIllustrations.js"></script>
   <script src="map.js"></script>
   <script src="game.js"></script>
   <script src="social.js"></script>

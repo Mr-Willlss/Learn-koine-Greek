@@ -4,6 +4,11 @@ const socialState = {
   friendships: [],
   incomingRequests: [],
   outgoingRequests: [],
+  gifts: {
+    received: [],
+    sent: []
+  },
+  studyRooms: [],
   leaderboard: {
     global: [],
     weekly: [],
@@ -122,6 +127,11 @@ function createFallbackProfile(user = getCurrentSocialUser()) {
       league: getLeagueLabel(weeklyXp),
       rankTitle: getRankLabel(totalXp),
       lastLessonCompletedAt: null
+    },
+    rewards: {
+      gems: 0,
+      heartPasses: 0,
+      crowns: 0
     }
   };
 }
@@ -131,6 +141,7 @@ function normalizeSocialDocData(uid, data) {
   const profile = data?.profile || {};
   const stats = data?.stats || {};
   const social = data?.social || {};
+  const rewards = data?.rewards || {};
   const totalXp = Number.isFinite(stats.totalXp) ? stats.totalXp : fallback.stats.totalXp;
   const weeklyXp = Number.isFinite(social.weeklyXp) ? social.weeklyXp : 0;
 
@@ -157,6 +168,11 @@ function normalizeSocialDocData(uid, data) {
       league: social.league || getLeagueLabel(weeklyXp),
       rankTitle: social.rankTitle || getRankLabel(totalXp),
       lastLessonCompletedAt: social.lastLessonCompletedAt || null
+    },
+    rewards: {
+      gems: Number.isFinite(rewards.gems) ? rewards.gems : 0,
+      heartPasses: Number.isFinite(rewards.heartPasses) ? rewards.heartPasses : 0,
+      crowns: Number.isFinite(rewards.crowns) ? rewards.crowns : 0
     }
   };
 }
@@ -180,6 +196,10 @@ function updateSocialChrome() {
   const heroRankBadge = document.getElementById("hero-rank-badge");
   const focusStreak = document.getElementById("focus-streak-value");
   const focusLeagueNote = document.getElementById("focus-league-note");
+  const rewardGems = document.getElementById("reward-gems");
+  const rewardHearts = document.getElementById("reward-heart-passes");
+  const rewardCrowns = document.getElementById("reward-crowns");
+  const rewardLast = document.getElementById("reward-last");
 
   if (rankEl) rankEl.textContent = `Rank ${profile.social.rankTitle}`;
   if (leagueEl) leagueEl.textContent = `League ${profile.social.league}`;
@@ -187,6 +207,14 @@ function updateSocialChrome() {
   if (heroRankBadge) heroRankBadge.textContent = profile.social.rankTitle;
   if (focusStreak) focusStreak.textContent = `${profile.stats.streakDays || 0} days`;
   if (focusLeagueNote) focusLeagueNote.textContent = `${profile.social.league} League`;
+  if (rewardGems) rewardGems.textContent = String(profile.rewards?.gems || 0);
+  if (rewardHearts) rewardHearts.textContent = String(profile.rewards?.heartPasses || 0);
+  if (rewardCrowns) rewardCrowns.textContent = String(profile.rewards?.crowns || 0);
+  if (rewardLast) {
+    rewardLast.textContent = getCurrentSocialUser()
+      ? `${profile.rewards?.gems || 0} gems saved for gifts and boosts`
+      : "Sign in to start collecting rewards";
+  }
 
   if (heroStatus) {
     if (getCurrentSocialUser()) {
@@ -349,6 +377,48 @@ async function loadFriendsState() {
   return socialState;
 }
 
+async function loadGiftsState() {
+  const user = getCurrentSocialUser();
+  if (!user || !db) {
+    socialState.gifts.received = [];
+    socialState.gifts.sent = [];
+    return socialState.gifts;
+  }
+
+  const [receivedSnap, sentSnap] = await Promise.all([
+    db.collection("gifts").where("recipientUid", "==", user.uid).orderBy("createdAt", "desc").limit(12).get(),
+    db.collection("gifts").where("senderUid", "==", user.uid).orderBy("createdAt", "desc").limit(12).get()
+  ]);
+
+  socialState.gifts.received = receivedSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  socialState.gifts.sent = sentSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return socialState.gifts;
+}
+
+async function loadStudyRoomsState() {
+  const user = getCurrentSocialUser();
+  if (!user || !db) {
+    socialState.studyRooms = [];
+    return [];
+  }
+
+  const [memberSnap, invitedSnap] = await Promise.all([
+    db.collection("studyRooms").where("memberUids", "array-contains", user.uid).orderBy("updatedAt", "desc").limit(8).get(),
+    db.collection("studyRooms").where("invitedUids", "array-contains", user.uid).orderBy("updatedAt", "desc").limit(8).get()
+  ]);
+
+  const seen = new Set();
+  socialState.studyRooms = [...memberSnap.docs, ...invitedSnap.docs]
+    .filter((doc) => {
+      if (seen.has(doc.id)) return false;
+      seen.add(doc.id);
+      return true;
+    })
+    .map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  return socialState.studyRooms;
+}
+
 async function loadLeaderboards() {
   const [globalRows, weeklyRows] = await Promise.all([
     loadLeaderboardRows("stats.totalXp"),
@@ -479,6 +549,60 @@ function requestRowsMarkup(items, kind) {
                  <button class="btn ghost" data-decline-request="${escapeHtml(item.id)}" type="button">Decline</button>`
               : `<button class="btn ghost" data-cancel-request="${escapeHtml(item.id)}" type="button">Cancel</button>`
           }
+        </div>
+      </div>
+    `)
+    .join("");
+}
+
+function giftRowsMarkup(items, emptyMessage) {
+  if (!items.length) return `<p class="muted">${escapeHtml(emptyMessage)}</p>`;
+
+  return items
+    .map((item) => `
+      <div class="gift-card">
+        <h5>${escapeHtml(item.giftLabel || item.giftType || "Gift")}</h5>
+        <p>${escapeHtml(item.message || "A study boost was shared.")}</p>
+        <p class="social-meta">${escapeHtml(formatActivityDate(item.createdAt))}</p>
+      </div>
+    `)
+    .join("");
+}
+
+function studyRoomCardsMarkup(items) {
+  if (!items.length) {
+    return `<p class="muted">No study rooms yet. Start one for your next lesson and invite a friend.</p>`;
+  }
+
+  return items
+    .map((room) => `
+      <div class="study-room-card">
+        <h5>${escapeHtml(room.lessonTitle || room.lessonId || "Study room")}</h5>
+        <p class="study-room-meta">Host: ${escapeHtml(room.hostDisplayName || "Greek learner")} - ${escapeHtml(room.memberUids?.length || 1)} learners inside</p>
+        <div class="social-actions">
+          <button class="btn ghost" data-open-room="${escapeHtml(room.id)}" type="button">Open room</button>
+          ${room.invitedUids?.includes(getCurrentSocialUser()?.uid) ? `<button class="btn" data-join-room="${escapeHtml(room.id)}" type="button">Join</button>` : ""}
+        </div>
+      </div>
+    `)
+    .join("");
+}
+
+function friendGiftOptionsMarkup() {
+  if (!socialState.friendships.length) {
+    return `<p class="muted">Add a friend first, then you can send them gifts and study boosts.</p>`;
+  }
+
+  return socialState.friendships
+    .map((friend) => `
+      <div class="social-list-row">
+        <div>
+          <strong>${escapeHtml(friend.profile.profile.displayName)}</strong>
+          <p class="muted">@${escapeHtml(friend.profile.profile.username)} - ${escapeHtml(friend.profile.social.rankTitle)}</p>
+        </div>
+        <div class="social-actions">
+          <button class="btn btn--mint" data-send-heart="${escapeHtml(friend.uid)}" type="button">Send heart</button>
+          <button class="btn btn--sky" data-send-gems="${escapeHtml(friend.uid)}" type="button">Send gems</button>
         </div>
       </div>
     `)
@@ -691,6 +815,389 @@ async function openFriendsModal() {
   }
 }
 
+function getFlatLessons() {
+  if (!window.lessonData?.worlds) return [];
+  const flat = [];
+  lessonData.worlds.forEach((world) => {
+    world.lessons.forEach((lesson) => {
+      flat.push({
+        id: lesson.id,
+        title: `${world.title} - ${lesson.title}`
+      });
+    });
+  });
+  return flat;
+}
+
+function buildShareUrl() {
+  const shareUrl = new URL(location.href);
+  shareUrl.searchParams.set("invite", getCurrentSocialUser()?.uid || "");
+  return shareUrl.toString();
+}
+
+async function openInviteModal() {
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  const shareUrl = buildShareUrl();
+  wrap.innerHTML = `
+    <div class="social-card-callout">
+      <h4>Invite friends safely</h4>
+      <p>Share your invite link, post your progress card, or send the link directly. Google contacts matching is intentionally not automatic here because it needs an extra People API permission and Google app verification.</p>
+    </div>
+    <div class="social-section">
+      <div class="social-section__head">
+        <h4>Your invite link</h4>
+        <span class="social-meta">Share anywhere</span>
+      </div>
+      <label class="social-field">
+        <span>Invite URL</span>
+        <input id="invite-link-input" type="text" readonly value="${escapeHtml(shareUrl)}">
+      </label>
+      <div class="social-actions">
+        <button class="btn btn--sky" id="invite-share-btn" type="button">Share invite</button>
+        <button class="btn ghost" id="invite-copy-btn" type="button">Copy link</button>
+      </div>
+    </div>
+  `;
+  setWideModal("Invite Friends", wrap);
+
+  wrap.querySelector("#invite-share-btn").addEventListener("click", async () => {
+    const payload = {
+      title: "Learn Koine Greek invite",
+      text: "Join me on Learn Koine Greek so we can climb the leaderboard together.",
+      url: shareUrl
+    };
+    if (navigator.share) {
+      await navigator.share(payload);
+      return;
+    }
+    await navigator.clipboard.writeText(`${payload.text} ${payload.url}`);
+    toast("Invite copied to your clipboard.");
+  });
+
+  wrap.querySelector("#invite-copy-btn").addEventListener("click", async () => {
+    await navigator.clipboard.writeText(shareUrl);
+    toast("Invite link copied.");
+  });
+}
+
+async function openGiftsModal() {
+  if (!requireSignIn()) return;
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  wrap.innerHTML = `<p class="muted">Loading gifts...</p>`;
+  setWideModal("Gifts", wrap);
+
+  try {
+    await Promise.all([loadOwnSocialProfile(), loadFriendsState(), loadGiftsState()]);
+    const profile = socialState.profile || createFallbackProfile();
+    wrap.innerHTML = `
+      <div class="gift-wallet">
+        <div class="gift-wallet__item">
+          <span class="eyebrow">Gems</span>
+          <strong>${profile.rewards.gems || 0}</strong>
+        </div>
+        <div class="gift-wallet__item">
+          <span class="eyebrow">Heart gifts</span>
+          <strong>${profile.rewards.heartPasses || 0}</strong>
+        </div>
+        <div class="gift-wallet__item">
+          <span class="eyebrow">Crowns</span>
+          <strong>${profile.rewards.crowns || 0}</strong>
+        </div>
+      </div>
+      <div class="social-actions">
+        <button class="btn btn--mint" id="redeem-heart-pass-btn" type="button" ${profile.rewards.heartPasses ? "" : "disabled"}>Use one heart gift</button>
+      </div>
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Send a boost</h4>
+          <span class="social-meta">Share rewards with friends</span>
+        </div>
+        ${friendGiftOptionsMarkup()}
+      </div>
+      <div class="social-inline-grid">
+        <div class="social-section">
+          <div class="social-section__head">
+            <h4>Received</h4>
+            <span class="social-meta">${socialState.gifts.received.length} gifts</span>
+          </div>
+          ${giftRowsMarkup(socialState.gifts.received, "No gifts yet.")}
+        </div>
+        <div class="social-section">
+          <div class="social-section__head">
+            <h4>Sent</h4>
+            <span class="social-meta">${socialState.gifts.sent.length} gifts</span>
+          </div>
+          ${giftRowsMarkup(socialState.gifts.sent, "No gifts sent yet.")}
+        </div>
+      </div>
+    `;
+
+    const redeemBtn = wrap.querySelector("#redeem-heart-pass-btn");
+    if (redeemBtn) {
+      redeemBtn.addEventListener("click", async () => {
+        try {
+          const data = await socialCall("redeemHeartPass");
+          if (data.user) applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
+          if (typeof progressState !== "undefined") {
+            progressState.hearts = HEART_MAX;
+            progressState.heartsUpdatedAt = Date.now();
+            progressState.exhaustedHeartTimes = [];
+            if (typeof updateStats === "function") updateStats();
+            if (typeof saveLocalProgress === "function") saveLocalProgress();
+          }
+          toast("One heart gift restored your hearts.");
+          openGiftsModal();
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Could not use the heart gift.");
+        }
+      });
+    }
+
+    wrap.querySelectorAll("[data-send-heart]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        try {
+          const data = await socialCall("sendGift", { targetUid: button.dataset.sendHeart, giftType: "heart" });
+          if (data.user) applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
+          toast("Heart gift sent.");
+          openGiftsModal();
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Could not send that heart gift.");
+        }
+      });
+    });
+
+    wrap.querySelectorAll("[data-send-gems]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        try {
+          const data = await socialCall("sendGift", { targetUid: button.dataset.sendGems, giftType: "gems" });
+          if (data.user) applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
+          toast("Gem pack sent.");
+          openGiftsModal();
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Could not send that gem pack.");
+        }
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    wrap.innerHTML = `<p class="muted">${escapeHtml(error.message || "Gifts are not ready until Firebase is fully deployed.")}</p>`;
+  }
+}
+
+async function loadStudyMessages(roomId) {
+  if (!db || !roomId) return [];
+  const snapshot = await db.collection("studyRooms").doc(roomId).collection("messages").orderBy("createdAt", "asc").limit(30).get();
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
+async function openStudyRoomThread(roomId) {
+  const roomDoc = await db.collection("studyRooms").doc(roomId).get();
+  if (!roomDoc.exists) {
+    toast("That study room is not available anymore.");
+    return;
+  }
+
+  const room = { id: roomDoc.id, ...roomDoc.data() };
+  const messages = await loadStudyMessages(roomId);
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  wrap.innerHTML = `
+    <div class="social-card-callout">
+      <h4>${escapeHtml(room.lessonTitle || room.lessonId || "Study room")}</h4>
+      <p>Use this room to ask a hard question, answer a friend's question, or keep each other moving through the lesson.</p>
+    </div>
+    <div class="study-message-list">
+      ${
+        messages.length
+          ? messages.map((message) => `
+            <div class="study-message">
+              <strong>${escapeHtml(message.authorName || "Learner")} - ${escapeHtml(message.kind || "note")}</strong>
+              <p>${escapeHtml(message.text || "")}</p>
+            </div>
+          `).join("")
+          : `<p class="muted">No messages yet. Ask the first question.</p>`
+      }
+    </div>
+    <div class="study-composer">
+      <select id="study-message-kind">
+        <option value="question">Question</option>
+        <option value="tip">Tip</option>
+        <option value="check-in">Check-in</option>
+      </select>
+      <textarea id="study-message-text" placeholder="Ask what confused you, or explain a tricky part to your friend."></textarea>
+      <div class="social-actions">
+        ${room.invitedUids?.includes(getCurrentSocialUser()?.uid) ? `<button class="btn btn--mint" id="study-join-btn" type="button">Join room</button>` : ""}
+        <button class="btn btn--berry" id="study-send-btn" type="button">Send</button>
+      </div>
+    </div>
+  `;
+  setWideModal("Study Room", wrap);
+
+  const joinBtn = wrap.querySelector("#study-join-btn");
+  if (joinBtn) {
+    joinBtn.addEventListener("click", async () => {
+      try {
+        await socialCall("joinStudyRoom", { roomId });
+        toast("You joined the study room.");
+        openStudyRoomThread(roomId);
+      } catch (error) {
+        console.error(error);
+        toast(error.message || "Could not join this room.");
+      }
+    });
+  }
+
+  wrap.querySelector("#study-send-btn").addEventListener("click", async () => {
+    try {
+      const text = wrap.querySelector("#study-message-text").value.trim();
+      const kind = wrap.querySelector("#study-message-kind").value;
+      if (!text) {
+        toast("Write a message first.");
+        return;
+      }
+      await socialCall("sendStudyMessage", { roomId, text, kind });
+      openStudyRoomThread(roomId);
+    } catch (error) {
+      console.error(error);
+      toast(error.message || "Could not send that message.");
+    }
+  });
+}
+
+async function openStudyTogetherModal(lesson) {
+  if (!requireSignIn()) return;
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  wrap.innerHTML = `<p class="muted">Loading study rooms...</p>`;
+  setWideModal("Study Together", wrap);
+
+  try {
+    await Promise.all([loadStudyRoomsState(), loadFriendsState()]);
+    const flatLessons = getFlatLessons();
+    const suggestedLesson = lesson?.id || flatLessons[0]?.id || "";
+    wrap.innerHTML = `
+      <div class="social-card-callout">
+        <h4>Shared lesson rooms</h4>
+        <p>These rooms are the first step toward co-op lessons. You can invite a friend into the same lesson, drop a question, and coordinate your progress in real time through Firestore updates.</p>
+      </div>
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Start a room</h4>
+          <span class="social-meta">Pick a lesson and invite one friend</span>
+        </div>
+        <div class="study-composer">
+          <select id="study-room-lesson">
+            ${flatLessons.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === suggestedLesson ? "selected" : ""}>${escapeHtml(item.title)}</option>`).join("")}
+          </select>
+          <select id="study-room-friend">
+            <option value="">Invite a friend later</option>
+            ${socialState.friendships.map((friend) => `<option value="${escapeHtml(friend.uid)}">${escapeHtml(friend.profile.profile.displayName)} (@${escapeHtml(friend.profile.profile.username)})</option>`).join("")}
+          </select>
+          <button class="btn btn--berry" id="study-room-create-btn" type="button">Create room</button>
+        </div>
+      </div>
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Your active rooms</h4>
+          <span class="social-meta">${socialState.studyRooms.length} room(s)</span>
+        </div>
+        ${studyRoomCardsMarkup(socialState.studyRooms)}
+      </div>
+    `;
+
+    wrap.querySelector("#study-room-create-btn").addEventListener("click", async () => {
+      try {
+        const lessonId = wrap.querySelector("#study-room-lesson").value;
+        const invitedUid = wrap.querySelector("#study-room-friend").value || "";
+        const data = await socialCall("createStudyRoom", { lessonId, invitedUid });
+        toast("Study room created.");
+        if (data.roomId) {
+          openStudyRoomThread(data.roomId);
+        } else {
+          openStudyTogetherModal(lesson);
+        }
+      } catch (error) {
+        console.error(error);
+        toast(error.message || "Could not create the study room.");
+      }
+    });
+
+    wrap.querySelectorAll("[data-open-room]").forEach((button) => {
+      button.addEventListener("click", () => openStudyRoomThread(button.dataset.openRoom));
+    });
+    wrap.querySelectorAll("[data-join-room]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        try {
+          await socialCall("joinStudyRoom", { roomId: button.dataset.joinRoom });
+          toast("You joined the room.");
+          openStudyRoomThread(button.dataset.joinRoom);
+        } catch (error) {
+          console.error(error);
+          toast(error.message || "Could not join this room.");
+        }
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    wrap.innerHTML = `<p class="muted">${escapeHtml(error.message || "Study rooms need Firebase deployment before they can open.")}</p>`;
+  }
+}
+
+async function openAskLessonQuestionModal(lesson, exercise) {
+  if (!requireSignIn()) return;
+  await loadFriendsState().catch(() => {});
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  const flatLessons = getFlatLessons();
+  const selectedLesson = lesson?.id || flatLessons[0]?.id || "";
+  const vocabHint = exercise?.vocab?.greek ? ` about ${exercise.vocab.greek}` : "";
+  wrap.innerHTML = `
+    <div class="social-card-callout">
+      <h4>Ask for help without losing momentum</h4>
+      <p>Turn your current difficulty into a question for a friend or a study room. This keeps the lesson social without forcing you to leave the path.</p>
+    </div>
+    <div class="study-composer">
+      <select id="question-lesson">
+        ${flatLessons.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === selectedLesson ? "selected" : ""}>${escapeHtml(item.title)}</option>`).join("")}
+      </select>
+      <select id="question-friend">
+        <option value="">Post in a new study room</option>
+        ${socialState.friendships.map((friend) => `<option value="${escapeHtml(friend.uid)}">${escapeHtml(friend.profile.profile.displayName)}</option>`).join("")}
+      </select>
+      <textarea id="question-text" placeholder="For example: I understand the word${escapeHtml(vocabHint)}, but I am confused about why the sentence order works this way.">${escapeHtml(exercise?.prompt ? `I need help with: ${exercise.prompt}` : "")}</textarea>
+      <button class="btn btn--berry" id="question-send-btn" type="button">Send question</button>
+    </div>
+  `;
+  setWideModal("Ask A Friend", wrap);
+
+  wrap.querySelector("#question-send-btn").addEventListener("click", async () => {
+    try {
+      const lessonId = wrap.querySelector("#question-lesson").value;
+      const invitedUid = wrap.querySelector("#question-friend").value || "";
+      const text = wrap.querySelector("#question-text").value.trim();
+      if (!text) {
+        toast("Write your question first.");
+        return;
+      }
+      const roomData = await socialCall("createStudyRoom", { lessonId, invitedUid });
+      if (!roomData.roomId) {
+        throw new Error("Could not create a study room for this question.");
+      }
+      await socialCall("sendStudyMessage", { roomId: roomData.roomId, text, kind: "question" });
+      toast("Question sent.");
+      openStudyRoomThread(roomData.roomId);
+    } catch (error) {
+      console.error(error);
+      toast(error.message || "Could not send your question.");
+    }
+  });
+}
+
 async function shareOwnProgress() {
   const profile = socialState.profile || createFallbackProfile();
   const text = `${profile.profile.displayName} is a ${profile.social.rankTitle} in Learn Koine Greek with ${profile.stats.totalXp} XP, ${profile.stats.progressPercent}% progress, and a ${profile.stats.streakDays}-day streak.`;
@@ -757,6 +1264,7 @@ async function openProfileModal() {
       </div>
       <div class="social-actions social-actions--stack">
         <button class="btn" id="share-progress-btn" type="button">Share progress</button>
+        <button class="btn ghost" id="profile-open-gifts-btn" type="button">Open gifts</button>
       </div>
     </div>
     <div class="social-stat-grid">
@@ -768,6 +1276,9 @@ async function openProfileModal() {
       <div class="social-stat-card"><span class="eyebrow">Friends</span><strong>${socialState.friendships.length}</strong></div>
       <div class="social-stat-card"><span class="eyebrow">Streak</span><strong>${profile.stats.streakDays} days</strong></div>
       <div class="social-stat-card"><span class="eyebrow">Visibility</span><strong>${profile.profile.isProfilePublic ? "Public" : "Private"}</strong></div>
+      <div class="social-stat-card"><span class="eyebrow">Gems</span><strong>${profile.rewards.gems || 0}</strong></div>
+      <div class="social-stat-card"><span class="eyebrow">Heart gifts</span><strong>${profile.rewards.heartPasses || 0}</strong></div>
+      <div class="social-stat-card"><span class="eyebrow">Crowns</span><strong>${profile.rewards.crowns || 0}</strong></div>
     </div>
     <div class="social-grid-two">
       <div class="social-section">
@@ -811,6 +1322,7 @@ async function openProfileModal() {
       toast("Could not open the share sheet just now.");
     });
   });
+  wrap.querySelector("#profile-open-gifts-btn").addEventListener("click", () => openGiftsModal());
 
   wrap.querySelector("#profile-save-btn").addEventListener("click", async () => {
     try {
@@ -849,6 +1361,9 @@ function resetSocialState() {
   socialState.friendships = [];
   socialState.incomingRequests = [];
   socialState.outgoingRequests = [];
+  socialState.gifts.received = [];
+  socialState.gifts.sent = [];
+  socialState.studyRooms = [];
   socialState.leaderboard.global = [];
   socialState.leaderboard.weekly = [];
   socialState.leaderboard.friends = [];
@@ -858,11 +1373,17 @@ function resetSocialState() {
 window.openProfileModal = openProfileModal;
 window.openLeaderboardModal = openLeaderboardModal;
 window.openFriendsModal = openFriendsModal;
+window.openInviteModal = openInviteModal;
+window.openGiftsModal = openGiftsModal;
+window.openStudyTogetherModal = openStudyTogetherModal;
+window.openAskLessonQuestionModal = openAskLessonQuestionModal;
 window.syncSocialAuthProfile = syncSocialAuthProfile;
 window.loadOwnSocialProfile = loadOwnSocialProfile;
 window.submitLessonCompletionToSocial = submitLessonCompletionToSocial;
 window.loadFriendsState = loadFriendsState;
 window.loadLeaderboards = loadLeaderboards;
+window.loadGiftsState = loadGiftsState;
+window.loadStudyRoomsState = loadStudyRoomsState;
 window.resetSocialState = resetSocialState;
 window.SOCIAL_EXERCISE_XP = SOCIAL_EXERCISE_XP;
 
@@ -877,6 +1398,8 @@ window.addEventListener("gq-auth-changed", (event) => {
     .then(() => Promise.all([
       loadOwnSocialProfile(),
       loadFriendsState().catch(() => {}),
+      loadGiftsState().catch(() => {}),
+      loadStudyRoomsState().catch(() => {}),
       loadLeaderboards().catch(() => {}),
       loadOwnActivities().catch(() => {})
     ]))
