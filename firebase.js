@@ -14,6 +14,7 @@ const firebaseConfig = {
 let app = null;
 let auth = null;
 let db = null;
+let functions = null;
 
 const firebaseState = {
   configured: false,
@@ -40,6 +41,7 @@ function initFirebase() {
     app = firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.firestore();
+    functions = firebase.functions ? firebase.functions() : null;
     firebaseState.configured = true;
     firebaseState.reason = "";
   } catch (e) {

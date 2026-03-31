@@ -110,8 +110,14 @@ function observeAuth() {
         if (user) {
           toast(`Signed in as ${user.displayName || user.email}`);
           loadRemoteProgress(user.uid);
+          if (typeof syncSocialAuthProfile === "function") {
+            syncSocialAuthProfile().catch((error) => console.error("Social profile sync failed", error));
+          }
         } else {
           toast("Not signed in. Progress will stay on this device.");
+          if (typeof resetSocialState === "function") {
+            resetSocialState();
+          }
         }
         const signBtn = document.getElementById("sign-in-btn");
         const logBtn = document.getElementById("log-in-btn");
@@ -133,6 +139,8 @@ function loadRemoteProgress(uid) {
   }
   db.collection("users")
     .doc(uid)
+    .collection("private")
+    .doc("progress")
     .get()
     .then((doc) => {
       if (doc.exists) {
@@ -147,7 +155,8 @@ function saveRemoteProgress(uid) {
   if (!db) {
     return;
   }
-  db.collection("users").doc(uid).set(getProgressPayload(), { merge: true });
+  const payload = typeof getRemoteProgressPayload === "function" ? getRemoteProgressPayload() : getProgressPayload();
+  db.collection("users").doc(uid).collection("private").doc("progress").set(payload, { merge: true });
 }
 
 function syncProgress() {

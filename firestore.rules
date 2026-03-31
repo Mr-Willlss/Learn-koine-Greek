@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{userId} {
+      allow read: if resource.data.profile.isProfilePublic == true || isOwner(userId);
+      allow write: if false;
+
+      match /private/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /lessonCompletions/{lessonId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+    }
+
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /friendRequests/{requestId} {
+      allow read: if signedIn() && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /friendships/{friendshipId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow write: if false;
+    }
+
+    match /activities/{activityId} {
+      allow read: if resource.data.visibility == "public" || (signedIn() && resource.data.actorUid == request.auth.uid);
+      allow write: if false;
+    }
+  }
+}

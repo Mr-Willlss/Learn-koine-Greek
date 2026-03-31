@@ -4,6 +4,8 @@ let currentLesson = null;
 let currentExerciseIndex = 0;
 let currentSelection = null;
 let lessonXpEarned = 0;
+let lessonCorrectCount = 0;
+let lessonWrongCount = 0;
 let userOptions = { sound: true, autoSave: true, brightness: 1, volume: 0.5, theme: "dark", autoHideSidebar: true };
 let audioCtx = null;
 let masterGain = null;
@@ -98,6 +100,8 @@ function ensureModalShell() {
 function showModal(title, bodyNode) {
   const modal = ensureModalShell();
   modal.querySelector(".modal-title").textContent = title;
+  const card = modal.querySelector(".modal-card");
+  if (card) card.classList.remove("modal-card--wide");
   const body = modal.querySelector(".modal-body");
   body.innerHTML = "";
   if (bodyNode) body.appendChild(bodyNode);
@@ -174,10 +178,21 @@ function getProgressPayload() {
   };
 }
 
+function getRemoteProgressPayload() {
+  return {
+    hearts: progressState.hearts,
+    heartsUpdatedAt: progressState.heartsUpdatedAt,
+    exhaustedHeartTimes: progressState.exhaustedHeartTimes,
+    completedLessons: progressState.completedLessons,
+    vocabProgress: progressState.vocabProgress,
+    spacedRepetition: spacedRepetition.items
+  };
+}
+
 function applyProgress(payload) {
   if (!payload) return;
-  progressState.xp = Number.isFinite(payload.xp) ? payload.xp : 0;
-  progressState.level = Number.isFinite(payload.level) ? payload.level : 1;
+  progressState.xp = Number.isFinite(payload.xp) ? payload.xp : progressState.xp;
+  progressState.level = Number.isFinite(payload.level) ? payload.level : progressState.level;
   progressState.hearts = Number.isFinite(payload.hearts) ? payload.hearts : HEART_MAX;
   progressState.heartsUpdatedAt = Number.isFinite(payload.heartsUpdatedAt) ? payload.heartsUpdatedAt : Date.now();
   progressState.exhaustedHeartTimes = Array.isArray(payload.exhaustedHeartTimes)
@@ -227,6 +242,8 @@ function startLesson(lesson, world) {
   currentLesson = { ...lesson, worldId: world.id };
   currentExerciseIndex = 0;
   lessonXpEarned = 0;
+  lessonCorrectCount = 0;
+  lessonWrongCount = 0;
 
   const vocabSample = vocabDatabase.slice(0, 4);
   currentLesson.exercises = shuffleArray(buildLessonExercises(lesson, vocabDatabase));
@@ -498,14 +515,14 @@ function checkAnswer() {
   }
 
   if (correct) {
-    progressState.xp += 5;
     lessonXpEarned += 5;
-    if (progressState.xp % 50 === 0) progressState.level += 1;
+    lessonCorrectCount += 1;
     setTeacherMood("happy");
     teacherSpeak("Great job!");
     updateSpacedRepetition(exercise.vocab?.id, true);
     playCorrectSound();
   } else {
+    lessonWrongCount += 1;
     loseHeart();
     setTeacherMood("sad");
     teacherSpeak("Try again!");
@@ -613,23 +630,54 @@ function consumeHeartIfNeeded() {
   return true;
 }
 
-function finishLesson() {
-  if (!progressState.completedLessons.includes(currentLesson.id)) {
-    progressState.completedLessons.push(currentLesson.id);
-    progressState.xp += currentLesson.xp;
+async function finishLesson() {
+  const firstLocalCompletion = !progressState.completedLessons.includes(currentLesson.id);
+  if (firstLocalCompletion) {
     lessonXpEarned += currentLesson.xp;
   }
   // Restore hearts on lesson completion
   progressState.hearts = HEART_MAX;
   progressState.heartsUpdatedAt = Date.now();
   progressState.exhaustedHeartTimes = [];
+  let completionConfirmed = !firstLocalCompletion;
+  let syncError = null;
+
+  let awardedXp = lessonXpEarned;
+  if (typeof submitLessonCompletionToSocial === "function") {
+    try {
+      const secureResult = await submitLessonCompletionToSocial(currentLesson);
+      if (secureResult && Number.isFinite(secureResult.awardedXp)) {
+        awardedXp = secureResult.awardedXp;
+      }
+      if (secureResult?.alreadyAwarded) {
+        toast("Lesson progress saved. XP was already counted for this lesson.");
+      }
+      completionConfirmed = !!secureResult;
+    } catch (error) {
+      console.error(error);
+      syncError = error;
+    }
+  }
+
+  if (completionConfirmed && firstLocalCompletion) {
+    progressState.completedLessons.push(currentLesson.id);
+  }
+  if (!completionConfirmed) {
+    awardedXp = 0;
+  }
+
   updateStats();
   updateProgressBar();
   renderMap(progressState);
   saveLocalProgress();
+
+  if (syncError) {
+    toast(syncError.message || "Lesson completed, but secure XP sync is not ready yet.");
+  }
+
   const next = getNextLesson(currentLesson.id);
-  showLessonCompleteModal(lessonXpEarned, () => {
-    if (next) startLesson(next.lesson, next.world);
+  showLessonCompleteModal(awardedXp, () => {
+    if (next && completionConfirmed) startLesson(next.lesson, next.world);
   });
 }
 
@@ -680,6 +728,10 @@ function registerEvents() {
   if (mapBtn) mapBtn.addEventListener("click", openMapModal);
   const profileBtn = document.getElementById("profile-btn");
   if (profileBtn) profileBtn.addEventListener("click", openProfileModal);
+  const leaderboardBtn = document.getElementById("leaderboard-btn");
+  if (leaderboardBtn) leaderboardBtn.addEventListener("click", openLeaderboardModal);
+  const friendsBtn = document.getElementById("friends-btn");
+  if (friendsBtn) friendsBtn.addEventListener("click", openFriendsModal);
   const optionsBtn = document.getElementById("options-btn");
   if (optionsBtn) optionsBtn.addEventListener("click", openOptionsModal);
   const tourBtn = document.getElementById("tour-btn");
@@ -836,7 +888,7 @@ function requireSignIn() {
 }
 
 function lockUI(locked) {
-  const ids = ["check-btn","hint-btn","skip-btn","map-btn","profile-btn","options-btn","contact-btn","about-btn"];
+  const ids = ["check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn","options-btn","contact-btn","about-btn"];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.disabled = locked;
@@ -851,6 +903,9 @@ function handleAuthChange() {
     renderMap(progressState);
     updateStats();
     updateProgressBar();
+    if (typeof loadOwnSocialProfile === "function") {
+      loadOwnSocialProfile().catch((error) => console.error("Profile load failed", error));
+    }
   }
 }
 
