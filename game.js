@@ -146,6 +146,10 @@ function updateStats() {
       ? `Low hearts. ${recommendedHearts} heart${recommendedHearts === 1 ? "" : "s"} cost ${recommendedHearts * HEART_GEM_COST} gems.`
       : `Low hearts. Full refill costs ${missingHearts * HEART_GEM_COST} gems.`;
   }
+  const lessonEarned = document.getElementById("lesson-earned-xp");
+  if (lessonEarned && !currentLesson) {
+    lessonEarned.textContent = "XP this lesson: 0";
+  }
   updateFocusStrip();
 }
 
@@ -880,9 +884,12 @@ function consumeHeartIfNeeded() {
 }
 
 async function finishLesson() {
-  const firstLocalCompletion = !progressState.completedLessons.includes(currentLesson.id);
+  const completedLesson = currentLesson;
+  if (!completedLesson) return;
+  const next = getNextLesson(completedLesson.id);
+  const firstLocalCompletion = !progressState.completedLessons.includes(completedLesson.id);
   if (firstLocalCompletion) {
-    lessonXpEarned += currentLesson.xp;
+    lessonXpEarned += completedLesson.xp;
   }
   // Restore hearts on lesson completion
   progressState.hearts = HEART_MAX;
@@ -896,7 +903,7 @@ async function finishLesson() {
   let secureProfileApplied = false;
   if (typeof submitLessonCompletionToSocial === "function") {
     try {
-      const secureResult = await submitLessonCompletionToSocial(currentLesson);
+      const secureResult = await submitLessonCompletionToSocial(completedLesson);
       if (secureResult && Number.isFinite(secureResult.awardedXp)) {
         awardedXp = secureResult.awardedXp;
       }
@@ -914,12 +921,13 @@ async function finishLesson() {
     }
   }
 
-  if (completionConfirmed && firstLocalCompletion) {
-    progressState.completedLessons.push(currentLesson.id);
+  if (firstLocalCompletion) {
+    progressState.completedLessons.push(completedLesson.id);
     markDailyQuestComplete();
-  }
-  if (!completionConfirmed) {
-    awardedXp = 0;
+    if (!secureProfileApplied) {
+      progressState.xp += awardedXp;
+      progressState.level = Math.max(1, Math.floor(progressState.xp / 50) + 1);
+    }
   }
   clearActiveLessonState();
 
@@ -945,9 +953,10 @@ async function finishLesson() {
 
   setLessonFeedback("success", `Lesson cleared. You banked ${awardedXp} XP and moved your journey forward.`);
 
-  const next = getNextLesson(currentLesson.id);
   showLessonCompleteModal(awardedXp, () => {
-    if (next && completionConfirmed) startLesson(next.lesson, next.world);
+    if (next) {
+      startLesson(next.lesson, next.world);
+    }
   }, rewardSummary);
 }
 
@@ -959,7 +968,7 @@ function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
     modal.className = "modal-overlay";
     modal.innerHTML = `
       <div class="modal-card">
-        <h3>Lesson Complete!</h3>
+        <h3>Congratulations!</h3>
         <p class="modal-xp"></p>
         <p class="modal-summary"></p>
         <button class="btn">Continue</button>
@@ -974,9 +983,12 @@ function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
   const next = currentLesson ? getNextLesson(currentLesson.id) : null;
   xpText.textContent = `You earned ${xpEarned} XP in this lesson.`;
   if (summaryText) {
+    const rewardText = rewardSummary
+      ? ` You also collected ${rewardSummary.gems || 0} gems, ${rewardSummary.heartPasses || 0} heart gifts, and ${rewardSummary.crowns || 0} crowns.`
+      : "";
     summaryText.textContent = next
-      ? `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy. Continue will move you straight to ${next.lesson.title}.`
-      : `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.`;
+      ? `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.${rewardText} Continue will move you straight to ${next.lesson.title}.`
+      : `${lessonCorrectCount} correct, ${lessonWrongCount} missed, ${accuracy}% accuracy.${rewardText}`;
   }
   const btn = modal.querySelector("button");
   let burst = modal.querySelector(".reward-burst");
@@ -1039,6 +1051,8 @@ function registerEvents() {
   if (friendsBtn) friendsBtn.addEventListener("click", openFriendsModal);
   const optionsBtn = document.getElementById("options-btn");
   if (optionsBtn) optionsBtn.addEventListener("click", openOptionsModal);
+  const startNewBtn = document.getElementById("start-new-btn");
+  if (startNewBtn) startNewBtn.addEventListener("click", confirmStartNew);
   const tourBtn = document.getElementById("tour-btn");
   if (tourBtn) tourBtn.addEventListener("click", startTour);
   const contactBtn = document.getElementById("contact-btn");
@@ -1206,10 +1220,10 @@ function getNextLesson(currentId) {
 function confirmStartNew() {
   if (!requireSignIn()) return;
   const body = document.createElement("div");
-  body.innerHTML = `<p>Are you sure you want to proceed? This will reset your progress.</p>`;
+  body.innerHTML = `<p>Are you sure you want to proceed? This will reset your progress, rewards, and current lesson state back to Lesson 1.</p>`;
   const agree = document.createElement("button");
   agree.className = "btn";
-  agree.textContent = "Agree and continue";
+  agree.textContent = "Start new game";
   const cancel = document.createElement("button");
   cancel.className = "btn ghost";
   cancel.style.marginLeft = "8px";
@@ -1218,14 +1232,34 @@ function confirmStartNew() {
   wrap.appendChild(body);
   wrap.appendChild(agree);
   wrap.appendChild(cancel);
-  agree.addEventListener("click", () => {
+  agree.addEventListener("click", async () => {
+    agree.disabled = true;
     progressState.completedLessons = [];
     progressState.xp = 0;
     progressState.level = 1;
+    progressState.hearts = HEART_MAX;
+    progressState.heartsUpdatedAt = Date.now();
+    progressState.exhaustedHeartTimes = [];
+    progressState.vocabProgress = {};
+    lessonXpEarned = 0;
+    lessonCorrectCount = 0;
+    lessonWrongCount = 0;
+    clearActiveLessonState();
+    currentLesson = null;
+    currentExerciseIndex = 0;
+    try {
+      if (typeof window.resetSocialGameState === "function") {
+        await window.resetSocialGameState();
+      }
+    } catch (error) {
+      console.error(error);
+      toast("Local progress reset. Cloud rewards will refresh after the next sync.");
+    }
     updateStats();
     updateProgressBar();
     renderMap(progressState);
-    toast("Progress reset. Pick any unlocked lesson.");
+    saveLocalProgress();
+    toast("New game started. Back to Lesson 1 with a clean slate.");
     const modal = document.getElementById("app-modal");
     if (modal) modal.classList.remove("show");
     startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]);
@@ -1250,7 +1284,7 @@ function requireSignIn() {
 function lockUI(locked) {
   const ids = [
     "check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn",
-    "options-btn","contact-btn","about-btn","continue-btn","gifts-btn","study-btn","question-btn",
+    "options-btn","start-new-btn","contact-btn","about-btn","continue-btn","gifts-btn","study-btn","question-btn",
     "invite-btn","lesson-ask-btn","lesson-study-btn"
   ];
   ids.forEach((id) => {
@@ -1352,6 +1386,10 @@ function openMapModal() {
 }
 
 function openProfileModal() {
+  if (window.openProfileModal && window.openProfileModal !== openProfileModal) {
+    window.openProfileModal();
+    return;
+  }
   const body = document.createElement("div");
   const user = (window.firebase && window.firebase.auth && firebase.auth().currentUser) || null;
   if (user) {
@@ -1410,8 +1448,14 @@ function saveOptions() {
   document.body.classList.remove("light", "dark");
   if (userOptions.theme === "light") document.body.classList.add("light");
   if (userOptions.theme === "dark") document.body.classList.add("dark");
-  document.body.classList.toggle("sidebar-hidden", !!userOptions.autoHideSidebar);
+  applySidebarPreference();
   if (masterGain) masterGain.gain.value = userOptions.volume;
+}
+
+function applySidebarPreference() {
+  const isMobileLayout = window.matchMedia && window.matchMedia("(max-width: 920px)").matches;
+  document.body.classList.toggle("sidebar-mobile", !!isMobileLayout);
+  document.body.classList.toggle("sidebar-hidden", isMobileLayout ? true : !!userOptions.autoHideSidebar);
 }
 
 function loadOptions() {
@@ -1427,13 +1471,15 @@ function loadOptions() {
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.body.classList.add(prefersDark ? "dark" : "light");
   }
-  document.body.classList.toggle("sidebar-hidden", !!userOptions.autoHideSidebar);
+  applySidebarPreference();
   if (masterGain) masterGain.gain.value = userOptions.volume;
 }
 
 function toggleSidebar() {
   document.body.classList.toggle("sidebar-hidden");
-  userOptions.autoHideSidebar = document.body.classList.contains("sidebar-hidden");
+  if (!(window.matchMedia && window.matchMedia("(max-width: 920px)").matches)) {
+    userOptions.autoHideSidebar = document.body.classList.contains("sidebar-hidden");
+  }
   localStorage.setItem("gqOptions", JSON.stringify(userOptions));
 }
 

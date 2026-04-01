@@ -1,5 +1,6 @@
 const socialState = {
   profile: null,
+  privateDetails: null,
   activities: [],
   friendships: [],
   incomingRequests: [],
@@ -117,6 +118,7 @@ function createFallbackProfile(user = getCurrentSocialUser()) {
       usernameLower: buildUsernameSeed(user),
       bio: "Learning Koine Greek one lesson at a time.",
       photoURL: user?.photoURL || "",
+      gender: "",
       isProfilePublic: true
     },
     stats: {
@@ -141,6 +143,12 @@ function createFallbackProfile(user = getCurrentSocialUser()) {
   };
 }
 
+function createDefaultPrivateDetails(user = getCurrentSocialUser()) {
+  return {
+    phoneNumber: user?.phoneNumber || ""
+  };
+}
+
 function normalizeSocialDocData(uid, data) {
   const fallback = createFallbackProfile({ uid });
   const profile = data?.profile || {};
@@ -158,6 +166,7 @@ function normalizeSocialDocData(uid, data) {
       usernameLower: profile.usernameLower || (profile.username || fallback.profile.username).toLowerCase(),
       bio: profile.bio || fallback.profile.bio,
       photoURL: profile.photoURL || fallback.profile.photoURL,
+      gender: profile.gender || fallback.profile.gender || "",
       isProfilePublic: profile.isProfilePublic !== false
     },
     stats: {
@@ -182,6 +191,13 @@ function normalizeSocialDocData(uid, data) {
   };
 }
 
+function normalizePrivateProfileDetails(data = {}, user = getCurrentSocialUser()) {
+  const fallback = createDefaultPrivateDetails(user);
+  return {
+    phoneNumber: String(data?.phoneNumber || fallback.phoneNumber || "").trim().slice(0, 24)
+  };
+}
+
 function applySocialProfile(profile) {
   socialState.profile = profile;
   if (typeof progressState !== "undefined") {
@@ -190,6 +206,10 @@ function applySocialProfile(profile) {
     if (typeof updateStats === "function") updateStats();
   }
   updateSocialChrome();
+}
+
+function applyPrivateProfileDetails(details) {
+  socialState.privateDetails = normalizePrivateProfileDetails(details);
 }
 
 function applyRewardSummaryToChrome(rewardSummary) {
@@ -219,6 +239,9 @@ function updateSocialChrome() {
   const rewardGems = document.getElementById("reward-gems");
   const rewardHearts = document.getElementById("reward-heart-passes");
   const rewardCrowns = document.getElementById("reward-crowns");
+  const sideRewardGems = document.getElementById("side-reward-gems");
+  const sideRewardHearts = document.getElementById("side-reward-hearts");
+  const sideRewardCrowns = document.getElementById("side-reward-crowns");
   const rewardLast = document.getElementById("reward-last");
 
   if (rankEl) rankEl.textContent = `Rank ${profile.social.rankTitle}`;
@@ -230,9 +253,12 @@ function updateSocialChrome() {
   if (rewardGems) rewardGems.textContent = String(profile.rewards?.gems || 0);
   if (rewardHearts) rewardHearts.textContent = String(profile.rewards?.heartPasses || 0);
   if (rewardCrowns) rewardCrowns.textContent = String(profile.rewards?.crowns || 0);
+  if (sideRewardGems) sideRewardGems.textContent = String(profile.rewards?.gems || 0);
+  if (sideRewardHearts) sideRewardHearts.textContent = String(profile.rewards?.heartPasses || 0);
+  if (sideRewardCrowns) sideRewardCrowns.textContent = String(profile.rewards?.crowns || 0);
   if (rewardLast) {
     rewardLast.textContent = getCurrentSocialUser()
-      ? `${profile.rewards?.gems || 0} gems saved for gifts and boosts`
+      ? `${profile.rewards?.gems || 0} gems, ${profile.rewards?.heartPasses || 0} heart gifts, ${profile.rewards?.crowns || 0} crowns ready to use`
       : "Sign in to start collecting rewards";
   }
 
@@ -309,6 +335,7 @@ async function ensureFallbackUserDocument(user = getCurrentSocialUser()) {
         username,
         usernameLower: username.toLowerCase(),
         photoURL: user.photoURL || existing.profile.photoURL,
+        gender: existing.profile.gender || "",
         isProfilePublic: existing.profile.isProfilePublic !== false
       },
       stats: {
@@ -339,6 +366,100 @@ async function ensureFallbackUserDocument(user = getCurrentSocialUser()) {
     }
     return merged;
   });
+}
+
+async function loadPrivateProfileDetails() {
+  const user = getCurrentSocialUser();
+  if (!user || !db) {
+    const fallback = createDefaultPrivateDetails(user);
+    applyPrivateProfileDetails(fallback);
+    return fallback;
+  }
+
+  const doc = await db.collection("users").doc(user.uid).collection("private").doc("profileDetails").get();
+  const details = doc.exists ? normalizePrivateProfileDetails(doc.data(), user) : createDefaultPrivateDetails(user);
+  applyPrivateProfileDetails(details);
+  return details;
+}
+
+async function savePrivateProfileDetails(details = {}) {
+  const user = getCurrentSocialUser();
+  if (!user || !db) throw new Error("Sign in to save your private details.");
+  const normalized = normalizePrivateProfileDetails(details, user);
+  await db.collection("users").doc(user.uid).collection("private").doc("profileDetails").set({
+    ...normalized,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  applyPrivateProfileDetails(normalized);
+  return normalized;
+}
+
+async function resetSocialGameState() {
+  const user = getCurrentSocialUser();
+  if (!user || !db) return null;
+
+  const userRef = db.collection("users").doc(user.uid);
+  const completionsRef = userRef.collection("lessonCompletions");
+  const privateProgressRef = userRef.collection("private").doc("progress");
+  const activitiesQuery = db.collection("activities").where("actorUid", "==", user.uid);
+
+  const [userDoc, completionSnap, activitySnap] = await Promise.all([
+    userRef.get(),
+    completionsRef.get(),
+    activitiesQuery.get()
+  ]);
+
+  const current = userDoc.exists ? normalizeSocialDocData(user.uid, userDoc.data()) : createFallbackProfile(user);
+  const resetProfile = {
+    ...current,
+    stats: {
+      ...current.stats,
+      totalXp: 0,
+      level: 1,
+      totalLessonsCompleted: 0,
+      progressPercent: 0,
+      streakDays: 0
+    },
+    social: {
+      ...current.social,
+      weeklyXp: 0,
+      league: getLeagueLabel(0),
+      rankTitle: getRankLabel(0),
+      lastLessonCompletedAt: null
+    },
+    rewards: {
+      gems: 0,
+      heartPasses: 0,
+      crowns: 0
+    },
+    updatedAt: serverTimestamp()
+  };
+
+  const batch = db.batch();
+  batch.set(userRef, resetProfile, { merge: true });
+  batch.set(privateProgressRef, {
+    xp: 0,
+    level: 1,
+    hearts: 5,
+    heartsUpdatedAt: Date.now(),
+    exhaustedHeartTimes: [],
+    completedLessons: [],
+    vocabProgress: {},
+    activeLessonId: null,
+    activeWorldId: null,
+    activeExerciseIndex: 0,
+    activeLessonCorrectCount: 0,
+    activeLessonWrongCount: 0,
+    activeLessonXpEarned: 0,
+    updatedAt: Date.now()
+  }, { merge: true });
+  completionSnap.forEach((doc) => batch.delete(doc.ref));
+  activitySnap.forEach((doc) => batch.delete(doc.ref));
+  await batch.commit();
+
+  applySocialProfile(resetProfile);
+  socialState.activities = [];
+  return resetProfile;
 }
 
 async function fallbackSyncUserProfile(payload = {}) {
@@ -377,8 +498,9 @@ async function fallbackUpdateUserProfile(payload = {}) {
         username: nextUsername,
         usernameLower: nextUsername,
         bio: (payload.bio || "").trim().slice(0, 180),
+        gender: String(payload.gender || current.profile.gender || "").trim().slice(0, 24),
         isProfilePublic: typeof payload.isProfilePublic === "boolean" ? payload.isProfilePublic : current.profile.isProfilePublic,
-        photoURL: current.profile.photoURL || user.photoURL || ""
+        photoURL: String(payload.photoURL || current.profile.photoURL || user.photoURL || "").trim().slice(0, 500)
       },
       updatedAt: serverTimestamp()
     };
@@ -746,12 +868,10 @@ function socialCall(name, payload = {}) {
     return functions.httpsCallable(name)(payload)
       .then((result) => result.data || {})
       .catch((error) => {
-        const code = String(error?.code || "");
-        const shouldFallback = code.includes("not-found") || code.includes("unimplemented") || code.includes("unavailable") || code.includes("failed-precondition");
-        if (shouldFallback) {
-          return socialFallbackCall(name, payload);
-        }
-        throw error;
+        return socialFallbackCall(name, payload).catch((fallbackError) => {
+          console.error("Cloud function and Firestore fallback both failed", error, fallbackError);
+          throw fallbackError || error;
+        });
       });
   }
   return socialFallbackCall(name, payload);
@@ -1930,10 +2050,16 @@ async function saveProfileSettingsFromModal(wrap) {
     displayName: wrap.querySelector("#profile-display-name").value.trim(),
     username: wrap.querySelector("#profile-username").value.trim(),
     bio: wrap.querySelector("#profile-bio").value.trim(),
+    photoURL: wrap.querySelector("#profile-photo-url").value.trim(),
+    gender: wrap.querySelector("#profile-gender").value.trim(),
     isProfilePublic: wrap.querySelector("#profile-public").checked
+  };
+  const privateDetails = {
+    phoneNumber: wrap.querySelector("#profile-phone-number").value.trim()
   };
 
   const data = await socialCall("updateUserProfile", payload);
+  await savePrivateProfileDetails(privateDetails);
   if (data.user) {
     applySocialProfile(normalizeSocialDocData(getCurrentSocialUser().uid, data.user));
   } else {
@@ -1957,6 +2083,7 @@ async function openProfileModal() {
   }
 
   const profile = socialState.profile || (await loadOwnSocialProfile());
+  const privateDetails = socialState.privateDetails || (await loadPrivateProfileDetails());
   await loadOwnActivities();
   await loadFriendsState();
 
@@ -1969,6 +2096,7 @@ async function openProfileModal() {
         <p class="eyebrow">Public profile</p>
         <h3>${escapeHtml(profile.profile.displayName)}</h3>
         <p class="muted">@${escapeHtml(profile.profile.username)} - ${escapeHtml(profile.social.rankTitle)} - ${escapeHtml(profile.social.league)} League</p>
+        <p class="muted">${escapeHtml(profile.profile.gender || "Gender not set")}</p>
       </div>
       <div class="social-actions social-actions--stack">
         <button class="btn" id="share-progress-btn" type="button">Share progress</button>
@@ -1995,6 +2123,10 @@ async function openProfileModal() {
           <span class="social-meta">People will find you by username</span>
         </div>
         <label class="social-field">
+          <span>Profile picture URL</span>
+          <input id="profile-photo-url" type="url" maxlength="500" value="${escapeHtml(profile.profile.photoURL || "")}" placeholder="Paste an image link">
+        </label>
+        <label class="social-field">
           <span>Display name</span>
           <input id="profile-display-name" type="text" maxlength="40" value="${escapeHtml(profile.profile.displayName)}">
         </label>
@@ -2003,14 +2135,31 @@ async function openProfileModal() {
           <input id="profile-username" type="text" maxlength="20" value="${escapeHtml(profile.profile.username)}">
         </label>
         <label class="social-field">
+          <span>Gender</span>
+          <select id="profile-gender">
+            <option value="" ${!profile.profile.gender ? "selected" : ""}>Prefer not to say</option>
+            <option value="Male" ${profile.profile.gender === "Male" ? "selected" : ""}>Male</option>
+            <option value="Female" ${profile.profile.gender === "Female" ? "selected" : ""}>Female</option>
+            <option value="Other" ${profile.profile.gender === "Other" ? "selected" : ""}>Other</option>
+          </select>
+        </label>
+        <label class="social-field">
+          <span>Phone number</span>
+          <input id="profile-phone-number" type="tel" maxlength="24" value="${escapeHtml(privateDetails.phoneNumber || "")}" placeholder="Saved privately to your account">
+        </label>
+        <label class="social-field">
           <span>Bio</span>
           <textarea id="profile-bio" rows="4" maxlength="180">${escapeHtml(profile.profile.bio)}</textarea>
         </label>
+        <p class="muted">Your phone number stays private to your account. Your avatar, username, bio, and gender can appear on your public profile.</p>
         <label class="toggle-row">
           <span>Public profile</span>
           <label class="switch"><input id="profile-public" type="checkbox" ${profile.profile.isProfilePublic ? "checked" : ""}><span class="slider"></span></label>
         </label>
-        <button class="btn" id="profile-save-btn" type="button">Save profile</button>
+        <div class="social-actions">
+          <button class="btn ghost" id="profile-use-google-photo" type="button">Use Google photo</button>
+          <button class="btn" id="profile-save-btn" type="button">Save profile</button>
+        </div>
       </div>
       <div class="social-section">
         <div class="social-section__head">
@@ -2031,6 +2180,22 @@ async function openProfileModal() {
     });
   });
   wrap.querySelector("#profile-open-gifts-btn").addEventListener("click", () => openGiftsModal());
+  const photoInput = wrap.querySelector("#profile-photo-url");
+  const avatarPreview = wrap.querySelector(".profile-avatar");
+  if (photoInput && avatarPreview) {
+    photoInput.addEventListener("input", () => {
+      avatarPreview.src = photoInput.value.trim() || profile.profile.photoURL || "assets/images/mascot-logo.svg";
+    });
+  }
+  const useGooglePhotoBtn = wrap.querySelector("#profile-use-google-photo");
+  if (useGooglePhotoBtn && photoInput) {
+    useGooglePhotoBtn.addEventListener("click", () => {
+      photoInput.value = user.photoURL || "";
+      if (avatarPreview) {
+        avatarPreview.src = photoInput.value.trim() || "assets/images/mascot-logo.svg";
+      }
+    });
+  }
 
   wrap.querySelector("#profile-save-btn").addEventListener("click", async () => {
     try {
@@ -2065,6 +2230,7 @@ async function submitLessonCompletionToSocial(lesson) {
 
 function resetSocialState() {
   socialState.profile = null;
+  socialState.privateDetails = null;
   socialState.activities = [];
   socialState.friendships = [];
   socialState.incomingRequests = [];
@@ -2088,6 +2254,8 @@ window.openStudyTogetherModal = openStudyTogetherModal;
 window.openAskLessonQuestionModal = openAskLessonQuestionModal;
 window.syncSocialAuthProfile = syncSocialAuthProfile;
 window.loadOwnSocialProfile = loadOwnSocialProfile;
+window.loadPrivateProfileDetails = loadPrivateProfileDetails;
+window.resetSocialGameState = resetSocialGameState;
 window.applyRewardSummaryToChrome = applyRewardSummaryToChrome;
 window.submitLessonCompletionToSocial = submitLessonCompletionToSocial;
 window.loadFriendsState = loadFriendsState;

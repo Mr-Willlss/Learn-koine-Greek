@@ -205,6 +205,10 @@ function signOutUser() {
 
 document.addEventListener("DOMContentLoaded", () => {
   updateAuthButton();
+  if (typeof applySidebarPreference === "function") {
+    applySidebarPreference();
+    window.addEventListener("resize", applySidebarPreference);
+  }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
       syncProgress();

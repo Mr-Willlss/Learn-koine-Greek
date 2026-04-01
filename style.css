@@ -175,6 +175,38 @@ p { margin: 0; }
   border: 1px solid rgba(31, 41, 55, 0.05);
   font-size: 0.9rem;
 }
+.side-rewards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.side-reward-chip {
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  background: rgba(255,255,255,0.86);
+  box-shadow: 0 10px 18px rgba(20, 31, 53, 0.06);
+}
+.side-reward-chip span {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.side-reward-chip strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.05rem;
+}
+.side-reward-chip--gold {
+  background: linear-gradient(135deg, rgba(255, 234, 168, 0.9), rgba(255,255,255,0.9));
+}
+.side-reward-chip--mint {
+  background: linear-gradient(135deg, rgba(184, 244, 205, 0.9), rgba(255,255,255,0.9));
+}
+.side-reward-chip--sky {
+  background: linear-gradient(135deg, rgba(187, 234, 255, 0.9), rgba(255,255,255,0.9));
+}
 .progress {
   height: 12px;
   background: rgba(31, 41, 55, 0.08);
@@ -1352,6 +1384,7 @@ body.dark .exercise input,
 body.dark .drag-token,
 body.dark .drag-target,
 body.dark .side-progress .stat-row span,
+body.dark .side-reward-chip,
 body.dark .lesson-hud__card,
 body.dark .lesson-feedback,
 body.dark .study-composer textarea,
@@ -1369,6 +1402,15 @@ body.dark .exercise-visual__art,
 body.dark .lesson-hearts-panel {
   background: rgba(18, 28, 49, 0.95);
   color: #f4f7fb;
+}
+body.dark .side-reward-chip--gold {
+  background: linear-gradient(135deg, rgba(96, 71, 8, 0.95), rgba(18, 28, 49, 0.95));
+}
+body.dark .side-reward-chip--mint {
+  background: linear-gradient(135deg, rgba(10, 91, 58, 0.95), rgba(18, 28, 49, 0.95));
+}
+body.dark .side-reward-chip--sky {
+  background: linear-gradient(135deg, rgba(14, 71, 116, 0.95), rgba(18, 28, 49, 0.95));
 }
 body.dark .reward-reel__chip,
 body.dark .world-card__chip,
@@ -1921,11 +1963,87 @@ body.dark .invite-checklist p {
 @media (max-width: 920px) {
   .layout {
     grid-template-columns: 1fr;
+    padding: 14px 12px 24px;
+    gap: 16px;
   }
 
   .sidebar {
-    position: relative;
-    top: 0;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: min(86vw, 340px);
+    z-index: 1450;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(0);
+    transition: transform 0.28s ease, opacity 0.28s ease;
+  }
+
+  .sidebar-hidden .sidebar {
+    display: flex;
+    transform: translateX(-120%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sidebar-hidden .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hamburger.floating {
+    top: 12px;
+    left: 12px;
+  }
+
+  .content {
+    min-width: 0;
+  }
+
+  .hero,
+  .map-shell,
+  .lesson-panel,
+  .reward-pocket,
+  .social-card {
+    border-radius: 24px;
+  }
+
+  .hero {
+    padding: 20px 18px;
+    margin-top: 44px;
+  }
+
+  .hero-tagline {
+    font-size: 0.98rem;
+  }
+
+  .hero-chip {
+    width: 100%;
+  }
+
+  .momentum-board {
+    gap: 12px;
+  }
+
+  .reward-pocket {
+    padding: 18px;
+  }
+
+  .reward-pocket__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reward-pocket__status {
+    max-width: none;
+  }
+
+  .reward-pocket__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reward-chip {
+    padding: 12px 14px;
   }
 
   .hero-copy__top,
@@ -1940,12 +2058,26 @@ body.dark .invite-checklist p {
     padding-right: 0;
   }
 
+  .lesson-panel {
+    padding: 18px;
+  }
+
   .side-nav {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .lesson-progress__meta {
     justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .lesson-progress {
+    width: 100%;
+  }
+
+  .lesson-hearts-panel {
+    width: 100%;
+    align-items: flex-start;
   }
 
   .lesson-feedback {
@@ -1967,6 +2099,14 @@ body.dark .invite-checklist p {
     flex: 1 1 180px;
   }
 
+  .lesson-footer {
+    position: sticky;
+    bottom: 10px;
+    z-index: 20;
+    padding-top: 12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(8,12,20,0.12) 38%, rgba(8,12,20,0.26));
+  }
+
   .world-trail__line {
     left: 30px;
     transform: none;
@@ -1979,10 +2119,10 @@ body.dark .invite-checklist p {
   }
 
   .mascot-cheer {
-    width: 64px;
-    height: 64px;
-    right: 16px;
-    top: 82px;
+    width: 58px;
+    height: 58px;
+    right: 12px;
+    top: 78px;
   }
 
   .exercise-visual {
@@ -2007,5 +2147,60 @@ body.dark .invite-checklist p {
   .social-actions--stack {
     align-items: flex-start;
     margin-left: 0;
+  }
+  .side-rewards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .layout {
+    padding: 12px 10px 22px;
+  }
+
+  .hero {
+    margin-top: 46px;
+    padding: 18px 16px;
+  }
+
+  .focus-strip,
+  .lesson-hud,
+  .social-rack,
+  .social-grid-two {
+    grid-template-columns: 1fr;
+  }
+
+  .section-head {
+    gap: 12px;
+  }
+
+  .lesson-progress__bar {
+    width: 100%;
+  }
+
+  .lesson-body {
+    min-height: 240px;
+  }
+
+  .lesson-footer {
+    gap: 8px;
+  }
+
+  .lesson-footer .btn {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .side-progress .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .side-rewards {
+    grid-template-columns: 1fr;
+  }
+
+  .progress {
+    margin-top: 10px;
   }
 }
