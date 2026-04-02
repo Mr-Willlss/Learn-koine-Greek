@@ -3,6 +3,7 @@ let vocabDatabase = [];
 let currentLesson = null;
 let currentExerciseIndex = 0;
 let currentSelection = null;
+let selectedWord = null;
 let lessonXpEarned = 0;
 let lessonCorrectCount = 0;
 let lessonWrongCount = 0;
@@ -160,6 +161,47 @@ function setLessonActionState(disabled) {
   if (checkBtn) checkBtn.disabled = disabled;
   if (hintBtn) hintBtn.disabled = disabled;
   if (skipBtn) skipBtn.disabled = disabled;
+}
+
+function updateDictionaryButtonState() {
+  const hintBtn = document.getElementById("hint-btn");
+  if (!hintBtn) return;
+  hintBtn.textContent = selectedWord ? "Dictionary" : "Hint";
+  hintBtn.classList.toggle("dictionary-mode", Boolean(selectedWord));
+}
+
+function clearSelectedDictionaryWord(options = {}) {
+  selectedWord = null;
+  document.querySelectorAll(".greek-word.active").forEach((el) => el.classList.remove("active"));
+  updateDictionaryButtonState();
+  if (options.resetPanel) {
+    setHeroStatusText("Tap a Greek word in the lesson area, then press Dictionary.", "status");
+  }
+}
+
+function selectDictionaryWord(wordEl) {
+  if (!wordEl) return;
+  const word = String(wordEl.dataset.word || "").trim();
+  if (!word) return;
+  if (selectedWord === word && wordEl.classList.contains("active")) {
+    clearSelectedDictionaryWord({ resetPanel: true });
+    return;
+  }
+  document.querySelectorAll(".greek-word.active").forEach((el) => el.classList.remove("active"));
+  wordEl.classList.add("active");
+  selectedWord = word;
+  updateDictionaryButtonState();
+  setHeroStatusText(`Selected: ${word}. Press Dictionary to view meaning and usage.`, "status");
+}
+
+function buildGreekWordChip(word, label = "") {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "greek-word";
+  button.dataset.word = word;
+  button.textContent = label || word;
+  button.addEventListener("click", () => selectDictionaryWord(button));
+  return button;
 }
 
 function showOutOfHeartsState() {
@@ -536,12 +578,7 @@ function extractDictionaryTermsFromExercise(exercise) {
 }
 
 function buildDictionaryChip(label, query) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "dictionary-chip";
-  button.textContent = label;
-  button.addEventListener("click", () => renderInlineDictionary(query));
-  return button;
+  return buildGreekWordChip(query, label);
 }
 
 function buildInteractivePrompt(text) {
@@ -553,20 +590,9 @@ function buildInteractivePrompt(text) {
   value.split(/\s+/).forEach((token, index) => {
     const spacer = index > 0 ? document.createTextNode(" ") : null;
     if (spacer) wrap.appendChild(spacer);
-    const clean = normalizeDictionaryToken(token);
-    const matches = clean ? findDictionaryEntries(token) : [];
-    if (matches.length) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "prompt-token";
-      button.textContent = token;
-      button.addEventListener("click", () => renderInlineDictionary(token));
-      wrap.appendChild(button);
-    } else {
-      const span = document.createElement("span");
-      span.textContent = token;
-      wrap.appendChild(span);
-    }
+    const button = buildGreekWordChip(token, token);
+    button.classList.add("prompt-token");
+    wrap.appendChild(button);
   });
   return wrap;
 }
@@ -719,9 +745,10 @@ function renderInlineDictionary(query, options = {}) {
     const first = uniqueEntries[0];
     setHeroStatusMarkup(`
       <div class="hero-status-card">
-        <strong>${escapeDictionaryHtml(first.greek || value)} · ${escapeDictionaryHtml(first.meaning || first.english || "Meaning")}</strong>
+        <strong>WORD: ${escapeDictionaryHtml(first.greek || value)}</strong>
         <p><strong>Meaning:</strong> ${escapeDictionaryHtml(first.meaning || first.english || "Unknown")}</p>
-        <p><strong>Use case:</strong> ${escapeDictionaryHtml(usageTemplateForEntry(first))}</p>
+        <p><strong>Type:</strong> ${escapeDictionaryHtml(first.partOfSpeech || "Vocabulary")}</p>
+        <p><strong>Usage:</strong> ${escapeDictionaryHtml(first.example || usageTemplateForEntry(first))}</p>
         <p><strong>How to use it:</strong> ${escapeDictionaryHtml(usageScenarioForEntry(first))}</p>
         ${chipsMarkup}
       </div>
@@ -731,7 +758,14 @@ function renderInlineDictionary(query, options = {}) {
   const status = document.getElementById("hero-status");
   if (status) {
     status.querySelectorAll("[data-inline-dict]").forEach((button) => {
-      button.addEventListener("click", () => renderInlineDictionary(button.dataset.inlineDict));
+      button.addEventListener("click", () => {
+        const value = button.dataset.inlineDict;
+        renderInlineDictionary(value);
+        const match = document.querySelector(`.greek-word[data-word="${CSS.escape(value)}"]`);
+        if (match) {
+          selectDictionaryWord(match);
+        }
+      });
     });
   }
 }
@@ -803,7 +837,7 @@ function renderExercise() {
   const body = document.getElementById("lesson-body");
   body.innerHTML = "";
   currentSelection = null;
-  setHeroStatusText("Tap Dictionary or any lesson word to inspect meaning and usage.", "dictionary");
+  clearSelectedDictionaryWord({ resetPanel: true });
   setLessonActionState(false);
 
   const wrapper = document.createElement("div");
@@ -825,9 +859,10 @@ function renderExercise() {
     if (visualCard) wrapper.appendChild(visualCard);
     const word = document.createElement("p");
     word.className = "prompt-word prompt-word--interactive";
-    word.textContent = `Greek: ${vocab.greek || "—"}`;
-    word.tabIndex = 0;
-    word.addEventListener("click", () => renderInlineDictionary(vocab.greek || vocab.transliteration || vocab.meaning || ""));
+    const label = document.createElement("span");
+    label.textContent = "Greek: ";
+    word.appendChild(label);
+    word.appendChild(buildGreekWordChip(vocab.greek || "—", vocab.greek || "—"));
     wrapper.appendChild(word);
     const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
     if (strip) wrapper.appendChild(strip);
@@ -845,10 +880,18 @@ function renderExercise() {
       const item = document.createElement("button");
       item.className = "choice";
       item.textContent = choice;
+      const matches = findDictionaryEntries(choice);
+      if (matches.length) {
+        item.dataset.word = matches[0].greek || choice;
+        item.classList.add("greek-word");
+      }
       item.addEventListener("click", () => {
         grid.querySelectorAll(".choice").forEach((c) => c.classList.remove("selected"));
         item.classList.add("selected");
         currentSelection = choice;
+        if (item.dataset.word) {
+          selectDictionaryWord(item);
+        }
       });
       grid.appendChild(item);
     });
@@ -867,9 +910,10 @@ function renderExercise() {
     ].filter(Boolean);
     const word = document.createElement("p");
     word.className = "prompt-word prompt-word--interactive";
-    word.textContent = `Greek: ${vocab.greek || "—"}`;
-    word.tabIndex = 0;
-    word.addEventListener("click", () => renderInlineDictionary(vocab.greek || vocab.transliteration || vocab.meaning || ""));
+    const label = document.createElement("span");
+    label.textContent = "Greek: ";
+    word.appendChild(label);
+    word.appendChild(buildGreekWordChip(vocab.greek || "—", vocab.greek || "—"));
     wrapper.appendChild(word);
     const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
     if (strip) wrapper.appendChild(strip);
@@ -934,10 +978,13 @@ function renderExercise() {
     target.className = "drag-target";
 
     exercise.tokens.forEach((token) => {
-      const chip = document.createElement("div");
-      chip.className = "drag-token";
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "drag-token greek-word";
+      chip.dataset.word = token;
       chip.textContent = token;
       chip.addEventListener("click", () => {
+        selectDictionaryWord(chip);
         target.appendChild(chip);
       });
       bank.appendChild(chip);
@@ -953,10 +1000,11 @@ function renderExercise() {
     const visualCard = buildVocabIllustrationCard(vocab);
     if (visualCard) wrapper.appendChild(visualCard);
     const text = document.createElement("p");
-    text.textContent = `Greek: ${vocab.greek}`;
     text.className = "prompt-word prompt-word--interactive";
-    text.tabIndex = 0;
-    text.addEventListener("click", () => renderInlineDictionary(vocab.greek || vocab.transliteration || vocab.meaning || ""));
+    const label = document.createElement("span");
+    label.textContent = "Greek: ";
+    text.appendChild(label);
+    text.appendChild(buildGreekWordChip(vocab.greek || "—", vocab.greek || "—"));
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Type the translation";
@@ -1369,23 +1417,7 @@ function registerEvents() {
   const lessonDictionaryBtn = document.getElementById("lesson-dictionary-btn");
   if (lessonDictionaryBtn) {
     lessonDictionaryBtn.addEventListener("click", () => {
-      const exercise = currentLesson?.exercises?.[currentExerciseIndex];
-      if (!exercise) {
-        setHeroStatusText("Start a lesson first, then tap Dictionary or any lesson word.", "dictionary");
-        toast("Start a lesson first.");
-        return;
-      }
-      const terms = extractDictionaryTermsFromExercise(exercise);
-      if (!terms.length) {
-        setHeroStatusText("No dictionary entry is attached to this exercise yet.", "dictionary");
-        toast("No dictionary entry for this exercise yet.");
-        return;
-      }
-      if (exercise.type === "sentence-builder" && exercise.sentence) {
-        renderInlineDictionary(exercise.sentence, { preferTokens: true });
-        return;
-      }
-      renderInlineDictionary(terms[0]);
+      showHint();
     });
   }
   const inviteBtn = document.getElementById("invite-btn");
@@ -1416,26 +1448,18 @@ function registerEvents() {
 function showHint() {
   const ex = currentLesson?.exercises?.[currentExerciseIndex];
   if (!ex) {
-    setHeroStatusText("Start a lesson first, then tap Dictionary or any lesson word.", "dictionary");
+    setHeroStatusText("Start a lesson first, then tap a Greek word in the lesson area.", "status");
     toast("Start a lesson first.");
     return;
   }
-
-  if (ex.type === "sentence-builder" && ex.sentence) {
-    renderInlineDictionary(ex.sentence, { preferTokens: true });
-    toast("Dictionary opened for this sentence.");
+  if (!selectedWord) {
+    updateDictionaryButtonState();
+    setHeroStatusText("Hint: tap a Greek word first. Once selected, this button changes to Dictionary.", "status");
+    toast("Tap a Greek word first.");
     return;
   }
-
-  const terms = extractDictionaryTermsFromExercise(ex);
-  if (terms.length) {
-    renderInlineDictionary(terms[0]);
-    toast("Dictionary opened for this lesson word.");
-    return;
-  }
-
-  setHeroStatusText("No dictionary entry is attached to this exercise yet.", "dictionary");
-  toast("No dictionary entry is attached to this exercise yet.");
+  renderInlineDictionary(selectedWord);
+  toast(`Dictionary opened for ${selectedWord}.`);
 }
 
 function initApp() {
