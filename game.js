@@ -456,6 +456,166 @@ function buildVocabIllustrationCard(vocab) {
   return card;
 }
 
+function normalizeDictionaryToken(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[.,;:!?()[\]{}"']/g, "");
+}
+
+function usageTemplateForEntry(entry) {
+  const greek = entry.greek || "This word";
+  const meaning = entry.meaning || entry.english || "this meaning";
+  const partOfSpeech = (entry.partOfSpeech || "").toLowerCase();
+  if (entry.example) return entry.example;
+  if (partOfSpeech.includes("verb")) {
+    return `${greek} can be used as an action word when you build a simple sentence.`;
+  }
+  if (partOfSpeech.includes("noun")) {
+    return `${greek} can act as the naming word in a sentence, often as the subject or object.`;
+  }
+  if (partOfSpeech.includes("article")) {
+    return `${greek} usually stays close to the noun it introduces in a sentence.`;
+  }
+  return `${greek} means "${meaning}" and can be combined with nearby lesson words to make a simple Koine Greek sentence.`;
+}
+
+function findDictionaryEntries(term) {
+  const normalized = normalizeDictionaryToken(term);
+  if (!normalized || !Array.isArray(vocabDatabase)) return [];
+  return vocabDatabase.filter((entry) => {
+    const greek = normalizeDictionaryToken(entry.greek);
+    const transliteration = normalizeDictionaryToken(entry.transliteration);
+    const meaning = normalizeDictionaryToken(entry.meaning || entry.english);
+    return [greek, transliteration, meaning].includes(normalized);
+  });
+}
+
+function extractDictionaryTermsFromExercise(exercise) {
+  if (!exercise) return [];
+  if (exercise.vocab) {
+    return [exercise.vocab.greek, exercise.vocab.transliteration, exercise.vocab.meaning || exercise.vocab.english].filter(Boolean);
+  }
+  if (exercise.type === "sentence-builder") {
+    return String(exercise.sentence || "")
+      .split(/\s+/)
+      .map((token) => token.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function buildDictionaryChip(label, query) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "dictionary-chip";
+  button.textContent = label;
+  button.addEventListener("click", () => openDictionaryModal(query));
+  return button;
+}
+
+function buildDictionarySentenceStrip(label, text) {
+  const terms = String(text || "").split(/\s+/).map((term) => term.trim()).filter(Boolean);
+  if (!terms.length) return null;
+  const wrap = document.createElement("div");
+  wrap.className = "dictionary-strip";
+  const title = document.createElement("p");
+  title.className = "eyebrow";
+  title.textContent = label;
+  wrap.appendChild(title);
+  const chips = document.createElement("div");
+  chips.className = "dictionary-strip__chips";
+  terms.forEach((term) => chips.appendChild(buildDictionaryChip(term, term)));
+  wrap.appendChild(chips);
+  return wrap;
+}
+
+function buildDictionaryQuickActions(exercise) {
+  const terms = extractDictionaryTermsFromExercise(exercise);
+  if (!terms.length) return null;
+  const wrap = document.createElement("div");
+  wrap.className = "dictionary-quick-actions";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn ghost";
+  button.textContent = "Check dictionary";
+  button.addEventListener("click", () => {
+    if (exercise.type === "sentence-builder" && exercise.sentence) {
+      openDictionaryModal(exercise.sentence, { preferTokens: true });
+      return;
+    }
+    openDictionaryModal(terms[0]);
+  });
+  wrap.appendChild(button);
+  return wrap;
+}
+
+function openDictionaryModal(query, options = {}) {
+  const value = String(query || "").trim();
+  if (!value) {
+    toast("Choose a word first.");
+    return;
+  }
+
+  const wrap = document.createElement("div");
+  wrap.className = "dictionary-modal";
+  const terms = (options.preferTokens ? value.split(/\s+/) : [value])
+    .map((term) => term.trim())
+    .filter(Boolean);
+  const entries = terms.flatMap((term) => findDictionaryEntries(term));
+  const uniqueEntries = [];
+  const seen = new Set();
+  entries.forEach((entry) => {
+    if (!entry?.id || seen.has(entry.id)) return;
+    seen.add(entry.id);
+    uniqueEntries.push(entry);
+  });
+
+  wrap.innerHTML = `
+    <div class="dictionary-callout">
+      <p class="eyebrow">Dictionary</p>
+      <h3>${escapeHtml(value)}</h3>
+      <p class="muted">Tap any word in a sentence to inspect what it means and how it helps you build a sentence.</p>
+    </div>
+  `;
+
+  if (terms.length > 1) {
+    const strip = buildDictionarySentenceStrip("Tap a word in this sentence", value);
+    if (strip) wrap.appendChild(strip);
+  }
+
+  if (!uniqueEntries.length) {
+    const empty = document.createElement("div");
+    empty.className = "dictionary-entry";
+    empty.innerHTML = `<strong>No entry yet</strong><p class="muted">This word is not in the dictionary yet. Add it to the vocabulary database so learners can inspect it here.</p>`;
+    wrap.appendChild(empty);
+    showModal("Dictionary", wrap);
+    return;
+  }
+
+  uniqueEntries.forEach((entry) => {
+    const card = document.createElement("div");
+    card.className = "dictionary-entry";
+    card.innerHTML = `
+      <div class="dictionary-entry__head">
+        <div>
+          <strong>${escapeHtml(entry.greek || entry.transliteration || entry.meaning || "Word")}</strong>
+          <p class="muted">${escapeHtml(entry.transliteration || "")} · ${escapeHtml(entry.partOfSpeech || "Lesson word")}</p>
+        </div>
+        <span class="dictionary-entry__badge">${escapeHtml(entry.meaning || entry.english || "Meaning")}</span>
+      </div>
+      <div class="dictionary-entry__grid">
+        <div><span class="eyebrow">Meaning</span><p>${escapeHtml(entry.meaning || entry.english || "Not added yet")}</p></div>
+        <div><span class="eyebrow">How to use it</span><p>${escapeHtml(usageTemplateForEntry(entry))}</p></div>
+        <div><span class="eyebrow">Sentence help</span><p>${escapeHtml(entry.details || `${entry.greek || "This word"} works best when you place it beside the other lesson words in the order the sentence expects.`)}</p></div>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+
+  showModal("Dictionary", wrap);
+}
+
 function loadVocabDatabase() {
   return fetch("vocabDatabase.json", { cache: "force-cache" })
     .then((res) => {
@@ -533,6 +693,8 @@ function renderExercise() {
   const prompt = document.createElement("h3");
   prompt.textContent = exercise.prompt;
   wrapper.appendChild(prompt);
+  const dictionaryActions = buildDictionaryQuickActions(exercise);
+  if (dictionaryActions) wrapper.appendChild(dictionaryActions);
 
   if (exercise.type === "vocab-recognition" || exercise.type === "listening") {
     const vocab = exercise.vocab || vocabDatabase[0];
@@ -543,6 +705,8 @@ function renderExercise() {
     word.className = "prompt-word";
     word.textContent = `Greek: ${vocab.greek || "—"}`;
     wrapper.appendChild(word);
+    const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
+    if (strip) wrapper.appendChild(strip);
     const playBtn = document.createElement("button");
     playBtn.className = "btn ghost";
     playBtn.textContent = "Play";
@@ -581,6 +745,8 @@ function renderExercise() {
     word.className = "prompt-word";
     word.textContent = `Greek: ${vocab.greek || "—"}`;
     wrapper.appendChild(word);
+    const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
+    if (strip) wrapper.appendChild(strip);
     const help = document.createElement("p");
     help.className = "muted";
     help.textContent = supportsSpeechRecognition()
@@ -634,6 +800,8 @@ function renderExercise() {
   }
 
   if (exercise.type === "sentence-builder") {
+    const sentenceStrip = buildDictionarySentenceStrip("Tap a word before you build the sentence", exercise.sentence || "");
+    if (sentenceStrip) wrapper.appendChild(sentenceStrip);
     const bank = document.createElement("div");
     bank.className = "drag-bank";
     const target = document.createElement("div");
@@ -660,6 +828,7 @@ function renderExercise() {
     if (visualCard) wrapper.appendChild(visualCard);
     const text = document.createElement("p");
     text.textContent = `Greek: ${vocab.greek}`;
+    text.className = "prompt-word";
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Type the translation";
@@ -667,6 +836,8 @@ function renderExercise() {
       currentSelection = input.value.trim();
     });
     wrapper.appendChild(text);
+    const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
+    if (strip) wrapper.appendChild(strip);
     wrapper.appendChild(input);
   }
 
@@ -1067,6 +1238,26 @@ function registerEvents() {
   if (studyBtn) studyBtn.addEventListener("click", () => window.openStudyTogetherModal?.());
   const questionBtn = document.getElementById("question-btn");
   if (questionBtn) questionBtn.addEventListener("click", () => window.openAskLessonQuestionModal?.(currentLesson, currentLesson?.exercises?.[currentExerciseIndex]));
+  const lessonDictionaryBtn = document.getElementById("lesson-dictionary-btn");
+  if (lessonDictionaryBtn) {
+    lessonDictionaryBtn.addEventListener("click", () => {
+      const exercise = currentLesson?.exercises?.[currentExerciseIndex];
+      if (!exercise) {
+        toast("Start a lesson first.");
+        return;
+      }
+      const terms = extractDictionaryTermsFromExercise(exercise);
+      if (!terms.length) {
+        toast("No dictionary entry for this exercise yet.");
+        return;
+      }
+      if (exercise.type === "sentence-builder" && exercise.sentence) {
+        openDictionaryModal(exercise.sentence, { preferTokens: true });
+        return;
+      }
+      openDictionaryModal(terms[0]);
+    });
+  }
   const inviteBtn = document.getElementById("invite-btn");
   if (inviteBtn) inviteBtn.addEventListener("click", () => window.openInviteModal?.());
   const lessonAskBtn = document.getElementById("lesson-ask-btn");
@@ -1285,7 +1476,7 @@ function lockUI(locked) {
   const ids = [
     "check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn",
     "options-btn","start-new-btn","contact-btn","about-btn","continue-btn","gifts-btn","study-btn","question-btn",
-    "invite-btn","lesson-ask-btn","lesson-study-btn"
+    "invite-btn","lesson-ask-btn","lesson-study-btn","lesson-dictionary-btn"
   ];
   ids.forEach((id) => {
     const el = document.getElementById(id);

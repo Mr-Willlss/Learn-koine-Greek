@@ -1044,6 +1044,82 @@ p { margin: 0; }
   flex-wrap: wrap;
   justify-content: flex-end;
 }
+.dictionary-quick-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+.dictionary-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(57, 189, 248, 0.08);
+  border: 1px solid rgba(57, 189, 248, 0.15);
+}
+.dictionary-strip__chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dictionary-chip {
+  border: 1px solid rgba(57, 189, 248, 0.18);
+  background: rgba(255,255,255,0.9);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.dictionary-chip:hover,
+.dictionary-chip:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(20, 31, 53, 0.08);
+  border-color: rgba(57, 189, 248, 0.34);
+}
+.dictionary-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.dictionary-callout {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 247, 219, 0.9), rgba(240, 248, 255, 0.9));
+  border: 1px solid rgba(31, 41, 55, 0.06);
+}
+.dictionary-entry {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(31, 41, 55, 0.06);
+  box-shadow: 0 12px 24px rgba(20, 31, 53, 0.05);
+  display: grid;
+  gap: 12px;
+}
+.dictionary-entry__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.dictionary-entry__badge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 207, 90, 0.2);
+  font-weight: 800;
+  color: #7a5a14;
+}
+.dictionary-entry__grid {
+  display: grid;
+  gap: 10px;
+}
+.dictionary-entry__grid p {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.5;
+}
 .lesson-body {
   min-height: 240px;
   background: linear-gradient(180deg, #ffffff, #f9fbff);
@@ -1359,6 +1435,7 @@ body.dark .social-list-row,
  body.dark .social-stat-card,
 body.dark .lesson-support-rail,
 body.dark .exercise-visual,
+body.dark .dictionary-entry,
 body.dark .gift-wallet__item,
 body.dark .study-room-card,
 body.dark .gift-card,
@@ -1381,6 +1458,7 @@ body.dark .world-card__bar {
 }
 body.dark .choice,
 body.dark .exercise input,
+body.dark .dictionary-chip,
 body.dark .drag-token,
 body.dark .drag-target,
 body.dark .side-progress .stat-row span,
@@ -1399,9 +1477,18 @@ body.dark .lesson-feedback__badge {
 }
 body.dark .reward-pocket__status,
 body.dark .exercise-visual__art,
+body.dark .dictionary-callout,
 body.dark .lesson-hearts-panel {
   background: rgba(18, 28, 49, 0.95);
   color: #f4f7fb;
+}
+body.dark .dictionary-strip {
+  background: rgba(57, 189, 248, 0.12);
+  border-color: rgba(113, 216, 255, 0.22);
+}
+body.dark .dictionary-entry__badge {
+  background: rgba(255, 207, 90, 0.16);
+  color: #ffe18a;
 }
 body.dark .side-reward-chip--gold {
   background: linear-gradient(135deg, rgba(96, 71, 8, 0.95), rgba(18, 28, 49, 0.95));
@@ -2097,6 +2184,9 @@ body.dark .invite-checklist p {
 
   .lesson-support-rail__actions .btn {
     flex: 1 1 180px;
+  }
+  .dictionary-entry__head {
+    flex-direction: column;
   }
 
   .lesson-footer {
