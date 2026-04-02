@@ -548,13 +548,13 @@ function buildDictionaryQuickActions(exercise) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "btn ghost";
-  button.textContent = "Check dictionary";
+  button.textContent = "Open dictionary";
   button.addEventListener("click", () => {
     if (exercise.type === "sentence-builder" && exercise.sentence) {
-      openDictionaryModal(exercise.sentence, { preferTokens: true });
+      renderInlineDictionary(exercise.sentence, { preferTokens: true });
       return;
     }
-    openDictionaryModal(terms[0]);
+    renderInlineDictionary(terms[0]);
   });
   wrap.appendChild(button);
   return wrap;
@@ -626,20 +626,21 @@ function openDictionaryModal(query, options = {}) {
   showModal("Dictionary", wrap);
 }
 
-function setHeroStatusMarkup(markup) {
+function setHeroStatusMarkup(markup, mode = "status") {
   const status = document.getElementById("hero-status");
   if (!status) return;
+  status.dataset.mode = mode;
   status.innerHTML = markup;
 }
 
-function setHeroStatusText(message) {
-  setHeroStatusMarkup(`<div class="hero-status-card"><p>${escapeDictionaryHtml(message || "")}</p></div>`);
+function setHeroStatusText(message, mode = "status") {
+  setHeroStatusMarkup(`<div class="hero-status-card"><p>${escapeDictionaryHtml(message || "")}</p></div>`, mode);
 }
 
 function renderInlineDictionary(query, options = {}) {
   const value = String(query || "").trim();
   if (!value) {
-    setHeroStatusText("Tap Dictionary or select a lesson word to inspect it.");
+    setHeroStatusText("Tap Dictionary or select a lesson word to inspect it.", "dictionary");
     return;
   }
 
@@ -666,7 +667,7 @@ function renderInlineDictionary(query, options = {}) {
         <p>No dictionary entry yet for this word. Add it to the vocabulary list to explain it here.</p>
         ${chipsMarkup}
       </div>
-    `);
+    `, "dictionary");
   } else {
     const first = uniqueEntries[0];
     setHeroStatusMarkup(`
@@ -675,7 +676,7 @@ function renderInlineDictionary(query, options = {}) {
         <p>${escapeDictionaryHtml(usageTemplateForEntry(first))}</p>
         ${chipsMarkup}
       </div>
-    `);
+    `, "dictionary");
   }
 
   const status = document.getElementById("hero-status");
@@ -753,7 +754,7 @@ function renderExercise() {
   const body = document.getElementById("lesson-body");
   body.innerHTML = "";
   currentSelection = null;
-  setHeroStatusText("Tap Dictionary or any lesson word to inspect meaning and usage.");
+  setHeroStatusText("Tap Dictionary or any lesson word to inspect meaning and usage.", "dictionary");
   setLessonActionState(false);
 
   const wrapper = document.createElement("div");
@@ -1318,19 +1319,21 @@ function registerEvents() {
     lessonDictionaryBtn.addEventListener("click", () => {
       const exercise = currentLesson?.exercises?.[currentExerciseIndex];
       if (!exercise) {
+        setHeroStatusText("Start a lesson first, then tap Dictionary or any lesson word.", "dictionary");
         toast("Start a lesson first.");
         return;
       }
       const terms = extractDictionaryTermsFromExercise(exercise);
       if (!terms.length) {
+        setHeroStatusText("No dictionary entry is attached to this exercise yet.", "dictionary");
         toast("No dictionary entry for this exercise yet.");
         return;
       }
       if (exercise.type === "sentence-builder" && exercise.sentence) {
-        openDictionaryModal(exercise.sentence, { preferTokens: true });
+        renderInlineDictionary(exercise.sentence, { preferTokens: true });
         return;
       }
-      openDictionaryModal(terms[0]);
+      renderInlineDictionary(terms[0]);
     });
   }
   const inviteBtn = document.getElementById("invite-btn");
@@ -1361,7 +1364,7 @@ function registerEvents() {
 function showHint() {
   const ex = currentLesson?.exercises?.[currentExerciseIndex];
   if (!ex) {
-    setHeroStatusText("Start a lesson first, then tap Dictionary or any lesson word.");
+    setHeroStatusText("Start a lesson first, then tap Dictionary or any lesson word.", "dictionary");
     toast("Start a lesson first.");
     return;
   }
@@ -1379,7 +1382,7 @@ function showHint() {
     return;
   }
 
-  setHeroStatusText("No dictionary entry is attached to this exercise yet.");
+  setHeroStatusText("No dictionary entry is attached to this exercise yet.", "dictionary");
   toast("No dictionary entry is attached to this exercise yet.");
 }
 
@@ -1390,7 +1393,7 @@ function initApp() {
     window.gqProgressHydrated = !isSignedIn();
   }
   const hintBox = document.getElementById("hero-status");
-  if (hintBox) setHeroStatusText("");
+  if (hintBox) setHeroStatusText("Sign in and open a lesson, then tap Dictionary or any lesson word.", "social");
   lockUI(!isSignedIn());
   handleAuthChange();
   updateDailyGoalUI();

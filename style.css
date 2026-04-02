@@ -1447,6 +1447,110 @@ p { margin: 0; }
 
 /* Theme handling */
 body.light { color: var(--ink); }
+body.light {
+  background:
+    radial-gradient(circle at top left, rgba(255, 214, 122, 0.22), transparent 24%),
+    radial-gradient(circle at top right, rgba(57, 189, 248, 0.14), transparent 28%),
+    linear-gradient(180deg, #fffdf9 0%, #f8fbff 45%, #f2f7ff 100%);
+}
+body.light .map-shell,
+body.light .lesson-panel,
+body.light .sidebar,
+body.light .world-card,
+body.light .hero,
+body.light .reward-pocket,
+body.light .social-card,
+body.light .lesson-body,
+body.light .hero-chip,
+body.light .focus-card,
+body.light .nav-btn,
+body.light .btn.ghost,
+body.light .modal-card,
+body.light .social-section,
+body.light .social-list-row,
+body.light .social-stat-card,
+body.light .lesson-support-rail,
+body.light .exercise-visual,
+body.light .dictionary-entry,
+body.light .gift-wallet__item,
+body.light .study-room-card,
+body.light .gift-card,
+body.light .social-card-callout,
+body.light .lesson-hud__card,
+body.light .lesson-feedback,
+body.light .lesson-hearts-panel,
+body.light .reward-pocket__status,
+body.light .dictionary-callout {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--ink) !important;
+  border-color: rgba(31, 41, 55, 0.08) !important;
+}
+body.light h1,
+body.light h2,
+body.light h3,
+body.light h4,
+body.light strong,
+body.light label,
+body.light .lesson-header,
+body.light .section-head,
+body.light .world-card__pct,
+body.light .world-card__chip,
+body.light .lesson-progress__meta,
+body.light .hero-tagline,
+body.light .side-progress,
+body.light .social-card p:not(.eyebrow),
+body.light .lesson-feedback,
+body.light .dictionary-entry__grid p {
+  color: var(--ink) !important;
+}
+body.light .muted,
+body.light .eyebrow,
+body.light .hero-status-card p,
+body.light .world-card__subtitle,
+body.light .focus-card p,
+body.light .dictionary-entry__grid p,
+body.light .social-meta,
+body.light .reward-chip p,
+body.light .side-reward-chip span {
+  color: #5b6678 !important;
+}
+body.light .choice,
+body.light .exercise input,
+body.light .dictionary-chip,
+body.light .hero-status-chip,
+body.light .prompt-word--interactive,
+body.light .drag-token,
+body.light .drag-target,
+body.light .side-progress .stat-row span,
+body.light .side-reward-chip,
+body.light .study-composer textarea,
+body.light .study-composer select {
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: var(--ink) !important;
+  border-color: rgba(31, 41, 55, 0.08) !important;
+}
+body.light .progress,
+body.light .lesson-progress__bar,
+body.light .world-card__bar {
+  background: rgba(31, 41, 55, 0.1) !important;
+}
+body.light .pill,
+body.light .hero-badge,
+body.light .reward-reel__chip,
+body.light .level-node__status,
+body.light .level-node__xp {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: var(--ink) !important;
+  border-color: rgba(31, 41, 55, 0.08) !important;
+}
+body.light .dictionary-strip {
+  background: rgba(57, 189, 248, 0.08) !important;
+  border-color: rgba(57, 189, 248, 0.18) !important;
+}
+body.light .dictionary-entry__badge {
+  background: rgba(255, 207, 90, 0.2) !important;
+  color: #7a5a14 !important;
+}
 body.dark {
   color: #f4f7fb;
   background:

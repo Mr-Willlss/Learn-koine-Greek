@@ -262,11 +262,12 @@ function updateSocialChrome() {
       : "Sign in to start collecting rewards";
   }
 
-  if (heroStatus) {
+  if (heroStatus && (!heroStatus.dataset.mode || heroStatus.dataset.mode === "social")) {
+    heroStatus.dataset.mode = "social";
     if (getCurrentSocialUser()) {
-      heroStatus.textContent = `${profile.profile.displayName} is in the ${profile.social.league} League with ${profile.stats.totalXp} XP. Keep the streak alive with one solid lesson today.`;
+      heroStatus.innerHTML = `<div class="hero-status-card"><p>${profile.profile.displayName} is in the ${profile.social.league} League with ${profile.stats.totalXp} XP. Keep the streak alive with one solid lesson today.</p></div>`;
     } else {
-      heroStatus.textContent = "Sign in to unlock leagues, friends, and cloud-synced progress across your devices.";
+      heroStatus.innerHTML = `<div class="hero-status-card"><p>Sign in to unlock leagues, friends, and cloud-synced progress across your devices.</p></div>`;
     }
   }
 }
