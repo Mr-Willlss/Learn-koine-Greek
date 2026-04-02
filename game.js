@@ -490,6 +490,26 @@ function usageTemplateForEntry(entry) {
   return `${greek} means "${meaning}" and can be combined with nearby lesson words to make a simple Koine Greek sentence.`;
 }
 
+function usageScenarioForEntry(entry) {
+  const greek = entry.greek || "This word";
+  const meaning = entry.meaning || entry.english || "this idea";
+  const partOfSpeech = (entry.partOfSpeech || "").toLowerCase();
+  if (entry.details) return entry.details;
+  if (partOfSpeech.includes("verb")) {
+    return `Use ${greek} when you want to describe an action in a sentence, then add the person or thing doing that action nearby.`;
+  }
+  if (partOfSpeech.includes("noun")) {
+    return `Use ${greek} when naming a person, object, place, or idea in the sentence. It can work as the subject or the object depending on the exercise.`;
+  }
+  if (partOfSpeech.includes("article")) {
+    return `Use ${greek} beside the noun it belongs to so the learner sees which person or thing the sentence is pointing to.`;
+  }
+  if (partOfSpeech.includes("adjective")) {
+    return `Use ${greek} to describe a noun more clearly, adding detail about what that person or thing is like.`;
+  }
+  return `Use ${greek} when you want to express "${meaning}" in a simple lesson sentence. Pair it with nearby words in the exercise to build a complete thought.`;
+}
+
 function findDictionaryEntries(term) {
   const normalized = normalizeDictionaryToken(term);
   if (!normalized || !Array.isArray(vocabDatabase)) return [];
@@ -522,6 +542,33 @@ function buildDictionaryChip(label, query) {
   button.textContent = label;
   button.addEventListener("click", () => renderInlineDictionary(query));
   return button;
+}
+
+function buildInteractivePrompt(text) {
+  const value = String(text || "").trim();
+  const wrap = document.createElement("div");
+  wrap.className = "interactive-prompt";
+  if (!value) return wrap;
+
+  value.split(/\s+/).forEach((token, index) => {
+    const spacer = index > 0 ? document.createTextNode(" ") : null;
+    if (spacer) wrap.appendChild(spacer);
+    const clean = normalizeDictionaryToken(token);
+    const matches = clean ? findDictionaryEntries(token) : [];
+    if (matches.length) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "prompt-token";
+      button.textContent = token;
+      button.addEventListener("click", () => renderInlineDictionary(token));
+      wrap.appendChild(button);
+    } else {
+      const span = document.createElement("span");
+      span.textContent = token;
+      wrap.appendChild(span);
+    }
+  });
+  return wrap;
 }
 
 function buildDictionarySentenceStrip(label, text) {
@@ -673,7 +720,9 @@ function renderInlineDictionary(query, options = {}) {
     setHeroStatusMarkup(`
       <div class="hero-status-card">
         <strong>${escapeDictionaryHtml(first.greek || value)} · ${escapeDictionaryHtml(first.meaning || first.english || "Meaning")}</strong>
-        <p>${escapeDictionaryHtml(usageTemplateForEntry(first))}</p>
+        <p><strong>Meaning:</strong> ${escapeDictionaryHtml(first.meaning || first.english || "Unknown")}</p>
+        <p><strong>Use case:</strong> ${escapeDictionaryHtml(usageTemplateForEntry(first))}</p>
+        <p><strong>How to use it:</strong> ${escapeDictionaryHtml(usageScenarioForEntry(first))}</p>
         ${chipsMarkup}
       </div>
     `, "dictionary");
@@ -760,8 +809,11 @@ function renderExercise() {
   const wrapper = document.createElement("div");
   wrapper.className = "exercise";
 
-  const prompt = document.createElement("h3");
-  prompt.textContent = exercise.prompt;
+  const prompt = document.createElement("div");
+  prompt.className = "exercise-prompt";
+  const promptTitle = document.createElement("h3");
+  promptTitle.appendChild(buildInteractivePrompt(exercise.prompt));
+  prompt.appendChild(promptTitle);
   wrapper.appendChild(prompt);
   const dictionaryActions = buildDictionaryQuickActions(exercise);
   if (dictionaryActions) wrapper.appendChild(dictionaryActions);

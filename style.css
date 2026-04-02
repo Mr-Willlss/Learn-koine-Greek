@@ -345,6 +345,9 @@ p { margin: 0; }
   color: var(--muted);
   margin: 0;
 }
+.hero-status-card p strong {
+  color: var(--ink);
+}
 .hero-status-card__chips {
   display: flex;
   gap: 8px;
@@ -1074,6 +1077,28 @@ p { margin: 0; }
   display: flex;
   justify-content: flex-start;
 }
+.exercise-prompt h3 {
+  line-height: 1.45;
+}
+.interactive-prompt {
+  display: inline;
+}
+.prompt-token {
+  border: none;
+  background: rgba(57, 189, 248, 0.12);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 2px 7px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(57, 189, 248, 0.22);
+}
+.prompt-token:hover,
+.prompt-token:focus-visible {
+  background: rgba(57, 189, 248, 0.2);
+  outline: none;
+}
 .dictionary-strip {
   display: flex;
   flex-direction: column;
@@ -1506,6 +1531,7 @@ body.light .dictionary-entry__grid p {
 body.light .muted,
 body.light .eyebrow,
 body.light .hero-status-card p,
+body.light .hero-status-card p strong,
 body.light .world-card__subtitle,
 body.light .focus-card p,
 body.light .dictionary-entry__grid p,
@@ -1518,6 +1544,7 @@ body.light .choice,
 body.light .exercise input,
 body.light .dictionary-chip,
 body.light .hero-status-chip,
+body.light .prompt-token,
 body.light .prompt-word--interactive,
 body.light .drag-token,
 body.light .drag-target,
@@ -1601,6 +1628,7 @@ body.dark .choice,
 body.dark .exercise input,
 body.dark .dictionary-chip,
 body.dark .hero-status-chip,
+body.dark .prompt-token,
 body.dark .prompt-word--interactive,
 body.dark .drag-token,
 body.dark .drag-target,
