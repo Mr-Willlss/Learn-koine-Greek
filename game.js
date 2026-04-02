@@ -165,7 +165,7 @@ function setLessonActionState(disabled) {
 function showOutOfHeartsState() {
   const body = document.getElementById("lesson-body");
   const hintBox = document.getElementById("hero-status");
-  if (hintBox) hintBox.textContent = "Out of hearts. One heart refills every 5 minutes.";
+  if (hintBox) setHeroStatusText("Out of hearts. One heart refills every 5 minutes.");
   setLessonFeedback("warning", "You are out of hearts. Take a short break while one heart refills.");
   if (!body) return;
 
@@ -463,6 +463,16 @@ function normalizeDictionaryToken(value) {
     .replace(/[.,;:!?()[\]{}"']/g, "");
 }
 
+function escapeDictionaryHtml(value) {
+  if (typeof escapeHtml === "function") return escapeHtml(value);
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function usageTemplateForEntry(entry) {
   const greek = entry.greek || "This word";
   const meaning = entry.meaning || entry.english || "this meaning";
@@ -510,7 +520,7 @@ function buildDictionaryChip(label, query) {
   button.type = "button";
   button.className = "dictionary-chip";
   button.textContent = label;
-  button.addEventListener("click", () => openDictionaryModal(query));
+  button.addEventListener("click", () => renderInlineDictionary(query));
   return button;
 }
 
@@ -616,6 +626,66 @@ function openDictionaryModal(query, options = {}) {
   showModal("Dictionary", wrap);
 }
 
+function setHeroStatusMarkup(markup) {
+  const status = document.getElementById("hero-status");
+  if (!status) return;
+  status.innerHTML = markup;
+}
+
+function setHeroStatusText(message) {
+  setHeroStatusMarkup(`<div class="hero-status-card"><p>${escapeDictionaryHtml(message || "")}</p></div>`);
+}
+
+function renderInlineDictionary(query, options = {}) {
+  const value = String(query || "").trim();
+  if (!value) {
+    setHeroStatusText("Tap Dictionary or select a lesson word to inspect it.");
+    return;
+  }
+
+  const terms = (options.preferTokens ? value.split(/\s+/) : [value])
+    .map((term) => term.trim())
+    .filter(Boolean);
+  const entries = terms.flatMap((term) => findDictionaryEntries(term));
+  const uniqueEntries = [];
+  const seen = new Set();
+  entries.forEach((entry) => {
+    if (!entry?.id || seen.has(entry.id)) return;
+    seen.add(entry.id);
+    uniqueEntries.push(entry);
+  });
+
+  const chipsMarkup = terms.length > 1
+    ? `<div class="hero-status-card__chips">${terms.map((term) => `<button class="hero-status-chip" type="button" data-inline-dict="${escapeDictionaryHtml(term)}">${escapeDictionaryHtml(term)}</button>`).join("")}</div>`
+    : "";
+
+  if (!uniqueEntries.length) {
+    setHeroStatusMarkup(`
+      <div class="hero-status-card">
+        <strong>${escapeDictionaryHtml(value)}</strong>
+        <p>No dictionary entry yet for this word. Add it to the vocabulary list to explain it here.</p>
+        ${chipsMarkup}
+      </div>
+    `);
+  } else {
+    const first = uniqueEntries[0];
+    setHeroStatusMarkup(`
+      <div class="hero-status-card">
+        <strong>${escapeDictionaryHtml(first.greek || value)} · ${escapeDictionaryHtml(first.meaning || first.english || "Meaning")}</strong>
+        <p>${escapeDictionaryHtml(usageTemplateForEntry(first))}</p>
+        ${chipsMarkup}
+      </div>
+    `);
+  }
+
+  const status = document.getElementById("hero-status");
+  if (status) {
+    status.querySelectorAll("[data-inline-dict]").forEach((button) => {
+      button.addEventListener("click", () => renderInlineDictionary(button.dataset.inlineDict));
+    });
+  }
+}
+
 function loadVocabDatabase() {
   return fetch("vocabDatabase.json", { cache: "force-cache" })
     .then((res) => {
@@ -683,8 +753,7 @@ function renderExercise() {
   const body = document.getElementById("lesson-body");
   body.innerHTML = "";
   currentSelection = null;
-  const hintBox = document.getElementById("hero-status");
-  if (hintBox) hintBox.textContent = "";
+  setHeroStatusText("Tap Dictionary or any lesson word to inspect meaning and usage.");
   setLessonActionState(false);
 
   const wrapper = document.createElement("div");
@@ -702,8 +771,10 @@ function renderExercise() {
     const visualCard = buildVocabIllustrationCard(vocab);
     if (visualCard) wrapper.appendChild(visualCard);
     const word = document.createElement("p");
-    word.className = "prompt-word";
+    word.className = "prompt-word prompt-word--interactive";
     word.textContent = `Greek: ${vocab.greek || "—"}`;
+    word.tabIndex = 0;
+    word.addEventListener("click", () => renderInlineDictionary(vocab.greek || vocab.transliteration || vocab.meaning || ""));
     wrapper.appendChild(word);
     const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
     if (strip) wrapper.appendChild(strip);
@@ -742,8 +813,10 @@ function renderExercise() {
       vocab.greek
     ].filter(Boolean);
     const word = document.createElement("p");
-    word.className = "prompt-word";
+    word.className = "prompt-word prompt-word--interactive";
     word.textContent = `Greek: ${vocab.greek || "—"}`;
+    word.tabIndex = 0;
+    word.addEventListener("click", () => renderInlineDictionary(vocab.greek || vocab.transliteration || vocab.meaning || ""));
     wrapper.appendChild(word);
     const strip = buildDictionarySentenceStrip("Tap the lesson word", vocab.greek || "");
     if (strip) wrapper.appendChild(strip);
@@ -828,7 +901,9 @@ function renderExercise() {
     if (visualCard) wrapper.appendChild(visualCard);
     const text = document.createElement("p");
     text.textContent = `Greek: ${vocab.greek}`;
-    text.className = "prompt-word";
+    text.className = "prompt-word prompt-word--interactive";
+    text.tabIndex = 0;
+    text.addEventListener("click", () => renderInlineDictionary(vocab.greek || vocab.transliteration || vocab.meaning || ""));
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Type the translation";
@@ -1285,25 +1360,27 @@ function registerEvents() {
 
 function showHint() {
   const ex = currentLesson?.exercises?.[currentExerciseIndex];
-  const hintBox = document.getElementById("hero-status");
   if (!ex) {
-    if (hintBox) hintBox.textContent = "";
-    toast("Hint: pick a lesson to begin.");
+    setHeroStatusText("Start a lesson first, then tap Dictionary or any lesson word.");
+    toast("Start a lesson first.");
     return;
   }
-  if (ex.vocab) {
-    const translit = ex.vocab.transliteration || "(listen for the sound)";
-    if (hintBox) hintBox.textContent = `${ex.vocab.greek || "Listen"} (${translit})`;
-    toast(`Hint: ${ex.vocab.greek || "Listen"} (${translit})`);
-    return;
-  }
+
   if (ex.type === "sentence-builder" && ex.sentence) {
-    if (hintBox) hintBox.textContent = `Order should be "${ex.sentence}".`;
-    toast(`Hint: Order should be "${ex.sentence}".`);
+    renderInlineDictionary(ex.sentence, { preferTokens: true });
+    toast("Dictionary opened for this sentence.");
     return;
   }
-  if (hintBox) hintBox.textContent = "Listen carefully to the Greek sound.";
-  toast("Hint: listen carefully to the Greek sound.");
+
+  const terms = extractDictionaryTermsFromExercise(ex);
+  if (terms.length) {
+    renderInlineDictionary(terms[0]);
+    toast("Dictionary opened for this lesson word.");
+    return;
+  }
+
+  setHeroStatusText("No dictionary entry is attached to this exercise yet.");
+  toast("No dictionary entry is attached to this exercise yet.");
 }
 
 function initApp() {
@@ -1313,7 +1390,7 @@ function initApp() {
     window.gqProgressHydrated = !isSignedIn();
   }
   const hintBox = document.getElementById("hero-status");
-  if (hintBox) hintBox.textContent = "";
+  if (hintBox) setHeroStatusText("");
   lockUI(!isSignedIn());
   handleAuthChange();
   updateDailyGoalUI();
