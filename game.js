@@ -166,8 +166,8 @@ function setLessonActionState(disabled) {
 function updateDictionaryButtonState() {
   const hintBtn = document.getElementById("hint-btn");
   if (!hintBtn) return;
-  hintBtn.textContent = selectedWord ? "Dictionary" : "Hint";
-  hintBtn.classList.toggle("dictionary-mode", Boolean(selectedWord));
+  hintBtn.textContent = "Hint";
+  hintBtn.classList.remove("dictionary-mode");
 }
 
 function clearSelectedDictionaryWord(options = {}) {
@@ -175,7 +175,7 @@ function clearSelectedDictionaryWord(options = {}) {
   document.querySelectorAll(".greek-word.active").forEach((el) => el.classList.remove("active"));
   updateDictionaryButtonState();
   if (options.resetPanel) {
-    setHeroStatusText("Tap a Greek word in the lesson area, then press Dictionary.", "status");
+    setHeroStatusText("Tap a Greek word or press Hint to see meaning, transliteration, and use cases.", "status");
   }
 }
 
@@ -191,7 +191,7 @@ function selectDictionaryWord(wordEl) {
   wordEl.classList.add("active");
   selectedWord = word;
   updateDictionaryButtonState();
-  setHeroStatusText(`Selected: ${word}. Press Dictionary to view meaning and usage.`, "status");
+  setHeroStatusText(`Selected: ${word}. Press Hint to view meaning, transliteration, and usage.`, "status");
 }
 
 function buildGreekWordChip(word, label = "") {
@@ -746,6 +746,7 @@ function renderInlineDictionary(query, options = {}) {
     setHeroStatusMarkup(`
       <div class="hero-status-card">
         <strong>WORD: ${escapeDictionaryHtml(first.greek || value)}</strong>
+        <p><strong>Transliteration:</strong> ${escapeDictionaryHtml(first.transliteration || "Not available")}</p>
         <p><strong>Meaning:</strong> ${escapeDictionaryHtml(first.meaning || first.english || "Unknown")}</p>
         <p><strong>Type:</strong> ${escapeDictionaryHtml(first.partOfSpeech || "Vocabulary")}</p>
         <p><strong>Usage:</strong> ${escapeDictionaryHtml(first.example || usageTemplateForEntry(first))}</p>
@@ -1448,18 +1449,18 @@ function registerEvents() {
 function showHint() {
   const ex = currentLesson?.exercises?.[currentExerciseIndex];
   if (!ex) {
-    setHeroStatusText("Start a lesson first, then tap a Greek word in the lesson area.", "status");
+    setHeroStatusText("Start a lesson first, then press Hint to see vocabulary help for the active word.", "status");
     toast("Start a lesson first.");
     return;
   }
-  if (!selectedWord) {
-    updateDictionaryButtonState();
-    setHeroStatusText("Hint: tap a Greek word first. Once selected, this button changes to Dictionary.", "status");
-    toast("Tap a Greek word first.");
+  const targetWord = selectedWord || extractDictionaryTermsFromExercise(ex)[0] || ex.vocab?.greek || ex.vocab?.meaning || "";
+  if (!targetWord) {
+    setHeroStatusText("No vocabulary help is attached to this exercise yet.", "status");
+    toast("No vocabulary help is attached to this exercise yet.");
     return;
   }
-  renderInlineDictionary(selectedWord);
-  toast(`Dictionary opened for ${selectedWord}.`);
+  renderInlineDictionary(targetWord);
+  toast(`Hint opened for ${targetWord}.`);
 }
 
 function initApp() {
