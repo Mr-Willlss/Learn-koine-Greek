@@ -152,6 +152,7 @@ function updateStats() {
     lessonEarned.textContent = "XP this lesson: 0";
   }
   updateFocusStrip();
+  updateQuestDeck();
 }
 
 function setLessonActionState(disabled) {
@@ -302,6 +303,7 @@ function saveDailyQuestState(state) {
 function markDailyQuestComplete() {
   saveDailyQuestState({ day: getTodayKey(), completed: true });
   updateDailyGoalUI();
+  updateQuestDeck();
 }
 
 function updateDailyGoalUI() {
@@ -316,6 +318,146 @@ function updateDailyGoalUI() {
   }
   value.textContent = "1 lesson";
   note.textContent = "Complete one lesson today to keep momentum.";
+}
+
+function getWeekKey(date = new Date()) {
+  const copy = new Date(date);
+  const day = copy.getDay();
+  const diff = (day + 6) % 7;
+  copy.setDate(copy.getDate() - diff);
+  return copy.toISOString().slice(0, 10);
+}
+
+function getHabitStats() {
+  const today = getTodayKey();
+  const week = getWeekKey();
+  const raw = localStorage.getItem("gqHabitStats");
+  const fallback = {
+    today,
+    week,
+    lessonsToday: 0,
+    lessonsWeek: 0,
+    practiceToday: 0,
+    lastAccuracy: 0
+  };
+  if (!raw) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      today,
+      week,
+      lessonsToday: parsed?.today === today ? Number(parsed.lessonsToday || 0) : 0,
+      lessonsWeek: parsed?.week === week ? Number(parsed.lessonsWeek || 0) : 0,
+      practiceToday: parsed?.today === today ? Number(parsed.practiceToday || 0) : 0,
+      lastAccuracy: Number(parsed?.lastAccuracy || 0)
+    };
+  } catch (error) {
+    console.error("Could not parse habit stats", error);
+    return fallback;
+  }
+}
+
+function saveHabitStats(state) {
+  localStorage.setItem("gqHabitStats", JSON.stringify(state));
+}
+
+function recordLessonOutcome({ accuracy = 0, practice = false } = {}) {
+  const state = getHabitStats();
+  state.lessonsToday += 1;
+  state.lessonsWeek += 1;
+  if (practice) state.practiceToday += 1;
+  state.lastAccuracy = Math.max(0, Math.min(100, Math.round(accuracy || 0)));
+  saveHabitStats(state);
+}
+
+function getPracticeInsights() {
+  const dueItems = Array.isArray(vocabDatabase) ? getReviewItems(vocabDatabase).slice(0, 6) : [];
+  const weakItems = Array.isArray(vocabDatabase)
+    ? [...vocabDatabase]
+        .map((item) => ({
+          item,
+          record: spacedRepetition.items?.[item.id] || { reviewInterval: 1, successCount: 0, nextReviewTime: Date.now() }
+        }))
+        .sort((a, b) => {
+          const aScore = (a.record.successCount || 0) * (a.record.reviewInterval || 1);
+          const bScore = (b.record.successCount || 0) * (b.record.reviewInterval || 1);
+          return aScore - bScore;
+        })
+        .slice(0, 6)
+        .map((entry) => entry.item)
+    : [];
+  return { dueItems, weakItems };
+}
+
+function updateQuestDeck() {
+  const questList = document.getElementById("quest-list");
+  const streakChip = document.getElementById("quest-streak-chip");
+  const practiceChip = document.getElementById("practice-due-chip");
+  const practiceSummary = document.getElementById("practice-summary");
+  if (!questList || !streakChip || !practiceChip || !practiceSummary) return;
+
+  const daily = getDailyQuestState();
+  const habit = getHabitStats();
+  const practice = getPracticeInsights();
+  const socialProfile = typeof socialState !== "undefined" && socialState?.profile ? socialState.profile : null;
+  const socialFriends = typeof socialState !== "undefined" && Array.isArray(socialState?.friendships) ? socialState.friendships.length : 0;
+
+  const quests = [
+    {
+      icon: "1",
+      title: "Daily lesson",
+      note: daily.completed ? "Daily lesson complete. Your streak is protected today." : "Finish one lesson today to keep the habit alive.",
+      status: daily.completed ? "Complete" : `${Math.min(habit.lessonsToday, 1)}/1`,
+      done: daily.completed
+    },
+    {
+      icon: "%",
+      title: "Accuracy check",
+      note: "Aim for 80% accuracy or better to keep the path feeling easy and satisfying.",
+      status: `${Math.min(habit.lastAccuracy, 100)}%`,
+      done: habit.lastAccuracy >= 80
+    },
+    {
+      icon: "5",
+      title: "Weekly climb",
+      note: "Complete five lessons this week to build the long-term study habit.",
+      status: `${Math.min(habit.lessonsWeek, 5)}/5`,
+      done: habit.lessonsWeek >= 5
+    },
+    {
+      icon: "+",
+      title: "Study circle",
+      note: socialFriends ? "Your friends board is active. Keep the accountability loop alive." : "Invite one friend so social pressure starts helping your consistency.",
+      status: socialFriends ? `${socialFriends} friend${socialFriends === 1 ? "" : "s"}` : "Invite",
+      done: socialFriends > 0
+    }
+  ];
+
+  questList.innerHTML = quests.map((quest) => `
+    <div class="quest-row ${quest.done ? "is-complete" : ""}">
+      <span class="quest-row__icon">${quest.icon}</span>
+      <div class="quest-row__body">
+        <strong>${quest.title}</strong>
+        <p>${quest.note}</p>
+      </div>
+      <span class="quest-row__status">${quest.status}</span>
+    </div>
+  `).join("");
+
+  streakChip.textContent = socialProfile?.stats?.streakDays
+    ? `${socialProfile.stats.streakDays} day streak`
+    : "Build a 7-day streak";
+
+  practiceChip.textContent = `${practice.dueItems.length} due now`;
+  if (practice.dueItems.length) {
+    const words = practice.dueItems.slice(0, 2).map((item) => item.greek).join(", ");
+    practiceSummary.textContent = `Your best next review set starts with ${words}. This keeps weak words from slipping away.`;
+  } else if (practice.weakItems.length) {
+    const words = practice.weakItems.slice(0, 2).map((item) => item.greek).join(", ");
+    practiceSummary.textContent = `No urgent reviews yet. Practice weak words like ${words} to stay sharp.`;
+  } else {
+    practiceSummary.textContent = "Finish a few lessons and your review set will appear here.";
+  }
 }
 
 function setLessonFeedback(mode, message) {
@@ -806,6 +948,74 @@ function startLesson(lesson, world, options = {}) {
   saveLocalProgress();
 }
 
+function createPracticeExercises(items, mode = "mixed") {
+  return items.flatMap((vocab) => {
+    if (!vocab) return [];
+    if (mode === "listening") {
+      return [{
+        type: "listening",
+        prompt: "Listen and choose the meaning.",
+        vocab
+      }];
+    }
+    if (mode === "speaking") {
+      return [{
+        type: "pronunciation",
+        prompt: "Say the Greek word.",
+        vocab
+      }];
+    }
+    return [
+      {
+        type: "vocab-recognition",
+        prompt: "Review the Greek word and choose the meaning.",
+        vocab
+      },
+      {
+        type: "translation",
+        prompt: "Translate to English.",
+        vocab
+      }
+    ];
+  });
+}
+
+function startPracticeLesson(mode = "mixed") {
+  if (!requireSignIn()) return;
+  const insights = getPracticeInsights();
+  const pool = (mode === "listening" || mode === "speaking")
+    ? (insights.dueItems.length ? insights.dueItems : insights.weakItems)
+    : (insights.dueItems.length ? insights.dueItems : insights.weakItems);
+  const items = pool.slice(0, 3);
+  if (!items.length) {
+    toast("Finish a few lessons first so the practice hub has words to review.");
+    return;
+  }
+
+  currentLesson = {
+    id: `practice-${mode}`,
+    title: mode === "listening" ? "Listening drill" : mode === "speaking" ? "Speaking drill" : "Practice review",
+    worldId: "practice",
+    xp: items.length * 10,
+    practiceMode: true,
+    exercises: createPracticeExercises(items, mode)
+  };
+  currentExerciseIndex = 0;
+  lessonXpEarned = 0;
+  lessonCorrectCount = 0;
+  lessonWrongCount = 0;
+
+  document.getElementById("lesson-title").textContent = `Practice Lab · ${currentLesson.title}`;
+  document.getElementById("lesson-type").textContent = "Practice";
+  document.getElementById("lesson-xp").textContent = `+${currentLesson.xp} XP`;
+  setLessonFeedback("info", `Practice lab ready. ${items.length} vocab item${items.length === 1 ? "" : "s"} queued for review.`);
+  syncActiveLessonState();
+  updateLessonProgress();
+  setTeacherMood("idle");
+  renderExercise();
+  saveLocalProgress();
+}
+
 function skipCurrentExercise() {
   if (!currentLesson || progressState.hearts <= 0) {
     if (progressState.hearts <= 0) showOutOfHeartsState();
@@ -1234,8 +1444,9 @@ function consumeHeartIfNeeded() {
 async function finishLesson() {
   const completedLesson = currentLesson;
   if (!completedLesson) return;
-  const next = getNextLesson(completedLesson.id);
-  const firstLocalCompletion = !progressState.completedLessons.includes(completedLesson.id);
+  const isPracticeLesson = !!completedLesson.practiceMode;
+  const next = isPracticeLesson ? findNextUnlockedLesson() : getNextLesson(completedLesson.id);
+  const firstLocalCompletion = isPracticeLesson ? true : !progressState.completedLessons.includes(completedLesson.id);
   if (firstLocalCompletion) {
     lessonXpEarned += completedLesson.xp;
   }
@@ -1249,7 +1460,7 @@ async function finishLesson() {
   let awardedXp = lessonXpEarned;
   let rewardSummary = null;
   let secureProfileApplied = false;
-  if (typeof submitLessonCompletionToSocial === "function") {
+  if (!isPracticeLesson && typeof submitLessonCompletionToSocial === "function") {
     try {
       const secureResult = await submitLessonCompletionToSocial(completedLesson);
       if (secureResult && Number.isFinite(secureResult.awardedXp)) {
@@ -1270,8 +1481,13 @@ async function finishLesson() {
   }
 
   if (firstLocalCompletion) {
-    progressState.completedLessons.push(completedLesson.id);
+    if (!isPracticeLesson) {
+      progressState.completedLessons.push(completedLesson.id);
+    }
     markDailyQuestComplete();
+    const answered = lessonCorrectCount + lessonWrongCount;
+    const accuracy = answered ? Math.round((lessonCorrectCount / answered) * 100) : 0;
+    recordLessonOutcome({ accuracy, practice: isPracticeLesson });
     if (!secureProfileApplied) {
       progressState.xp += awardedXp;
       progressState.level = Math.max(1, Math.floor(progressState.xp / 50) + 1);
@@ -1282,6 +1498,7 @@ async function finishLesson() {
   updateStats();
   updateProgressBar();
   renderMap(progressState);
+  updateQuestDeck();
   saveLocalProgress();
 
   if (syncError) {
@@ -1409,6 +1626,16 @@ function registerEvents() {
   if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
   const continueBtn = document.getElementById("continue-btn");
   if (continueBtn) continueBtn.addEventListener("click", startNextUnlockedLesson);
+  const practiceReviewBtn = document.getElementById("practice-review-btn");
+  if (practiceReviewBtn) practiceReviewBtn.addEventListener("click", () => startPracticeLesson("mixed"));
+  const practiceListenBtn = document.getElementById("practice-listen-btn");
+  if (practiceListenBtn) practiceListenBtn.addEventListener("click", () => startPracticeLesson("listening"));
+  const practiceSpeakBtn = document.getElementById("practice-speak-btn");
+  if (practiceSpeakBtn) practiceSpeakBtn.addEventListener("click", () => startPracticeLesson("speaking"));
+  const studyCircleOpenBtn = document.getElementById("study-circle-open-btn");
+  if (studyCircleOpenBtn) studyCircleOpenBtn.addEventListener("click", openFriendsModal);
+  const studyCircleLeaderboardBtn = document.getElementById("study-circle-leaderboard-btn");
+  if (studyCircleLeaderboardBtn) studyCircleLeaderboardBtn.addEventListener("click", openLeaderboardModal);
   const giftsBtn = document.getElementById("gifts-btn");
   if (giftsBtn) giftsBtn.addEventListener("click", () => window.openGiftsModal?.());
   const studyBtn = document.getElementById("study-btn");
@@ -1486,6 +1713,7 @@ function initApp() {
       renderMap(progressState);
       updateStats();
       updateProgressBar();
+      updateQuestDeck();
       if (pendingIntroResume) {
         pendingIntroResume = false;
         startOrResumeFromIntro();
@@ -1498,6 +1726,7 @@ function initApp() {
       renderMap(progressState);
       updateStats();
       updateProgressBar();
+      updateQuestDeck();
       if (pendingIntroResume) {
         pendingIntroResume = false;
         startOrResumeFromIntro();

@@ -243,6 +243,9 @@ function updateSocialChrome() {
   const sideRewardHearts = document.getElementById("side-reward-hearts");
   const sideRewardCrowns = document.getElementById("side-reward-crowns");
   const rewardLast = document.getElementById("reward-last");
+  const studyCircleCount = document.getElementById("study-circle-count");
+  const studyCircleNote = document.getElementById("study-circle-note");
+  const friendCount = Array.isArray(socialState.friendships) ? socialState.friendships.length : 0;
 
   if (rankEl) rankEl.textContent = `Rank ${profile.social.rankTitle}`;
   if (leagueEl) leagueEl.textContent = `League ${profile.social.league}`;
@@ -261,6 +264,14 @@ function updateSocialChrome() {
       ? `${profile.rewards?.gems || 0} gems, ${profile.rewards?.heartPasses || 0} heart gifts, ${profile.rewards?.crowns || 0} crowns ready to use`
       : "Sign in to start collecting rewards";
   }
+  if (studyCircleCount) {
+    studyCircleCount.textContent = `${friendCount} friend${friendCount === 1 ? "" : "s"}`;
+  }
+  if (studyCircleNote) {
+    studyCircleNote.textContent = friendCount
+      ? `Your study circle is live. Learners with at least one shared streak are more likely to finish their daily lesson, so keep nudging each other forward.`
+      : "Invite one friend so your study circle can add social accountability to the path.";
+  }
 
   if (heroStatus && (!heroStatus.dataset.mode || heroStatus.dataset.mode === "social")) {
     heroStatus.dataset.mode = "social";
@@ -269,6 +280,10 @@ function updateSocialChrome() {
     } else {
       heroStatus.innerHTML = `<div class="hero-status-card"><p>Sign in to unlock leagues, friends, and cloud-synced progress across your devices.</p></div>`;
     }
+  }
+
+  if (typeof updateQuestDeck === "function") {
+    updateQuestDeck();
   }
 }
 

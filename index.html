@@ -181,6 +181,50 @@
         </div>
       </section>
 
+      <section class="engagement-deck" aria-label="Daily quests and practice">
+        <article class="quest-card">
+          <div class="quest-card__head">
+            <div>
+              <p class="eyebrow">Quest board</p>
+              <h3>Keep the habit alive</h3>
+            </div>
+            <span id="quest-streak-chip" class="quest-chip">Streak focus</span>
+          </div>
+          <div id="quest-list" class="quest-list" aria-live="polite"></div>
+        </article>
+
+        <article class="practice-card">
+          <div class="practice-card__head">
+            <div>
+              <p class="eyebrow">Practice hub</p>
+              <h3>Sharpen weak spots</h3>
+            </div>
+            <span id="practice-due-chip" class="quest-chip quest-chip--sky">0 due now</span>
+          </div>
+          <p id="practice-summary" class="muted">Finish a few lessons and your review set will appear here.</p>
+          <div class="practice-card__actions">
+            <button id="practice-review-btn" class="btn btn--sky" type="button">Review weak words</button>
+            <button id="practice-listen-btn" class="btn ghost" type="button">Listening drill</button>
+            <button id="practice-speak-btn" class="btn ghost" type="button">Speaking drill</button>
+          </div>
+        </article>
+
+        <article class="social-quest-card">
+          <div class="social-quest-card__head">
+            <div>
+              <p class="eyebrow">Social momentum</p>
+              <h3>Accountability works</h3>
+            </div>
+            <span id="study-circle-count" class="quest-chip quest-chip--mint">0 friends</span>
+          </div>
+          <p id="study-circle-note" class="muted">Invite one friend so your study circle starts working for you.</p>
+          <div class="social-quest-card__actions">
+            <button id="study-circle-open-btn" class="btn btn--mint" type="button">Open friends</button>
+            <button id="study-circle-leaderboard-btn" class="btn ghost" type="button">View leaderboard</button>
+          </div>
+        </article>
+      </section>
+
       <section class="map-shell" aria-label="World map">
         <div class="section-head">
           <h3>Worlds & Levels</h3>
