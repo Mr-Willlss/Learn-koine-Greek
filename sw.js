@@ -1,4 +1,4 @@
-const CACHE_NAME = "learn-koine-greek-v1";
+const CACHE_NAME = "learn-koine-greek-v2026-04-07";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,17 +8,18 @@ const APP_SHELL = [
   "./game.js",
   "./lessons.js",
   "./map.js",
+  "./social.js",
   "./spacedRepetition.js",
   "./speech.js",
   "./teacherCharacter.js",
+  "./vocabIllustrations.js",
   "./vocabDatabase.json",
   "./manifest.json",
-  "./assets/audio/vocabularies.json",
+  "./assets/media/mascot-whisk.mp4",
   "./assets/images/icon-192.png",
   "./assets/images/icon-512.png",
   "./assets/images/mascot-logo.svg",
-  "./assets/images/vocab-generic.svg",
-  "./assets/sprites/teacher.svg"
+  "./assets/images/vocab-generic.svg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -43,34 +44,31 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const requestUrl = new URL(event.request.url);
+  const sameOrigin = requestUrl.origin === self.location.origin;
+  const requestMode = event.request.mode === "navigate";
+  const freshFirst = requestMode || ["script", "style", "document"].includes(event.request.destination);
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request)
-        .then((networkResponse) => {
-          const requestUrl = new URL(event.request.url);
-          const sameOrigin = requestUrl.origin === self.location.origin;
-
-          if (sameOrigin && networkResponse.ok) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-
-          return networkResponse;
-        })
-        .catch(() => {
-          if (event.request.mode === "navigate") {
-            return caches.match("./index.html");
-          }
-
-          return Response.error();
-        });
-    })
+    (freshFirst
+      ? fetch(event.request)
+          .then((networkResponse) => {
+            if (sameOrigin && networkResponse.ok) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+            }
+            return networkResponse;
+          })
+          .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./index.html")))
+      : caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          return fetch(event.request).then((networkResponse) => {
+            if (sameOrigin && networkResponse.ok) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+            }
+            return networkResponse;
+          });
+        }))
   );
 });

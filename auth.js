@@ -7,19 +7,23 @@ function updateAuthButton() {
   const signBtn = document.getElementById("sign-in-btn");
   const logBtn = document.getElementById("log-in-btn");
   const outBtn = document.getElementById("logout-btn");
-  if (!signBtn || !logBtn || !outBtn) return;
+  const heroSignBtn = document.getElementById("hero-sign-in-btn");
+  const heroLogBtn = document.getElementById("hero-log-in-btn");
+  const heroOutBtn = document.getElementById("hero-logout-btn");
+  const buttons = [signBtn, logBtn, outBtn, heroSignBtn, heroLogBtn, heroOutBtn].filter(Boolean);
+  if (!buttons.length) return;
 
   const st = window.GreekQuestFirebaseState;
 
   if (!st || !st.configured) {
-    [signBtn, logBtn, outBtn].forEach((btn) => {
+    buttons.forEach((btn) => {
       btn.disabled = true;
       btn.title = st?.reason || "Firebase not configured.";
     });
     return;
   }
 
-  [signBtn, logBtn, outBtn].forEach((btn) => {
+  buttons.forEach((btn) => {
     btn.disabled = false;
     btn.title = "";
   });
@@ -55,6 +59,7 @@ function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.useDeviceLanguage();
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const isOpera = /OPR\//i.test(navigator.userAgent) || /Opera/i.test(navigator.userAgent);
 
   const doRedirect = () =>
     auth
@@ -80,9 +85,8 @@ function signInWithGoogle() {
         }
       });
 
-  if (isMobile) {
-    // Mobile Chrome sometimes breaks redirect state; try popup first.
-    tryPopup();
+  if (isMobile || isOpera) {
+    doRedirect();
     return;
   }
 
@@ -124,11 +128,24 @@ function observeAuth() {
         const signBtn = document.getElementById("sign-in-btn");
         const logBtn = document.getElementById("log-in-btn");
         const outBtn = document.getElementById("logout-btn");
+        const heroSignBtn = document.getElementById("hero-sign-in-btn");
+        const heroLogBtn = document.getElementById("hero-log-in-btn");
+        const heroOutBtn = document.getElementById("hero-logout-btn");
+        const syncBadge = document.getElementById("hero-sync-badge");
         if (signBtn && logBtn && outBtn) {
           const signedIn = !!user;
           signBtn.style.display = signedIn ? "none" : "";
           logBtn.style.display = signedIn ? "none" : "";
           outBtn.style.display = signedIn ? "" : "none";
+        }
+        if (heroSignBtn && heroLogBtn && heroOutBtn) {
+          const signedIn = !!user;
+          heroSignBtn.style.display = signedIn ? "none" : "";
+          heroLogBtn.style.display = signedIn ? "none" : "";
+          heroOutBtn.style.display = signedIn ? "" : "none";
+        }
+        if (syncBadge) {
+          syncBadge.textContent = user ? "Google sync on" : "Device only";
         }
         window.dispatchEvent(new CustomEvent("gq-auth-changed", { detail: { user: authState.user } }));
       });

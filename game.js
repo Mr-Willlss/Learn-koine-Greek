@@ -460,6 +460,126 @@ function updateQuestDeck() {
   }
 }
 
+function buildQuestRows(quests) {
+  return quests.map((quest) => `
+    <div class="quest-row ${quest.done ? "is-complete" : ""}">
+      <span class="quest-row__icon">${quest.icon}</span>
+      <div class="quest-row__body">
+        <strong>${quest.title}</strong>
+        <p>${quest.note}</p>
+      </div>
+      <span class="quest-row__status">${quest.status}</span>
+    </div>
+  `).join("");
+}
+
+function openRewardPocketModal() {
+  const profile = (typeof socialState !== "undefined" && socialState?.profile)
+    ? socialState.profile
+    : (typeof createFallbackProfile === "function" ? createFallbackProfile() : null);
+  const rewardSummary = profile?.rewards || { gems: 0, heartPasses: 0, crowns: 0 };
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  wrap.innerHTML = `
+    <div class="social-card-callout">
+      <h4>Reward pocket</h4>
+      <p>Your lesson rewards live here. Use gems to refill hearts, keep crowns climbing, and save heart gifts for when a run gets rough.</p>
+    </div>
+    <div class="gift-wallet">
+      <div class="gift-wallet__item">
+        <span class="eyebrow">Gems</span>
+        <strong>${rewardSummary.gems || 0}</strong>
+      </div>
+      <div class="gift-wallet__item">
+        <span class="eyebrow">Heart gifts</span>
+        <strong>${rewardSummary.heartPasses || 0}</strong>
+      </div>
+      <div class="gift-wallet__item">
+        <span class="eyebrow">Crowns</span>
+        <strong>${rewardSummary.crowns || 0}</strong>
+      </div>
+    </div>
+    <div class="social-actions">
+      <button class="btn btn--mint" id="reward-pocket-open-gifts" type="button">Open gifts</button>
+      <button class="btn ghost" id="reward-pocket-open-profile" type="button">Open profile</button>
+    </div>
+  `;
+  showModal("Reward Pocket", wrap);
+  wrap.querySelector("#reward-pocket-open-gifts").addEventListener("click", () => window.openGiftsModal?.());
+  wrap.querySelector("#reward-pocket-open-profile").addEventListener("click", () => window.openProfileModal?.());
+}
+
+function openQuestBoardModal() {
+  const daily = getDailyQuestState();
+  const habit = getHabitStats();
+  const practice = getPracticeInsights();
+  const socialProfile = typeof socialState !== "undefined" && socialState?.profile ? socialState.profile : null;
+  const socialFriends = typeof socialState !== "undefined" && Array.isArray(socialState?.friendships) ? socialState.friendships.length : 0;
+  const quests = [
+    {
+      icon: "1",
+      title: "Daily lesson",
+      note: daily.completed ? "Daily lesson complete. Your streak is protected today." : "Finish one lesson today to keep the habit alive.",
+      status: daily.completed ? "Complete" : `${Math.min(habit.lessonsToday, 1)}/1`,
+      done: daily.completed
+    },
+    {
+      icon: "%",
+      title: "Accuracy check",
+      note: "Aim for 80% accuracy or better to keep the path feeling easy and satisfying.",
+      status: `${Math.min(habit.lastAccuracy, 100)}%`,
+      done: habit.lastAccuracy >= 80
+    },
+    {
+      icon: "5",
+      title: "Weekly climb",
+      note: "Complete five lessons this week to build the long-term study habit.",
+      status: `${Math.min(habit.lessonsWeek, 5)}/5`,
+      done: habit.lessonsWeek >= 5
+    },
+    {
+      icon: "+",
+      title: "Study circle",
+      note: socialFriends ? "Your friends board is active. Keep the accountability loop alive." : "Invite one friend so social pressure starts helping your consistency.",
+      status: socialFriends ? `${socialFriends} friend${socialFriends === 1 ? "" : "s"}` : "Invite",
+      done: socialFriends > 0
+    }
+  ];
+
+  const dueWords = practice.dueItems.slice(0, 4).map((item) => item.greek).join(", ") || "No urgent reviews yet";
+  const wrap = document.createElement("div");
+  wrap.className = "social-modal";
+  wrap.innerHTML = `
+    <div class="social-grid-two">
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Quest board</h4>
+          <span class="social-meta">${socialProfile?.stats?.streakDays || 0} day streak</span>
+        </div>
+        <div class="quest-list">
+          ${buildQuestRows(quests)}
+        </div>
+      </div>
+      <div class="social-section">
+        <div class="social-section__head">
+          <h4>Practice hub</h4>
+          <span class="social-meta">${practice.dueItems.length} due now</span>
+        </div>
+        <p class="muted">Best next review set: ${dueWords}</p>
+        <div class="social-actions">
+          <button class="btn btn--sky" id="quest-review-btn" type="button">Review weak words</button>
+          <button class="btn ghost" id="quest-listen-btn" type="button">Listening drill</button>
+          <button class="btn ghost" id="quest-speak-btn" type="button">Speaking drill</button>
+        </div>
+      </div>
+    </div>
+  `;
+  showModal("Quest Board", wrap);
+  wrap.querySelector("#quest-review-btn").addEventListener("click", () => startPracticeLesson("mixed"));
+  wrap.querySelector("#quest-listen-btn").addEventListener("click", () => startPracticeLesson("listening"));
+  wrap.querySelector("#quest-speak-btn").addEventListener("click", () => startPracticeLesson("speaking"));
+}
+
 function setLessonFeedback(mode, message) {
   const wrap = document.getElementById("lesson-feedback");
   const text = document.getElementById("lesson-feedback-text");
@@ -503,8 +623,9 @@ function cheerMascot(kind = "success") {
 
 function flashRewardPocket(rewardSummary) {
   if (!rewardSummary) return;
-  const pocket = document.getElementById("reward-pocket");
+  const pocket = document.getElementById("reward-pocket") || document.getElementById("home-rewards-btn");
   const reel = document.getElementById("reward-reel");
+  const homeNote = document.getElementById("reward-last-home");
   if (pocket) {
     pocket.classList.remove("reward-pocket--burst");
     void pocket.offsetWidth;
@@ -517,6 +638,9 @@ function flashRewardPocket(rewardSummary) {
       <span class="reward-reel__chip reward-reel__chip--mint">+${rewardSummary.heartPasses || 0} heart gift</span>
       <span class="reward-reel__chip reward-reel__chip--sky">+${rewardSummary.crowns || 0} crowns</span>
     `;
+  }
+  if (homeNote) {
+    homeNote.textContent = `Latest reward: +${rewardSummary.gems || 0} gems, +${rewardSummary.heartPasses || 0} heart gifts, +${rewardSummary.crowns || 0} crowns`;
   }
 }
 
@@ -1605,6 +1729,12 @@ function registerEvents() {
   if (logInBtn) logInBtn.addEventListener("click", signInWithGoogle);
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) logoutBtn.addEventListener("click", signOutUser);
+  const heroSignInBtn = document.getElementById("hero-sign-in-btn");
+  if (heroSignInBtn) heroSignInBtn.addEventListener("click", signInWithGoogle);
+  const heroLogInBtn = document.getElementById("hero-log-in-btn");
+  if (heroLogInBtn) heroLogInBtn.addEventListener("click", signInWithGoogle);
+  const heroLogoutBtn = document.getElementById("hero-logout-btn");
+  if (heroLogoutBtn) heroLogoutBtn.addEventListener("click", signOutUser);
 
   const mapBtn = document.getElementById("map-btn");
   if (mapBtn) mapBtn.addEventListener("click", openMapModal);
@@ -1626,6 +1756,14 @@ function registerEvents() {
   if (aboutBtn) aboutBtn.addEventListener("click", () => toast("Learn Koine Greek · prototype"));
   const continueBtn = document.getElementById("continue-btn");
   if (continueBtn) continueBtn.addEventListener("click", startNextUnlockedLesson);
+  const homeRewardsBtn = document.getElementById("home-rewards-btn");
+  if (homeRewardsBtn) homeRewardsBtn.addEventListener("click", openRewardPocketModal);
+  const homeInviteBtn = document.getElementById("home-invite-btn");
+  if (homeInviteBtn) homeInviteBtn.addEventListener("click", () => window.openInviteModal?.());
+  const homeGiftsBtn = document.getElementById("home-gifts-btn");
+  if (homeGiftsBtn) homeGiftsBtn.addEventListener("click", () => window.openGiftsModal?.());
+  const homeQuestsBtn = document.getElementById("home-quests-btn");
+  if (homeQuestsBtn) homeQuestsBtn.addEventListener("click", openQuestBoardModal);
   const practiceReviewBtn = document.getElementById("practice-review-btn");
   if (practiceReviewBtn) practiceReviewBtn.addEventListener("click", () => startPracticeLesson("mixed"));
   const practiceListenBtn = document.getElementById("practice-listen-btn");
@@ -2032,7 +2170,13 @@ function saveOptions() {
 function applySidebarPreference() {
   const isMobileLayout = window.matchMedia && window.matchMedia("(max-width: 920px)").matches;
   document.body.classList.toggle("sidebar-mobile", !!isMobileLayout);
-  document.body.classList.toggle("sidebar-hidden", isMobileLayout ? true : !!userOptions.autoHideSidebar);
+  if (isMobileLayout) {
+    document.body.classList.remove("sidebar-hidden");
+    document.body.classList.remove("sidebar-open");
+    return;
+  }
+  document.body.classList.remove("sidebar-open");
+  document.body.classList.toggle("sidebar-hidden", !!userOptions.autoHideSidebar);
 }
 
 function loadOptions() {
@@ -2053,10 +2197,13 @@ function loadOptions() {
 }
 
 function toggleSidebar() {
-  document.body.classList.toggle("sidebar-hidden");
-  if (!(window.matchMedia && window.matchMedia("(max-width: 920px)").matches)) {
-    userOptions.autoHideSidebar = document.body.classList.contains("sidebar-hidden");
+  const isMobileLayout = window.matchMedia && window.matchMedia("(max-width: 920px)").matches;
+  if (isMobileLayout) {
+    document.body.classList.toggle("sidebar-open");
+    return;
   }
+  document.body.classList.toggle("sidebar-hidden");
+  userOptions.autoHideSidebar = document.body.classList.contains("sidebar-hidden");
   localStorage.setItem("gqOptions", JSON.stringify(userOptions));
 }
 

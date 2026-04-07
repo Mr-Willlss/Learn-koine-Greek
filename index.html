@@ -115,12 +115,47 @@
             </div>
           </div>
           <div class="hero-actions">
+            <div class="auth-dock">
+              <button id="hero-sign-in-btn" class="btn btn--sky" type="button">Sign in with Google</button>
+              <button id="hero-log-in-btn" class="btn ghost" type="button">Log in</button>
+              <button id="hero-logout-btn" class="btn ghost" type="button" style="display:none">Log out</button>
+            </div>
             <button id="continue-btn" class="btn" type="button">Continue path</button>
           </div>
         </div>
       </header>
 
-      <section class="momentum-board" aria-label="Momentum and social features">
+      <section class="home-launchpad home-launchpad--primary" aria-label="Quick access panels">
+        <div class="home-launchpad__copy">
+          <p class="eyebrow">Quick access</p>
+          <h3>Keep home focused on lessons</h3>
+          <p>Rewards, invites, gifts, and quests now open from their own panels so this home screen stays fast, clean, and lesson-first.</p>
+        </div>
+        <div class="home-launchpad__grid">
+          <button id="home-rewards-btn" class="home-launcher home-launcher--gold" type="button">
+            <span class="home-launcher__eyebrow">Reward pocket</span>
+            <strong>View gems, hearts, and crowns</strong>
+            <small id="reward-last-home">Finish a lesson to collect rewards.</small>
+          </button>
+          <button id="home-invite-btn" class="home-launcher home-launcher--sky" type="button">
+            <span class="home-launcher__eyebrow">Invite</span>
+            <strong>Grow your study circle</strong>
+            <small>Share your link and bring in classmates.</small>
+          </button>
+          <button id="home-gifts-btn" class="home-launcher home-launcher--mint" type="button">
+            <span class="home-launcher__eyebrow">Gifts</span>
+            <strong>Send energy boosts</strong>
+            <small>Trade gems and heart gifts with friends.</small>
+          </button>
+          <button id="home-quests-btn" class="home-launcher home-launcher--berry" type="button">
+            <span class="home-launcher__eyebrow">Quest board</span>
+            <strong>Check streaks and practice goals</strong>
+            <small>Open daily goals, review prompts, and drills.</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="home-launchpad" aria-label="Quick access panels">
         <div class="reward-pocket" id="reward-pocket">
           <div class="reward-pocket__header">
             <div>
@@ -363,9 +398,11 @@
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch((error) => {
-          console.error("Service worker registration failed:", error);
-        });
+        navigator.serviceWorker.register("./sw.js")
+          .then((registration) => registration.update())
+          .catch((error) => {
+            console.error("Service worker registration failed:", error);
+          });
       });
     }
   </script>

@@ -243,6 +243,7 @@ function updateSocialChrome() {
   const sideRewardHearts = document.getElementById("side-reward-hearts");
   const sideRewardCrowns = document.getElementById("side-reward-crowns");
   const rewardLast = document.getElementById("reward-last");
+  const rewardLastHome = document.getElementById("reward-last-home");
   const studyCircleCount = document.getElementById("study-circle-count");
   const studyCircleNote = document.getElementById("study-circle-note");
   const friendCount = Array.isArray(socialState.friendships) ? socialState.friendships.length : 0;
@@ -261,6 +262,11 @@ function updateSocialChrome() {
   if (sideRewardCrowns) sideRewardCrowns.textContent = String(profile.rewards?.crowns || 0);
   if (rewardLast) {
     rewardLast.textContent = getCurrentSocialUser()
+      ? `${profile.rewards?.gems || 0} gems, ${profile.rewards?.heartPasses || 0} heart gifts, ${profile.rewards?.crowns || 0} crowns ready to use`
+      : "Sign in to start collecting rewards";
+  }
+  if (rewardLastHome) {
+    rewardLastHome.textContent = getCurrentSocialUser()
       ? `${profile.rewards?.gems || 0} gems, ${profile.rewards?.heartPasses || 0} heart gifts, ${profile.rewards?.crowns || 0} crowns ready to use`
       : "Sign in to start collecting rewards";
   }
