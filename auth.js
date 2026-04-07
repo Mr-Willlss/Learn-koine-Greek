@@ -29,7 +29,7 @@ function updateAuthButton() {
   });
 }
 
-function signInWithGoogle() {
+function signInWithGoogle(options = {}) {
   const st = window.GreekQuestFirebaseState;
 
   if (!st || !st.configured || !auth) {
@@ -40,7 +40,7 @@ function signInWithGoogle() {
       body.innerHTML = `<p>${msg}</p><p>Sign-in requires hosting over https:// (or http://localhost) with a valid Firebase web config.</p>`;
       showModal("Sign-in blocked", body);
     }
-    return;
+    return Promise.resolve({ started: false, reason: "not-configured" });
   }
 
   // Extra guard for insecure context
@@ -53,7 +53,7 @@ function signInWithGoogle() {
       body.innerHTML = `<p>${note}</p><p>Please host the folder with a local server (e.g., VS Code Live Server) or deploy to GitHub Pages.</p>`;
       showModal("Sign-in blocked", body);
     }
-    return;
+    return Promise.resolve({ started: false, reason: "insecure-context" });
   }
 
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -65,7 +65,11 @@ function signInWithGoogle() {
     auth
       .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(() => auth.signInWithRedirect(provider))
-      .catch((err) => toast(err.message));
+      .then(() => ({ started: true, mode: "redirect" }))
+      .catch((err) => {
+        toast(err.message);
+        return { started: false, reason: err.code || "redirect-failed" };
+      });
 
   toast("Opening Google sign-in...");
 
@@ -73,24 +77,25 @@ function signInWithGoogle() {
     auth
       .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(() => auth.signInWithPopup(provider))
+      .then(() => ({ started: true, mode: "popup" }))
       .catch((error) => {
         if (
           error.code === "auth/operation-not-supported-in-this-environment" ||
           error.code === "auth/popup-blocked" ||
           error.code === "auth/popup-closed-by-user"
         ) {
-          doRedirect();
+          return doRedirect();
         } else {
           toast(error.message);
+          return { started: false, reason: error.code || "popup-failed" };
         }
       });
 
-  if (isMobile || isOpera) {
-    doRedirect();
-    return;
+  if (options.forceRedirect || isMobile || isOpera) {
+    return doRedirect();
   }
 
-  tryPopup();
+  return tryPopup();
 }
 
 function observeAuth() {

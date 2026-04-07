@@ -1,4 +1,4 @@
-const CACHE_NAME = "learn-koine-greek-v2026-04-07";
+const CACHE_NAME = "learn-koine-greek-v2026-04-07-startfix";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -15,6 +15,7 @@ const APP_SHELL = [
   "./vocabIllustrations.js",
   "./vocabDatabase.json",
   "./manifest.json",
+  "./assets/media/mascot-coach.mp4",
   "./assets/media/mascot-whisk.mp4",
   "./assets/images/icon-192.png",
   "./assets/images/icon-512.png",

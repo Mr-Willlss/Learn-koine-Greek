@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -95,6 +95,16 @@
             <p class="eyebrow">Dictionary / Status</p>
             <div id="hero-status"></div>
           </div>
+          <div class="hero-coach" aria-label="Mascot coach">
+            <div class="hero-coach__media">
+              <video class="mascot-video mascot-video--coach" src="assets/media/mascot-coach.mp4" autoplay muted loop playsinline></video>
+            </div>
+            <div class="hero-coach__bubble">
+              <p class="eyebrow">Coach</p>
+              <strong id="coach-title">Ready when you are</strong>
+              <p id="coach-copy">Tap Start, sign in once, and I’ll bring you back to your last cloud-synced lesson automatically.</p>
+            </div>
+          </div>
         </div>
         <div class="hero-panel">
           <div class="focus-strip">
@@ -122,143 +132,32 @@
             </div>
             <button id="continue-btn" class="btn" type="button">Continue path</button>
           </div>
+          <div class="hero-shortcuts" aria-label="Quick access panels">
+            <button id="home-rewards-btn" class="hero-shortcut hero-shortcut--gold" type="button">
+              <span class="hero-shortcut__eyebrow">Reward pocket</span>
+              <strong>Rewards</strong>
+              <small id="reward-last-home">Finish a lesson to collect rewards.</small>
+            </button>
+            <button id="home-invite-btn" class="hero-shortcut hero-shortcut--sky" type="button">
+              <span class="hero-shortcut__eyebrow">Invite</span>
+              <strong>Invite friends</strong>
+              <small>Bring classmates into your study circle.</small>
+            </button>
+            <button id="home-gifts-btn" class="hero-shortcut hero-shortcut--mint" type="button">
+              <span class="hero-shortcut__eyebrow">Gifts</span>
+              <strong>Open gifts</strong>
+              <small>Trade gems and heart boosts.</small>
+            </button>
+            <button id="home-quests-btn" class="hero-shortcut hero-shortcut--berry" type="button">
+              <span class="hero-shortcut__eyebrow">Quest board</span>
+              <strong>Daily goals</strong>
+              <small>Check streaks, drills, and quests.</small>
+            </button>
+          </div>
         </div>
       </header>
 
-      <section class="home-launchpad home-launchpad--primary" aria-label="Quick access panels">
-        <div class="home-launchpad__copy">
-          <p class="eyebrow">Quick access</p>
-          <h3>Keep home focused on lessons</h3>
-          <p>Rewards, invites, gifts, and quests now open from their own panels so this home screen stays fast, clean, and lesson-first.</p>
-        </div>
-        <div class="home-launchpad__grid">
-          <button id="home-rewards-btn" class="home-launcher home-launcher--gold" type="button">
-            <span class="home-launcher__eyebrow">Reward pocket</span>
-            <strong>View gems, hearts, and crowns</strong>
-            <small id="reward-last-home">Finish a lesson to collect rewards.</small>
-          </button>
-          <button id="home-invite-btn" class="home-launcher home-launcher--sky" type="button">
-            <span class="home-launcher__eyebrow">Invite</span>
-            <strong>Grow your study circle</strong>
-            <small>Share your link and bring in classmates.</small>
-          </button>
-          <button id="home-gifts-btn" class="home-launcher home-launcher--mint" type="button">
-            <span class="home-launcher__eyebrow">Gifts</span>
-            <strong>Send energy boosts</strong>
-            <small>Trade gems and heart gifts with friends.</small>
-          </button>
-          <button id="home-quests-btn" class="home-launcher home-launcher--berry" type="button">
-            <span class="home-launcher__eyebrow">Quest board</span>
-            <strong>Check streaks and practice goals</strong>
-            <small>Open daily goals, review prompts, and drills.</small>
-          </button>
-        </div>
-      </section>
-
-      <section class="home-launchpad" aria-label="Quick access panels">
-        <div class="reward-pocket" id="reward-pocket">
-          <div class="reward-pocket__header">
-            <div>
-              <p class="eyebrow">Reward pocket</p>
-              <h3>Wins you can feel</h3>
-            </div>
-            <span id="reward-last" class="reward-pocket__status">Next reward: finish a lesson</span>
-          </div>
-          <div class="reward-pocket__grid">
-            <div class="reward-chip reward-chip--gold">
-              <span class="reward-chip__icon">◆</span>
-              <div>
-                <strong id="reward-gems">0</strong>
-                <p>Gems</p>
-              </div>
-            </div>
-            <div class="reward-chip reward-chip--mint">
-              <span class="reward-chip__icon">♥</span>
-              <div>
-                <strong id="reward-heart-passes">0</strong>
-                <p>Heart gifts</p>
-              </div>
-            </div>
-            <div class="reward-chip reward-chip--sky">
-              <span class="reward-chip__icon">★</span>
-              <div>
-                <strong id="reward-crowns">0</strong>
-                <p>Crowns</p>
-              </div>
-            </div>
-          </div>
-          <div id="reward-reel" class="reward-reel" aria-live="polite">
-            <span class="reward-reel__chip">Finish a lesson to collect gems, crowns, and heart gifts.</span>
-          </div>
-        </div>
-        <div class="social-rack">
-          <article class="social-card social-card--sun">
-            <p class="eyebrow">Invite</p>
-            <h3>Grow your study circle</h3>
-            <p>Share your link, bring in friends, and keep your leaderboard active.</p>
-            <button id="invite-btn" class="btn btn--sky" type="button">Invite friends</button>
-          </article>
-          <article class="social-card social-card--mint">
-            <p class="eyebrow">Gifts</p>
-            <h3>Send energy boosts</h3>
-            <p>Trade gems and heart gifts so friends can stay in the lesson longer.</p>
-            <button id="gifts-btn" class="btn btn--mint" type="button">Open gifts</button>
-          </article>
-          <article class="social-card social-card--berry">
-            <p class="eyebrow">Study together</p>
-            <h3>Play and ask for help</h3>
-            <p>Start a room, invite a friend, or drop a question when a lesson gets tough.</p>
-            <div class="social-card__actions">
-              <button id="study-btn" class="btn btn--berry" type="button">Study room</button>
-              <button id="question-btn" class="btn ghost" type="button">Ask a friend</button>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="engagement-deck" aria-label="Daily quests and practice">
-        <article class="quest-card">
-          <div class="quest-card__head">
-            <div>
-              <p class="eyebrow">Quest board</p>
-              <h3>Keep the habit alive</h3>
-            </div>
-            <span id="quest-streak-chip" class="quest-chip">Streak focus</span>
-          </div>
-          <div id="quest-list" class="quest-list" aria-live="polite"></div>
-        </article>
-
-        <article class="practice-card">
-          <div class="practice-card__head">
-            <div>
-              <p class="eyebrow">Practice hub</p>
-              <h3>Sharpen weak spots</h3>
-            </div>
-            <span id="practice-due-chip" class="quest-chip quest-chip--sky">0 due now</span>
-          </div>
-          <p id="practice-summary" class="muted">Finish a few lessons and your review set will appear here.</p>
-          <div class="practice-card__actions">
-            <button id="practice-review-btn" class="btn btn--sky" type="button">Review weak words</button>
-            <button id="practice-listen-btn" class="btn ghost" type="button">Listening drill</button>
-            <button id="practice-speak-btn" class="btn ghost" type="button">Speaking drill</button>
-          </div>
-        </article>
-
-        <article class="social-quest-card">
-          <div class="social-quest-card__head">
-            <div>
-              <p class="eyebrow">Social momentum</p>
-              <h3>Accountability works</h3>
-            </div>
-            <span id="study-circle-count" class="quest-chip quest-chip--mint">0 friends</span>
-          </div>
-          <p id="study-circle-note" class="muted">Invite one friend so your study circle starts working for you.</p>
-          <div class="social-quest-card__actions">
-            <button id="study-circle-open-btn" class="btn btn--mint" type="button">Open friends</button>
-            <button id="study-circle-leaderboard-btn" class="btn ghost" type="button">View leaderboard</button>
-          </div>
-        </article>
-      </section>
+      <div id="quest-list" class="quest-list hidden-support-data" aria-hidden="true"></div>
 
       <section class="map-shell" aria-label="World map">
         <div class="section-head">
@@ -326,7 +225,7 @@
 
         <div class="teacher" id="teacher" aria-hidden="true"></div>
         <div class="mascot-cheer" aria-hidden="true">
-          <video class="mascot-video mascot-video--cheer" src="assets/media/mascot-whisk.mp4" autoplay muted loop playsinline></video>
+          <video class="mascot-video mascot-video--cheer" src="assets/media/mascot-coach.mp4" autoplay muted loop playsinline></video>
         </div>
 
         <div class="lesson-body" id="lesson-body">
@@ -349,7 +248,7 @@
   <div id="intro-overlay" class="intro-overlay" aria-hidden="true">
     <div class="intro-card">
       <div class="logo-mark">
-        <video class="mascot-video mascot-video--intro" src="assets/media/mascot-whisk.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
+        <video class="mascot-video mascot-video--intro" src="assets/media/mascot-coach.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
       </div>
       <p class="eyebrow">Loading</p>
       <h3 class="intro-title" aria-label="Learn Koine Greek">
@@ -408,3 +307,6 @@
   </script>
 </body>
 </html>
+
+
+

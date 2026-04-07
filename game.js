@@ -14,6 +14,7 @@ let startupPlayed = false;
 let heartRefillTicker = null;
 let vocabReady = false;
 let pendingIntroResume = false;
+let introStartPending = false;
 
 const progressState = {
   xp: 0,
@@ -599,6 +600,18 @@ function setLessonFeedback(mode, message) {
   }
 
   text.textContent = message;
+  const coachTitle = document.getElementById("coach-title");
+  const coachCopy = document.getElementById("coach-copy");
+  if (coachTitle && coachCopy) {
+    if (mode === "success") {
+      coachTitle.textContent = "That one counts";
+    } else if (mode === "warning") {
+      coachTitle.textContent = "One more try";
+    } else {
+      coachTitle.textContent = "Ready when you are";
+    }
+    coachCopy.textContent = message;
+  }
 }
 
 function pulseLessonPanel(kind = "success") {
@@ -619,6 +632,14 @@ function cheerMascot(kind = "success") {
   setTimeout(() => {
     mascot.classList.remove("is-cheering", "is-concerned");
   }, 900);
+  const heroCoach = document.querySelector(".hero-coach");
+  if (heroCoach) {
+    heroCoach.classList.remove("is-cheering", "is-concerned");
+    heroCoach.classList.add(kind === "warning" ? "is-concerned" : "is-cheering");
+    setTimeout(() => {
+      heroCoach.classList.remove("is-cheering", "is-concerned");
+    }, 900);
+  }
 }
 
 function flashRewardPocket(rewardSummary) {
@@ -816,6 +837,40 @@ function usageScenarioForEntry(entry) {
     return `Use ${greek} to describe a noun more clearly, adding detail about what that person or thing is like.`;
   }
   return `Use ${greek} when you want to express "${meaning}" in a simple lesson sentence. Pair it with nearby words in the exercise to build a complete thought.`;
+}
+
+function getAcceptedMeanings(vocab) {
+  const rawValues = [
+    vocab?.acceptedMeanings,
+    vocab?.meanings,
+    vocab?.english,
+    vocab?.meaning
+  ].flat().filter(Boolean);
+
+  const accepted = new Set();
+  rawValues.forEach((value) => {
+    String(value)
+      .split(/;|\/|\bor\b|,/i)
+      .map((part) => normalizeDictionaryToken(part))
+      .filter(Boolean)
+      .forEach((part) => accepted.add(part));
+  });
+  return Array.from(accepted);
+}
+
+function getPrimaryMeaning(vocab) {
+  const accepted = getAcceptedMeanings(vocab);
+  return accepted[0] || normalizeDictionaryToken(vocab?.english || vocab?.meaning || "");
+}
+
+function isMeaningMatch(selection, vocab) {
+  const chosen = normalizeDictionaryToken(selection);
+  if (!chosen) return false;
+  const accepted = getAcceptedMeanings(vocab);
+  if (!accepted.length) {
+    return chosen === normalizeDictionaryToken(vocab?.english || vocab?.meaning || "");
+  }
+  return accepted.includes(chosen);
 }
 
 function findDictionaryEntries(term) {
@@ -1207,8 +1262,13 @@ function renderExercise() {
     playBtn.addEventListener("click", () => playLessonAudio(vocab));
     wrapper.appendChild(playBtn);
 
-    const distractors = shuffleArray((vocabDatabase || []).map((v) => v.english).filter((w) => w && w !== vocab.english)).slice(0, 3);
-    const choices = shuffleArray([vocab.english, ...distractors]);
+    const primaryMeaning = getPrimaryMeaning(vocab) || (vocab.english || vocab.meaning || "");
+    const distractors = shuffleArray(
+      (vocabDatabase || [])
+        .map((v) => getPrimaryMeaning(v) || v.english || v.meaning)
+        .filter((w) => w && normalizeDictionaryToken(w) !== normalizeDictionaryToken(primaryMeaning))
+    ).slice(0, 3);
+    const choices = shuffleArray([primaryMeaning, ...distractors]);
     const grid = document.createElement("div");
     grid.className = "choice-grid";
     choices.forEach((choice) => {
@@ -1342,7 +1402,10 @@ function renderExercise() {
     text.appendChild(buildGreekWordChip(vocab.greek || "—", vocab.greek || "—"));
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "Type the translation";
+    const acceptedPreview = getAcceptedMeanings(vocab).slice(0, 2);
+    input.placeholder = acceptedPreview.length > 1
+      ? `Type a correct meaning, for example ${acceptedPreview.join(" or ")}`
+      : "Type the translation";
     input.addEventListener("input", () => {
       currentSelection = input.value.trim();
     });
@@ -1427,7 +1490,7 @@ function checkAnswer() {
   let correct = false;
 
   if (exercise.type === "vocab-recognition" || exercise.type === "listening") {
-    correct = currentSelection === exercise.vocab.english;
+    correct = isMeaningMatch(currentSelection, exercise.vocab);
   }
   if (exercise.type === "pronunciation") {
     correct = currentSelection && currentSelection.score >= 25;
@@ -1436,7 +1499,7 @@ function checkAnswer() {
     correct = typeof currentSelection === "function" && currentSelection().trim() === exercise.sentence;
   }
   if (exercise.type === "translation") {
-    correct = currentSelection && currentSelection.toLowerCase() === exercise.vocab.english.toLowerCase();
+    correct = isMeaningMatch(currentSelection, exercise.vocab);
   }
 
   if (correct) {
@@ -1879,9 +1942,27 @@ function initApp() {
   // Safety: never keep intro longer than 10 seconds
   setTimeout(startOrResumeFromIntro, 9000);
   window.addEventListener("gq-progress-hydrated", () => {
+    introStartPending = false;
+    const introStart = document.getElementById("intro-start");
+    if (introStart) {
+      introStart.disabled = false;
+      introStart.textContent = "Start";
+    }
     if (pendingIntroResume) {
       pendingIntroResume = false;
       startOrResumeFromIntro();
+    }
+  });
+  window.addEventListener("gq-auth-changed", () => {
+    if (isSignedIn()) {
+      pendingIntroResume = true;
+    } else {
+      introStartPending = false;
+      const introStart = document.getElementById("intro-start");
+      if (introStart) {
+        introStart.disabled = false;
+        introStart.textContent = "Start";
+      }
     }
   });
 }
@@ -2459,7 +2540,9 @@ function hideIntro() {
 
 function startOrResumeFromIntro() {
   const intro = document.getElementById("intro-overlay");
+  const introStart = document.getElementById("intro-start");
   if (!intro || intro.classList.contains("hide")) return;
+  if (introStartPending) return;
   if (!vocabReady) {
     pendingIntroResume = true;
     return;
@@ -2468,8 +2551,41 @@ function startOrResumeFromIntro() {
     pendingIntroResume = true;
     return;
   }
-  if (requireSignIn()) {
+  if (isSignedIn()) {
     startFromSavedStateOrDefault();
+    hideIntro();
+    if (introStart) {
+      introStart.disabled = false;
+      introStart.textContent = "Start";
+    }
+    return;
   }
-  hideIntro();
+  pendingIntroResume = true;
+  introStartPending = true;
+  if (introStart) {
+    introStart.disabled = true;
+    introStart.textContent = "Signing in...";
+  }
+  setLessonFeedback("info", "Signing you in with Google, then we’ll resume your last cloud-synced lesson.");
+  Promise.resolve(signInWithGoogle({ forceRedirect: true }))
+    .then((result) => {
+      if (result?.started && result.mode !== "redirect") {
+        setLessonFeedback("info", "Sign-in complete. Loading your saved progress now.");
+        return;
+      }
+      if (!result?.started) {
+        introStartPending = false;
+        if (introStart) {
+          introStart.disabled = false;
+          introStart.textContent = "Start";
+        }
+      }
+    })
+    .catch(() => {
+      introStartPending = false;
+      if (introStart) {
+        introStart.disabled = false;
+        introStart.textContent = "Start";
+      }
+    });
 }
