@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek" />
+  <title>Learn Koine Greek Dashboard</title>
+  <link rel="manifest" href="manifest.json?v=20260408" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=20260408" />
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=20260408" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=20260408" />
+</head>
+<body class="dark app-home">
+  <div class="app-shell">
+    <header class="app-topbar">
+      <a class="brand-lockup" href="index.html" aria-label="Back to start">
+        <span class="brand-mark">
+          <video class="mascot-video mascot-video--logo" src="assets/media/mascot-coach.mp4?v=20260408" autoplay muted loop playsinline aria-hidden="true"></video>
+        </span>
+        <span class="brand-copy">
+          <strong>Learn Koine Greek</strong>
+          <small>Focused path, clear progress, fast lessons</small>
+        </span>
+      </a>
+      <div class="topbar-actions">
+        <button id="hero-sign-in-btn" class="btn btn--sky" type="button">Sign in with Google</button>
+        <button id="hero-log-in-btn" class="btn ghost" type="button">Log in</button>
+        <button id="hero-logout-btn" class="btn ghost" type="button" style="display:none">Log out</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <header class="hero hero--dashboard">
+        <div class="hero-copy">
+          <div class="hero-copy__top">
+            <p class="eyebrow">Welcome back</p>
+            <div class="hero-badges">
+              <span id="hero-rank-badge" class="hero-badge">Novice Scribe</span>
+              <span id="hero-sync-badge" class="hero-badge hero-badge--muted">Device only</span>
+            </div>
+          </div>
+          <h1>Learn Koine Greek</h1>
+          <p class="hero-tagline">Keep the home screen about learning: your lesson, your dictionary, and one clean path forward.</p>
+          <div class="hero-chip hero-chip--dictionary">
+            <p class="eyebrow">Dictionary / Status</p>
+            <div id="hero-status"></div>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="focus-strip">
+            <div class="focus-card">
+              <span class="eyebrow">Progress</span>
+              <strong id="focus-progress-value">0 / 25</strong>
+              <p id="focus-progress-note" class="muted">Your path starts at Level 1.</p>
+            </div>
+            <div class="focus-card">
+              <span class="eyebrow">Streak</span>
+              <strong id="focus-streak-value">0 days</strong>
+              <p id="focus-league-note" class="muted">Bronze League</p>
+            </div>
+            <div class="focus-card focus-card--accent">
+              <span class="eyebrow">Next up</span>
+              <strong id="focus-next-value">Level 1</strong>
+              <p id="focus-next-note" class="muted">Pick up where you left off.</p>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button id="continue-btn" class="btn" type="button">Continue path</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="utility-rail" aria-label="Navigation and quick actions">
+        <nav class="utility-nav">
+          <button id="map-btn" class="nav-btn" type="button">Map</button>
+          <button id="profile-btn" class="nav-btn" type="button">Profile</button>
+          <button id="leaderboard-btn" class="nav-btn" type="button">Leaderboard</button>
+          <button id="friends-btn" class="nav-btn" type="button">Friends</button>
+          <button id="options-btn" class="nav-btn" type="button">Options</button>
+          <button id="start-new-btn" class="nav-btn" type="button">Start new game</button>
+          <button id="about-btn" class="nav-btn" type="button">About</button>
+          <button id="contact-btn" class="nav-btn" type="button">Contact</button>
+        </nav>
+        <div class="hero-shortcuts hero-shortcuts--inline" aria-label="Quick access panels">
+          <button id="home-rewards-btn" class="hero-shortcut hero-shortcut--gold" type="button">
+            <span class="hero-shortcut__eyebrow">Reward pocket</span>
+            <strong>Rewards</strong>
+            <small id="reward-last-home">Finish a lesson to collect rewards.</small>
+          </button>
+          <button id="home-invite-btn" class="hero-shortcut hero-shortcut--sky" type="button">
+            <span class="hero-shortcut__eyebrow">Invite</span>
+            <strong>Invite friends</strong>
+            <small>Grow your study circle.</small>
+          </button>
+          <button id="home-gifts-btn" class="hero-shortcut hero-shortcut--mint" type="button">
+            <span class="hero-shortcut__eyebrow">Gifts</span>
+            <strong>Open gifts</strong>
+            <small>Send hearts and gems.</small>
+          </button>
+          <button id="home-quests-btn" class="hero-shortcut hero-shortcut--berry" type="button">
+            <span class="hero-shortcut__eyebrow">Quest board</span>
+            <strong>Daily goals</strong>
+            <small>Check your momentum.</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="status-ribbon" aria-label="Current profile summary">
+        <div class="stat-row stat-row--summary">
+          <span id="stat-level">Level 1</span>
+          <span id="stat-xp">XP 0</span>
+          <span id="stat-hearts">Hearts 5</span>
+          <span id="stat-rank">Rank Novice</span>
+          <span id="stat-league">League Bronze</span>
+          <span id="stat-streak">Streak 0</span>
+        </div>
+        <div class="side-rewards side-rewards--summary">
+          <div class="side-reward-chip side-reward-chip--gold"><span>Gems</span><strong id="side-reward-gems">0</strong></div>
+          <div class="side-reward-chip side-reward-chip--mint"><span>Heart gifts</span><strong id="side-reward-hearts">0</strong></div>
+          <div class="side-reward-chip side-reward-chip--sky"><span>Crowns</span><strong id="side-reward-crowns">0</strong></div>
+        </div>
+      </section>
+
+      <section class="map-shell" aria-label="World map">
+        <div class="section-head">
+          <h2>Worlds & Levels</h2>
+          <div class="lesson-progress">
+            <div class="lesson-progress__meta">
+              <span id="lesson-category" class="eyebrow">Category: -</span>
+              <span id="lesson-progress-text" class="eyebrow">Lesson: -</span>
+              <div class="lesson-hearts-panel">
+                <span id="lesson-hearts" class="eyebrow">Hearts: 5</span>
+                <div id="lesson-hearts-diagram" class="heart-diagram" aria-label="5 of 5 hearts remaining"></div>
+                <span id="lesson-earned-xp" class="eyebrow lesson-earned-xp">XP this lesson: 0</span>
+              </div>
+            </div>
+            <div class="lesson-progress__bar"><span id="lesson-progress-bar"></span></div>
+          </div>
+        </div>
+        <div id="world-map" class="world-map"></div>
+      </section>
+
+      <section class="lesson-panel" id="lesson-panel" aria-label="Lesson play area">
+        <div class="lesson-header">
+          <div>
+            <p class="eyebrow" id="lesson-type">Choose a lesson to begin</p>
+            <h2 id="lesson-title">Welcome</h2>
+          </div>
+          <span id="lesson-xp" class="pill">+0 XP</span>
+        </div>
+
+        <div class="lesson-hud">
+          <div class="lesson-hud__card">
+            <span class="eyebrow">Activity</span>
+            <strong id="lesson-step-count">0 / 0</strong>
+            <p id="lesson-step-note" class="muted">Choose a lesson to begin.</p>
+          </div>
+          <div class="lesson-hud__card">
+            <span class="eyebrow">Accuracy</span>
+            <strong id="lesson-accuracy">0%</strong>
+            <p id="lesson-accuracy-note" class="muted">Warm up with your first answer.</p>
+          </div>
+          <div class="lesson-hud__card lesson-hud__card--quest">
+            <span class="eyebrow">Daily goal</span>
+            <strong id="daily-goal-value">1 lesson</strong>
+            <p id="daily-goal-note" class="muted">Complete one lesson today to keep momentum.</p>
+          </div>
+        </div>
+
+        <div id="lesson-feedback" class="lesson-feedback" aria-live="polite">
+          <span class="lesson-feedback__badge">Ready</span>
+          <p id="lesson-feedback-text">Start a lesson and let&apos;s build your streak with small wins.</p>
+        </div>
+
+        <div class="lesson-support-rail">
+          <div class="lesson-support-rail__copy">
+            <p class="eyebrow">Lesson support</p>
+            <strong>Dictionary first, then friends if you need more help.</strong>
+            <span class="muted">Keep the main screen focused on the lesson, and open the other sections only when you need them.</span>
+          </div>
+          <div class="lesson-support-rail__actions">
+            <button id="lesson-dictionary-btn" class="btn btn--sky" type="button">Check dictionary</button>
+            <button id="lesson-ask-btn" class="btn ghost" type="button">Ask friends</button>
+            <button id="lesson-study-btn" class="btn btn--berry" type="button">Study together</button>
+          </div>
+        </div>
+
+        <div class="mascot-cheer mascot-cheer--inline" aria-hidden="true">
+          <video class="mascot-video mascot-video--cheer" src="assets/media/mascot-coach.mp4?v=20260408" autoplay muted loop playsinline></video>
+        </div>
+
+        <div class="lesson-body" id="lesson-body">
+          <div class="welcome">
+            <h3>Tap a lesson node to start.</h3>
+            <p>Your lesson surface stays clean now. Rewards, gifts, invites, and quest details live behind the quick buttons above.</p>
+          </div>
+        </div>
+
+        <div class="lesson-footer">
+          <button id="hint-btn" class="btn ghost" type="button" disabled>Hint</button>
+          <button id="check-btn" class="btn" type="button" disabled>Check</button>
+          <button id="skip-btn" class="btn ghost" type="button" disabled>Skip</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="tour-overlay" class="tour-overlay" aria-hidden="true">
+    <div class="tour-spotlight"></div>
+    <div class="tour-card">
+      <div class="mascot">
+        <div class="mascot-face"></div>
+        <div class="mascot-body"></div>
+      </div>
+      <div class="tour-content">
+        <h3 id="tour-title">Welcome</h3>
+        <p id="tour-text">Let me show you around.</p>
+        <div class="tour-actions">
+          <button id="tour-skip" class="btn ghost" type="button">Skip</button>
+          <button id="tour-next" class="btn" type="button">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="firebase.js?v=20260408"></script>
+  <script src="auth.js?v=20260408"></script>
+  <script src="spacedRepetition.js?v=20260408"></script>
+  <script src="speech.js?v=20260408"></script>
+  <script src="teacherCharacter.js?v=20260408"></script>
+  <script src="lessons.js?v=20260408"></script>
+  <script src="vocabIllustrations.js?v=20260408"></script>
+  <script src="map.js?v=20260408"></script>
+  <script src="social.js?v=20260408"></script>
+  <script src="game.js?v=20260408"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js?v=20260408").catch((error) => {
+          console.error("Service worker registration failed:", error);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

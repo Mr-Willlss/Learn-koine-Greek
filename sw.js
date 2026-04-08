@@ -1,7 +1,10 @@
-const CACHE_NAME = "learn-koine-greek-v2026-04-07-startfix";
+const CACHE_NAME = "learn-koine-greek-v2026-04-08-clean-shell";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./home.html",
+  "./start.css",
+  "./start.js",
   "./style.css",
   "./auth.js",
   "./firebase.js",
@@ -16,7 +19,6 @@ const APP_SHELL = [
   "./vocabDatabase.json",
   "./manifest.json",
   "./assets/media/mascot-coach.mp4",
-  "./assets/media/mascot-whisk.mp4",
   "./assets/images/icon-192.png",
   "./assets/images/icon-512.png",
   "./assets/images/mascot-logo.svg",
@@ -60,7 +62,7 @@ self.addEventListener("fetch", (event) => {
             }
             return networkResponse;
           })
-          .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./index.html")))
+          .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./home.html") || caches.match("./index.html")))
       : caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
           return fetch(event.request).then((networkResponse) => {

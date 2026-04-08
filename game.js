@@ -13,8 +13,6 @@ let masterGain = null;
 let startupPlayed = false;
 let heartRefillTicker = null;
 let vocabReady = false;
-let pendingIntroResume = false;
-let introStartPending = false;
 
 const progressState = {
   xp: 0,
@@ -134,9 +132,12 @@ function renderHeartDiagram(containerId, hearts = progressState.hearts, maxHeart
 }
 
 function updateStats() {
-  document.getElementById("stat-xp").textContent = `XP ${progressState.xp}`;
-  document.getElementById("stat-level").textContent = `Level ${progressState.level}`;
-  document.getElementById("stat-hearts").textContent = `Hearts ${progressState.hearts}`;
+  const statXp = document.getElementById("stat-xp");
+  const statLevel = document.getElementById("stat-level");
+  const statHearts = document.getElementById("stat-hearts");
+  if (statXp) statXp.textContent = `XP ${progressState.xp}`;
+  if (statLevel) statLevel.textContent = `Level ${progressState.level}`;
+  if (statHearts) statHearts.textContent = `Hearts ${progressState.hearts}`;
   const heartEl = document.getElementById("lesson-hearts");
   if (heartEl) heartEl.textContent = `Hearts: ${progressState.hearts}`;
   renderHeartDiagram("lesson-hearts-diagram");
@@ -234,8 +235,10 @@ function updateProgressBar() {
   const total = lessonData.worlds.reduce((sum, w) => sum + w.lessons.length, 0);
   const completed = progressState.completedLessons.length;
   const pct = total ? Math.floor((completed / total) * 100) : 0;
-  document.getElementById("progress-bar").style.width = `${pct}%`;
-  document.getElementById("progress-text").textContent = `${pct}% complete`;
+  const progressBar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+  if (progressBar) progressBar.style.width = `${pct}%`;
+  if (progressText) progressText.textContent = `${pct}% complete`;
 }
 
 function findNextUnlockedLesson() {
@@ -1093,7 +1096,7 @@ function renderInlineDictionary(query, options = {}) {
 }
 
 function loadVocabDatabase() {
-  return fetch("vocabDatabase.json", { cache: "force-cache" })
+  return fetch("vocabDatabase.json", { cache: "no-store" })
     .then((res) => {
       if (!res.ok) throw new Error("Failed to load vocabDatabase.json");
       return res.json();
@@ -1859,10 +1862,7 @@ function registerEvents() {
   if (sidebarToggle) sidebarToggle.addEventListener("click", toggleSidebar);
   const sidebarToggleFloating = document.getElementById("sidebar-toggle-floating");
   if (sidebarToggleFloating) sidebarToggleFloating.addEventListener("click", toggleSidebar);
-
-  const introStart = document.getElementById("intro-start");
-  if (introStart) introStart.addEventListener("click", startOrResumeFromIntro);
-  const logo = document.querySelector(".logo, .side-logo");
+  const logo = document.querySelector(".logo, .side-logo, .brand-lockup");
   if (logo) logo.addEventListener("click", () => {
     document.getElementById("lesson-title").textContent = "Welcome";
     document.getElementById("lesson-type").textContent = "Choose a lesson to begin";
@@ -1898,8 +1898,7 @@ function initApp() {
     window.gqProgressHydrated = !isSignedIn();
   }
   const hintBox = document.getElementById("hero-status");
-  if (hintBox) setHeroStatusText("Sign in and open a lesson, then tap Dictionary or any lesson word.", "social");
-  lockUI(!isSignedIn());
+  if (hintBox) setHeroStatusText("Open a lesson, then press Hint or tap a lesson word to inspect its meaning and usage.", "social");
   handleAuthChange();
   updateDailyGoalUI();
   updateFocusStrip();
@@ -1915,10 +1914,6 @@ function initApp() {
       updateStats();
       updateProgressBar();
       updateQuestDeck();
-      if (pendingIntroResume) {
-        pendingIntroResume = false;
-        startOrResumeFromIntro();
-      }
     })
     .catch((err) => {
       console.error(err);
@@ -1928,43 +1923,12 @@ function initApp() {
       updateStats();
       updateProgressBar();
       updateQuestDeck();
-      if (pendingIntroResume) {
-        pendingIntroResume = false;
-        startOrResumeFromIntro();
-      }
     });
 
   if (heartRefillTicker) {
     clearInterval(heartRefillTicker);
   }
   heartRefillTicker = setInterval(refillHeartsIfNeeded, 1000);
-
-  // Safety: never keep intro longer than 10 seconds
-  setTimeout(startOrResumeFromIntro, 9000);
-  window.addEventListener("gq-progress-hydrated", () => {
-    introStartPending = false;
-    const introStart = document.getElementById("intro-start");
-    if (introStart) {
-      introStart.disabled = false;
-      introStart.textContent = "Start";
-    }
-    if (pendingIntroResume) {
-      pendingIntroResume = false;
-      startOrResumeFromIntro();
-    }
-  });
-  window.addEventListener("gq-auth-changed", () => {
-    if (isSignedIn()) {
-      pendingIntroResume = true;
-    } else {
-      introStartPending = false;
-      const introStart = document.getElementById("intro-start");
-      if (introStart) {
-        introStart.disabled = false;
-        introStart.textContent = "Start";
-      }
-    }
-  });
 }
 
 // Startup audio intentionally removed.
@@ -2014,7 +1978,6 @@ function getNextLesson(currentId) {
 }
 
 function confirmStartNew() {
-  if (!requireSignIn()) return;
   const body = document.createElement("div");
   body.innerHTML = `<p>Are you sure you want to proceed? This will reset your progress, rewards, and current lesson state back to Lesson 1.</p>`;
   const agree = document.createElement("button");
@@ -2072,26 +2035,15 @@ function isSignedIn() {
 }
 
 function requireSignIn() {
-  if (isSignedIn()) return true;
-  toast("Please sign in with Google to play.");
-  return false;
+  return true;
 }
 
 function lockUI(locked) {
-  const ids = [
-    "check-btn","hint-btn","skip-btn","map-btn","profile-btn","leaderboard-btn","friends-btn",
-    "options-btn","start-new-btn","contact-btn","about-btn","continue-btn","gifts-btn","study-btn","question-btn",
-    "invite-btn","lesson-ask-btn","lesson-study-btn","lesson-dictionary-btn"
-  ];
-  ids.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.disabled = locked;
-  });
+  return locked;
 }
 
 function handleAuthChange() {
   const signedIn = isSignedIn();
-  lockUI(!signedIn);
   if (signedIn) {
     loadLocalProgress();
     renderMap(progressState);
@@ -2100,12 +2052,15 @@ function handleAuthChange() {
     if (typeof loadOwnSocialProfile === "function") {
       loadOwnSocialProfile().catch((error) => console.error("Profile load failed", error));
     }
+  } else {
+    updateStats();
+    updateProgressBar();
   }
 }
 
 // Guided tour with mascot
 const tourSteps = [
-  { target: ".side-logo", title: "Welcome!", text: "I am Aletheia, your guide. I'll show you around." },
+  { target: ".brand-lockup", title: "Welcome!", text: "I am Aletheia, your guide. I'll show you around." },
   { target: "#map-btn", title: "Map", text: "Open the map to pick any unlocked level." },
   { target: "#profile-btn", title: "Profile", text: "See your Google profile after sign-in." },
   { target: "#options-btn", title: "Options", text: "Adjust sound, brightness, autosave, and theme." },
@@ -2528,64 +2483,4 @@ function playStartupAmbient() {
   shimmer.connect(shimmerGain).connect(masterGain);
   shimmer.start();
   shimmer.stop(audioCtx.currentTime + 6.2);
-}
-
-function hideIntro() {
-  const intro = document.getElementById("intro-overlay");
-  if (intro) {
-    intro.classList.add("hide");
-    setTimeout(() => intro.remove(), 900);
-  }
-}
-
-function startOrResumeFromIntro() {
-  const intro = document.getElementById("intro-overlay");
-  const introStart = document.getElementById("intro-start");
-  if (!intro || intro.classList.contains("hide")) return;
-  if (introStartPending) return;
-  if (!vocabReady) {
-    pendingIntroResume = true;
-    return;
-  }
-  if (isSignedIn() && window.gqProgressHydrated === false) {
-    pendingIntroResume = true;
-    return;
-  }
-  if (isSignedIn()) {
-    startFromSavedStateOrDefault();
-    hideIntro();
-    if (introStart) {
-      introStart.disabled = false;
-      introStart.textContent = "Start";
-    }
-    return;
-  }
-  pendingIntroResume = true;
-  introStartPending = true;
-  if (introStart) {
-    introStart.disabled = true;
-    introStart.textContent = "Signing in...";
-  }
-  setLessonFeedback("info", "Signing you in with Google, then we’ll resume your last cloud-synced lesson.");
-  Promise.resolve(signInWithGoogle({ forceRedirect: true }))
-    .then((result) => {
-      if (result?.started && result.mode !== "redirect") {
-        setLessonFeedback("info", "Sign-in complete. Loading your saved progress now.");
-        return;
-      }
-      if (!result?.started) {
-        introStartPending = false;
-        if (introStart) {
-          introStart.disabled = false;
-          introStart.textContent = "Start";
-        }
-      }
-    })
-    .catch(() => {
-      introStartPending = false;
-      if (introStart) {
-        introStart.disabled = false;
-        introStart.textContent = "Start";
-      }
-    });
 }
