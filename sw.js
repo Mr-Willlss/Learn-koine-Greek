@@ -1,22 +1,5 @@
-const CACHE_NAME = "learn-koine-greek-v2026-04-08-clean-shell";
+const CACHE_NAME = "learn-koine-greek-v2026-04-08-autorefresh";
 const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./home.html",
-  "./start.css",
-  "./start.js",
-  "./style.css",
-  "./auth.js",
-  "./firebase.js",
-  "./game.js",
-  "./lessons.js",
-  "./map.js",
-  "./social.js",
-  "./spacedRepetition.js",
-  "./speech.js",
-  "./teacherCharacter.js",
-  "./vocabIllustrations.js",
-  "./vocabDatabase.json",
   "./manifest.json",
   "./assets/media/mascot-coach.mp4",
   "./assets/images/icon-192.png",
@@ -51,12 +34,13 @@ self.addEventListener("fetch", (event) => {
   const sameOrigin = requestUrl.origin === self.location.origin;
   const requestMode = event.request.mode === "navigate";
   const freshFirst = requestMode || ["script", "style", "document"].includes(event.request.destination);
+  const shouldCache = sameOrigin && !requestMode && !["script", "style", "document"].includes(event.request.destination);
 
   event.respondWith(
     (freshFirst
       ? fetch(event.request)
           .then((networkResponse) => {
-            if (sameOrigin && networkResponse.ok) {
+            if (shouldCache && networkResponse.ok) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
             }
@@ -66,7 +50,7 @@ self.addEventListener("fetch", (event) => {
       : caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
           return fetch(event.request).then((networkResponse) => {
-            if (sameOrigin && networkResponse.ok) {
+            if (shouldCache && networkResponse.ok) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
             }

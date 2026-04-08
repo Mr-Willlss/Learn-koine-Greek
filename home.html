@@ -9,20 +9,21 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek" />
   <title>Learn Koine Greek Dashboard</title>
-  <link rel="manifest" href="manifest.json?v=20260408" />
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=20260408" />
-  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=20260408" />
+  <link rel="manifest" href="manifest.json?v=202604082" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604082" />
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604082" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260408" />
+  <script src="app-version.js?v=202604082"></script>
+  <link rel="stylesheet" href="style.css?v=202604082" />
 </head>
 <body class="dark app-home">
   <div class="app-shell">
     <header class="app-topbar">
       <a class="brand-lockup" href="index.html" aria-label="Back to start">
         <span class="brand-mark">
-          <video class="mascot-video mascot-video--logo" src="assets/media/mascot-coach.mp4?v=20260408" autoplay muted loop playsinline aria-hidden="true"></video>
+          <video class="mascot-video mascot-video--logo" src="assets/media/mascot-coach.mp4?v=202604082" autoplay muted loop playsinline aria-hidden="true"></video>
         </span>
         <span class="brand-copy">
           <strong>Learn Koine Greek</strong>
@@ -194,7 +195,7 @@
         </div>
 
         <div class="mascot-cheer mascot-cheer--inline" aria-hidden="true">
-          <video class="mascot-video mascot-video--cheer" src="assets/media/mascot-coach.mp4?v=20260408" autoplay muted loop playsinline></video>
+          <video class="mascot-video mascot-video--cheer" src="assets/media/mascot-coach.mp4?v=202604082" autoplay muted loop playsinline></video>
         </div>
 
         <div class="lesson-body" id="lesson-body">
@@ -235,20 +236,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="firebase.js?v=20260408"></script>
-  <script src="auth.js?v=20260408"></script>
-  <script src="spacedRepetition.js?v=20260408"></script>
-  <script src="speech.js?v=20260408"></script>
-  <script src="teacherCharacter.js?v=20260408"></script>
-  <script src="lessons.js?v=20260408"></script>
-  <script src="vocabIllustrations.js?v=20260408"></script>
-  <script src="map.js?v=20260408"></script>
-  <script src="social.js?v=20260408"></script>
-  <script src="game.js?v=20260408"></script>
+  <script src="firebase.js?v=202604082"></script>
+  <script src="auth.js?v=202604082"></script>
+  <script src="spacedRepetition.js?v=202604082"></script>
+  <script src="speech.js?v=202604082"></script>
+  <script src="teacherCharacter.js?v=202604082"></script>
+  <script src="lessons.js?v=202604082"></script>
+  <script src="vocabIllustrations.js?v=202604082"></script>
+  <script src="map.js?v=202604082"></script>
+  <script src="social.js?v=202604082"></script>
+  <script src="game.js?v=202604082"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=20260408").catch((error) => {
+        navigator.serviceWorker.register("./sw.js?v=202604082").catch((error) => {
           console.error("Service worker registration failed:", error);
         });
       });

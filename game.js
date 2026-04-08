@@ -13,6 +13,7 @@ let masterGain = null;
 let startupPlayed = false;
 let heartRefillTicker = null;
 let vocabReady = false;
+let lessonAdvanceTimer = null;
 
 const progressState = {
   xp: 0,
@@ -1736,6 +1737,10 @@ function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
   const answered = lessonCorrectCount + lessonWrongCount;
   const accuracy = answered ? Math.round((lessonCorrectCount / answered) * 100) : 0;
   const next = currentLesson ? getNextLesson(currentLesson.id) : null;
+  if (lessonAdvanceTimer) {
+    clearTimeout(lessonAdvanceTimer);
+    lessonAdvanceTimer = null;
+  }
   xpText.textContent = `You earned ${xpEarned} XP in this lesson.`;
   if (summaryText) {
     const rewardText = rewardSummary
@@ -1771,11 +1776,24 @@ function showLessonCompleteModal(xpEarned, onContinue, rewardSummary) {
     modal.querySelector(".modal-card").insertBefore(burst, btn);
   }
   btn.textContent = typeof onContinue === "function" ? "Continue to next lesson" : "Close";
-  btn.onclick = () => {
+  let handled = false;
+  const advance = () => {
+    if (handled) return;
+    handled = true;
+    if (lessonAdvanceTimer) {
+      clearTimeout(lessonAdvanceTimer);
+      lessonAdvanceTimer = null;
+    }
     modal.classList.remove("show");
     if (typeof onContinue === "function") onContinue();
   };
+  btn.onclick = advance;
   modal.classList.add("show");
+  if (typeof onContinue === "function") {
+    lessonAdvanceTimer = setTimeout(() => {
+      advance();
+    }, 1600);
+  }
 }
 
 function shuffleArray(array) {
@@ -1870,6 +1888,9 @@ function registerEvents() {
   });
 
   window.addEventListener("gq-auth-changed", handleAuthChange);
+  window.addEventListener("gq-progress-hydrated", () => {
+    resumeSavedLessonIfAvailable();
+  });
 
   // Startup audio removed per request
 }
@@ -1914,6 +1935,7 @@ function initApp() {
       updateStats();
       updateProgressBar();
       updateQuestDeck();
+      resumeSavedLessonIfAvailable();
     })
     .catch((err) => {
       console.error(err);
@@ -1923,6 +1945,7 @@ function initApp() {
       updateStats();
       updateProgressBar();
       updateQuestDeck();
+      resumeSavedLessonIfAvailable();
     });
 
   if (heartRefillTicker) {
@@ -1965,6 +1988,15 @@ function startFromSavedStateOrDefault() {
   }
 
   startLesson(lessonData.worlds[0].lessons[0], lessonData.worlds[0]);
+}
+
+function resumeSavedLessonIfAvailable() {
+  if (!vocabReady || !lessonData?.worlds?.length) return false;
+  if (isSignedIn() && window.gqProgressHydrated === false) return false;
+  if (currentLesson) return false;
+  if (!progressState.activeLessonId && !progressState.completedLessons.length) return false;
+  startFromSavedStateOrDefault();
+  return true;
 }
 
 function getNextLesson(currentId) {
@@ -2052,9 +2084,15 @@ function handleAuthChange() {
     if (typeof loadOwnSocialProfile === "function") {
       loadOwnSocialProfile().catch((error) => console.error("Profile load failed", error));
     }
+    if (window.gqProgressHydrated !== false) {
+      resumeSavedLessonIfAvailable();
+    }
   } else {
     updateStats();
     updateProgressBar();
+    if (!currentLesson) {
+      resumeSavedLessonIfAvailable();
+    }
   }
 }
 
