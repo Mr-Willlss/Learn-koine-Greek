@@ -1,5 +1,5 @@
 (function () {
-  const APP_VERSION = "2026.04.08.2";
+  const APP_VERSION = "2026.04.08.3";
   const STORAGE_KEY = "gq_app_version";
   const RELOAD_KEY = "gq_version_reload_pending";
 
@@ -11,6 +11,8 @@
 
     if ("serviceWorker" in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
+      // Encourage the browser to pull the newest SW before we unregister/reload.
+      await Promise.all(registrations.map((registration) => registration.update().catch(() => {})));
       await Promise.all(registrations.map((registration) => registration.unregister()));
     }
   }

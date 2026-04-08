@@ -1,4 +1,4 @@
-const CACHE_NAME = "learn-koine-greek-v2026-04-08-autorefresh";
+const CACHE_NAME = "learn-koine-greek-v2026-04-08-202604083";
 const APP_SHELL = [
   "./manifest.json",
   "./assets/media/mascot-coach.mp4",
@@ -36,9 +36,18 @@ self.addEventListener("fetch", (event) => {
   const freshFirst = requestMode || ["script", "style", "document"].includes(event.request.destination);
   const shouldCache = sameOrigin && !requestMode && !["script", "style", "document"].includes(event.request.destination);
 
+  const fetchFresh = (request) => {
+    try {
+      // Bypass HTTP cache for app-critical assets so users get updates without hard refresh.
+      return fetch(new Request(request, { cache: "no-store" }));
+    } catch (_) {
+      return fetch(request);
+    }
+  };
+
   event.respondWith(
     (freshFirst
-      ? fetch(event.request)
+      ? fetchFresh(event.request)
           .then((networkResponse) => {
             if (shouldCache && networkResponse.ok) {
               const responseClone = networkResponse.clone();
@@ -49,7 +58,7 @@ self.addEventListener("fetch", (event) => {
           .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./home.html") || caches.match("./index.html")))
       : caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
-          return fetch(event.request).then((networkResponse) => {
+          return fetchFresh(event.request).then((networkResponse) => {
             if (shouldCache && networkResponse.ok) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));

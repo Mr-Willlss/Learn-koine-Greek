@@ -948,11 +948,14 @@ function buildDictionaryQuickActions(exercise) {
   button.className = "btn ghost";
   button.textContent = "Open dictionary";
   button.addEventListener("click", () => {
-    if (exercise.type === "sentence-builder" && exercise.sentence) {
-      renderInlineDictionary(exercise.sentence, { preferTokens: true });
+    // Sentence builder should not reveal the correct sentence arrangement automatically.
+    // "Hint" is the only control that reveals the full answer sentence.
+    if (exercise.type === "sentence-builder") {
+      const fallback = selectedWord || exercise.tokens?.[0] || terms[0];
+      renderInlineDictionary(fallback);
       return;
     }
-    renderInlineDictionary(terms[0]);
+    renderInlineDictionary(selectedWord || terms[0]);
   });
   wrap.appendChild(button);
   return wrap;
@@ -1369,7 +1372,11 @@ function renderExercise() {
   }
 
   if (exercise.type === "sentence-builder") {
-    const sentenceStrip = buildDictionarySentenceStrip("Tap a word before you build the sentence", exercise.sentence || "");
+    // Do not show the correct sentence order up-front. Only reveal it via Hint.
+    const sentenceStrip = buildDictionarySentenceStrip(
+      "Tap any word to check its meaning (Hint reveals the correct order).",
+      (exercise.tokens || []).join(" ")
+    );
     if (sentenceStrip) wrapper.appendChild(sentenceStrip);
     const bank = document.createElement("div");
     bank.className = "drag-bank";
@@ -1900,6 +1907,19 @@ function showHint() {
   if (!ex) {
     setHeroStatusText("Start a lesson first, then press Hint to see vocabulary help for the active word.", "status");
     toast("Start a lesson first.");
+    return;
+  }
+  if (ex.type === "sentence-builder" && ex.sentence) {
+    const usage = selectedWord ? ` You also selected "${selectedWord}" if you want to inspect it.` : "";
+    setHeroStatusMarkup(`
+      <div class="hero-status-card">
+        <strong>Sentence hint</strong>
+        <p>Correct order:</p>
+        <p><strong>${escapeDictionaryHtml(ex.sentence)}</strong></p>
+        <p class="muted">Tap the word chips below to build it in order.${escapeDictionaryHtml(usage)}</p>
+      </div>
+    `, "hint");
+    toast("Hint revealed the correct sentence order.");
     return;
   }
   const targetWord = selectedWord || extractDictionaryTermsFromExercise(ex)[0] || ex.vocab?.greek || ex.vocab?.meaning || "";
