@@ -1,5 +1,5 @@
 (function () {
-  const APP_VERSION = "2026.04.08.3";
+  const APP_VERSION = "2026.04.17.1";
   const STORAGE_KEY = "gq_app_version";
   const RELOAD_KEY = "gq_version_reload_pending";
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "learn-koine-greek-v2026-04-08-202604083";
+const CACHE_NAME = "learn-koine-greek-v2026-04-17-202604171";
 const APP_SHELL = [
   "./manifest.json",
   "./assets/media/mascot-coach.mp4",

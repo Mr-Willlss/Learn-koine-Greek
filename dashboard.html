@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek" />
+  <title>Learn Koine Greek</title>
+
+  <link rel="manifest" href="manifest.json?v=202604171" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604171" />
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604171" />
+
+  <script src="app-version.js?v=202604171"></script>
+
+  <!-- Tailwind (CDN) + design tokens (safe for static GitHub Pages) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: {
+              950: "#070A12",
+              900: "#0B0F1A",
+              800: "#121A2B",
+              700: "#18243B"
+            },
+            glass: "rgba(255,255,255,0.06)",
+            stroke: "rgba(255,255,255,0.10)",
+            glow: "rgba(255,255,255,0.12)",
+            accent: {
+              gold: "#FFD166",
+              mint: "#06D6A0",
+              berry: "#EF476F",
+              sky: "#118AB2",
+              violet: "#9B5DE5"
+            }
+          },
+          boxShadow: {
+            soft: "0 18px 60px rgba(0,0,0,0.45)",
+            card: "0 10px 30px rgba(0,0,0,0.35)",
+            glow: "0 0 0 1px rgba(255,255,255,0.08) inset, 0 20px 70px rgba(0,0,0,0.45)"
+          },
+          borderRadius: {
+            xl2: "1.25rem",
+            xl3: "1.75rem"
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root { color-scheme: dark; }
+    html, body { height: 100%; }
+    body { font-family: "Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .font-display { font-family: "Fraunces", ui-serif, Georgia, serif; }
+    .tap { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+<body class="tap bg-ink-950 text-white">
+  <div id="root" class="min-h-[100dvh]"></div>
+
+  <!-- Firebase auth is optional here; only used if the user taps Sign in. -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="firebase.js?v=202604171"></script>
+  <script src="auth.js?v=202604171"></script>
+
+  <script type="module" src="dashboard-app.js?v=202604171"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js?v=202604171").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
+
