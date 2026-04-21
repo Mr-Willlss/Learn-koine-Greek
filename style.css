@@ -20,11 +20,16 @@ body {
   margin: 0;
   font-family: "Space Grotesk", sans-serif;
   color: var(--ink);
-  background:
-    radial-gradient(circle at top left, rgba(255, 214, 122, 0.36), transparent 24%),
-    radial-gradient(circle at top right, rgba(57, 189, 248, 0.22), transparent 28%),
-    linear-gradient(180deg, #fffaf2 0%, #f6f8ff 40%, #eef6ff 100%);
   min-height: 100vh;
+}
+
+/* Central theme: allow lesson page to inherit dashboard dark-glass background via css/theme.css. */
+body.dark{
+  background:
+    radial-gradient(1200px 650px at 20% 0%, rgba(17,138,178,.22), transparent 60%),
+    radial-gradient(900px 500px at 70% 15%, rgba(155,93,229,.22), transparent 55%),
+    radial-gradient(900px 520px at 35% 85%, rgba(6,214,160,.15), transparent 60%),
+    linear-gradient(180deg, var(--bg0, #070A12), var(--bg1, #0B0F1A));
 }
 
 h1, h2, h3, h4 { margin: 0; font-family: "Fraunces", serif; }

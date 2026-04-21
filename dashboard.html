@@ -16,6 +16,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604211" />
   <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604211" />
 
+  <link rel="stylesheet" href="css/theme.css?v=202604211" />
   <link rel="stylesheet" href="css/main.css?v=202604211" />
 
   <!-- Firebase is optional for dashboard profile sync. -->
@@ -26,7 +27,26 @@
   <script defer src="js/main.js?v=202604211"></script>
 </head>
 <body>
-  <div class="shell" role="application" aria-label="Learn Koine Greek dashboard">
+  <div class="app">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="sideBrand">
+        <div class="sideLogo" aria-hidden="true">δῡξ</div>
+        <div style="min-width:0">
+          <div class="sideTitle">Learn Koine Greek</div>
+          <div class="sideSub">Dashboard</div>
+        </div>
+      </div>
+      <nav class="sideNav">
+        <a class="sideLink sideLinkActive" data-side="home" href="dashboard.html">Dashboard</a>
+        <a class="sideLink" data-side="practice" href="dashboard.html#practice">Practice</a>
+        <a class="sideLink" data-side="lessons" href="lesson.html">Lessons</a>
+        <a class="sideLink" data-side="rewards" href="dashboard.html#rewards">Rewards</a>
+        <a class="sideLink" data-side="profile" href="dashboard.html#profile">Profile</a>
+        <a class="sideLink" data-side="settings" href="dashboard.html#settings">Settings</a>
+      </nav>
+    </aside>
+
+    <div class="shell" role="application" aria-label="Learn Koine Greek dashboard">
     <header class="topbar">
       <div class="brand" aria-label="App title">
         <div class="brandMark" aria-hidden="true">🌐</div>
@@ -177,6 +197,7 @@
       <button class="navBtn" data-tab="profile" type="button" aria-label="Profile tab">👤<small>Profile</small></button>
       <button class="navBtn" data-tab="rewards" type="button" aria-label="Rewards tab">🎒<small>Rewards</small></button>
     </nav>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -198,4 +219,3 @@
   </div>
 </body>
 </html>
-
