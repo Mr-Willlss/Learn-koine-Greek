@@ -61,8 +61,12 @@ self.addEventListener("fetch", (event) => {
             }
             return networkResponse;
           })
-           .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./dashboard.html") || caches.match("./index.html")))
-      : caches.match(event.request).then((cachedResponse) => {
+           .catch(() =>
+             caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) =>
+               cachedResponse || caches.match("./dashboard.html") || caches.match("./index.html")
+             )
+           )
+      : caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
           return fetchFresh(event.request).then((networkResponse) => {
             if (shouldCache && networkResponse.ok) {
