@@ -1,11 +1,3 @@
-﻿<!--
-Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
-1) Bento dashboards win when they reduce cognitive load: fewer, larger cards; one primary CTA; progressive disclosure for secondary actions.
-2) Habit loops work best when feedback is immediate and emotional: streak flame + short motivational copy + small reward animations on completion.
-3) Micro-interactions should be transform/opacity based for smooth performance; respect prefers-reduced-motion and avoid heavy layout thrash.
-4) Dark mode engagement improves with high-contrast text, warm reward accents (gold/mint/violet), and soft glass layers instead of flat black.
-5) "Above the fold" zero-scroll layouts need strict height budgeting: fixed app shell, bottom nav, and cards that adapt via container rules.
--->
 <!doctype html>
 <html lang="en">
 <head>
@@ -18,692 +10,252 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek" />
-  <title>Learn Koine Greek</title>
-
-  <link rel="manifest" href="manifest.json?v=202604181" />
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604181" />
-  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604181" />
-
-  <style>
-    :root{
-      color-scheme: dark;
-      --bg0:#070A12;
-      --bg1:#0B0F1A;
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --muted:rgba(255,255,255,.68);
-      --muted2:rgba(255,255,255,.52);
-      --text:#ffffff;
-      --gold:#FFD166;
-      --mint:#06D6A0;
-      --violet:#9B5DE5;
-      --sky:#118AB2;
-      --berry:#EF476F;
-      --r24:24px;
-      --shadow:0 18px 60px rgba(0,0,0,.45);
-      --glow:0 0 0 1px rgba(255,255,255,.08) inset, 0 20px 70px rgba(0,0,0,.45);
-      --tap:transparent;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:
-        radial-gradient(1200px 650px at 20% 0%, rgba(17,138,178,.22), transparent 60%),
-        radial-gradient(900px 500px at 70% 15%, rgba(155,93,229,.22), transparent 55%),
-        radial-gradient(900px 520px at 35% 85%, rgba(6,214,160,.15), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-      -webkit-tap-highlight-color:var(--tap);
-      overflow:hidden;
-    }
-    button{font:inherit}
-    .shell{
-      height:100dvh;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      max-width:1100px;
-      margin:0 auto;
-      padding:14px 14px 12px;
-      gap:12px;
-    }
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:12px;
-      border-radius:var(--r24);
-      background:var(--card);
-      box-shadow:var(--glow);
-      border:1px solid var(--stroke);
-      backdrop-filter: blur(14px);
-    }
-    .brand{display:flex;align-items:center;gap:10px;min-width:0}
-    .brandMark{
-      width:40px;height:40px;border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      display:grid;place-items:center;
-    }
-    .brandTitle{font-weight:900;letter-spacing:.2px;line-height:1.05}
-    .brandSub{font-size:12px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .topActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05);
-      color:rgba(255,255,255,.85);
-      font-size:12px;
-    }
-    .btn{
-      border:0;border-radius:999px;
-      padding:10px 14px;
-      font-weight:900;cursor:pointer;
-      color:#081019;
-      background:var(--gold);
-      box-shadow:0 12px 35px rgba(0,0,0,.35);
-      transition:transform .12s ease, filter .12s ease;
-    }
-    .btn:active{transform:scale(.98)}
-    .btnGhost{
-      background:rgba(255,255,255,.06);
-      color:rgba(255,255,255,.86);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:none;
-    }
-    .btn:focus-visible,.btnGhost:focus-visible,.navBtn:focus-visible,.card:focus-visible{
-      outline:2px solid rgba(255,209,102,.70);
-      outline-offset:2px;
-    }
-    .grid{
-      height:100%;
-      display:grid;
-      gap:12px;
-      grid-template-columns:1fr;
-      grid-template-rows:auto 1fr;
-      min-height:0;
-    }
-    .coach{
-      border-radius:var(--r24);
-      background:var(--card);
-      border:1px solid var(--stroke);
-      box-shadow:var(--glow);
-      backdrop-filter: blur(14px);
-      padding:12px;
-      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-    }
-    .coach h1{margin:0;font-size:18px}
-    .coach p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.25}
-    .coachRight{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .pill{
-      padding:8px 10px;border-radius:999px;font-size:12px;font-weight:900;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:rgba(255,255,255,.85);
-    }
-    .pillGold{background:rgba(255,209,102,.18);border-color:rgba(255,209,102,.28);color:var(--gold)}
-    .pillMint{background:rgba(6,214,160,.18);border-color:rgba(6,214,160,.28);color:var(--mint)}
-    .pillViolet{background:rgba(155,93,229,.18);border-color:rgba(155,93,229,.28);color:var(--violet)}
-    .pillSky{background:rgba(17,138,178,.18);border-color:rgba(17,138,178,.28);color:var(--sky)}
-    .pillBerry{background:rgba(239,71,111,.18);border-color:rgba(239,71,111,.28);color:var(--berry)}
-    .bento{
-      min-height:0;
-      display:grid;
-      gap:12px;
-      grid-template-columns:1fr;
-      grid-template-rows:repeat(6, minmax(0, 1fr));
-    }
-    @media (min-width: 820px){
-      .bento{
-        grid-template-columns:repeat(12, minmax(0, 1fr));
-        grid-template-rows:repeat(3, minmax(0, 1fr));
-      }
-      .span7{grid-column:span 7}
-      .span5{grid-column:span 5}
-      .span4{grid-column:span 4}
-      .span12{grid-column:span 12}
-      .row2{grid-row:span 2}
-    }
-    .card{
-      border-radius:var(--r24);
-      background:var(--card);
-      border:1px solid var(--stroke);
-      box-shadow:var(--glow);
-      backdrop-filter: blur(14px);
-      padding:12px;
-      position:relative;
-      overflow:hidden;
-      cursor:pointer;
-      transition:transform .14s ease, filter .14s ease;
-    }
-    .card:hover{transform:translateY(-2px)}
-    .card:active{transform:translateY(-1px) scale(.99)}
-    .cardTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2)}
-    .cardTitle{margin:2px 0 0;font-weight:900;letter-spacing:.2px}
-    .cardBody{margin-top:10px;min-height:0}
-    .muted{color:var(--muted);font-size:13px;line-height:1.25}
-    .cta{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-    .bigTitle{font-size:20px;font-weight:900;letter-spacing:.2px;margin:0}
-    .bigSub{margin:8px 0 0;color:var(--muted);font-size:13px}
-    .bar{
-      height:10px;border-radius:999px;background:rgba(255,255,255,.08);
-      overflow:hidden;border:1px solid rgba(255,255,255,.10);
-    }
-    .bar > span{
-      display:block;height:100%;
-      background:linear-gradient(90deg, var(--sky), var(--violet), var(--berry));
-      width:0%;
-      transition:width .5s ease;
-    }
-    .streakRow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
-    .streakDay{display:flex;flex-direction:column;align-items:center;gap:6px}
-    .streakLbl{font-size:10px;color:var(--muted2)}
-    .dot{
-      width:14px;height:14px;border-radius:999px;
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .dotOn{background:rgba(6,214,160,.90);border-color:rgba(6,214,160,.38)}
-    .dotToday{box-shadow:0 0 0 3px rgba(255,255,255,.10)}
-    .flame{
-      width:38px;height:38px;border-radius:16px;
-      display:grid;place-items:center;
-      background:rgba(255,209,102,.16);
-      border:1px solid rgba(255,209,102,.24);
-    }
-    .flamePulse{animation:flame 1.25s ease-in-out infinite}
-    @keyframes flame{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-    .rewardBox{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .chest{
-      width:56px;height:56px;border-radius:18px;
-      display:grid;place-items:center;
-      background:rgba(255,209,102,.16);
-      border:1px solid rgba(255,209,102,.24);
-      font-size:26px;
-    }
-    .chestOpen{animation:chest .6s ease}
-    @keyframes chest{0%{transform:rotate(0) scale(1)}35%{transform:rotate(-7deg) scale(1.08)}70%{transform:rotate(7deg) scale(1.04)}100%{transform:rotate(0) scale(1)}}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .miniBtn{
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      padding:10px;
-      cursor:pointer;
-      color:rgba(255,255,255,.88);
-      font-weight:900;
-      transition:transform .12s ease;
-    }
-    .miniBtn:active{transform:scale(.98)}
-    .miniBtn small{display:block;margin-top:4px;font-size:11px;color:var(--muted2);font-weight:800}
-    .miniMint{background:rgba(6,214,160,.18);border-color:rgba(6,214,160,.26)}
-    .miniSky{background:rgba(17,138,178,.18);border-color:rgba(17,138,178,.26)}
-    .miniViolet{background:rgba(155,93,229,.18);border-color:rgba(155,93,229,.26)}
-    .notif{display:grid;gap:8px}
-    .note{
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      padding:10px;
-    }
-    .note b{display:block;font-size:13px}
-    .note span{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
-    .nav{
-      height:70px;
-      border-radius:var(--r24);
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(14px);
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:8px;
-      padding:8px;
-    }
-    .navBtn{
-      border-radius:18px;
-      border:0;
-      background:transparent;
-      color:rgba(255,255,255,.78);
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      padding:8px;
-      transition:background .12s ease, transform .12s ease;
-      font-weight:900;
-      line-height:1;
-    }
-    .navBtn small{margin-top:4px;font-size:11px;font-weight:800;color:rgba(255,255,255,.70)}
-    .navBtnActive{background:rgba(255,255,255,.10);color:#fff}
-    .navBtn:active{transform:scale(.98)}
-    .toast{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:92px;
-      max-width:min(520px, calc(100vw - 24px));
-      padding:10px 12px;
-      border-radius:16px;
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.14);
-      color:rgba(255,255,255,.92);
-      box-shadow:var(--shadow);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .2s ease, transform .2s ease;
-    }
-    .toastShow{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    .modalOverlay{
-      position:fixed;inset:0;
-      display:none;
-      place-items:center;
-      padding:14px;
-      background:rgba(0,0,0,.62);
-      z-index:50;
-    }
-    .modalOverlay.show{display:grid}
-    .modal{
-      width:min(520px, 100%);
-      border-radius:var(--r24);
-      background:rgba(11,15,26,.92);
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow:var(--shadow);
-      padding:14px;
-    }
-    .modalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .modalHead h3{margin:0;font-size:16px}
-    .modalBody{margin-top:10px;color:var(--muted);font-size:13px}
-    .modalActions{margin-top:14px;display:flex;justify-content:flex-end;gap:8px}
-    @media (max-height: 740px){
-      .shell{gap:10px;padding:12px 12px 10px}
-      .bento{gap:10px}
-      .card,.coach,.topbar{padding:10px}
-      .notif .note:nth-child(n+2){display:none}
-      .bigTitle{font-size:18px}
-    }
-    @media (prefers-reduced-motion: reduce){
-      *{animation:none !important;transition:none !important}
-    }
-  </style>
+  <title>Learn Koine Greek Dashboard</title>
+  <link rel="manifest" href="manifest.json?v=202604211" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604211" />
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604211" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="app-version.js?v=202604211"></script>
+  <link rel="stylesheet" href="style.css?v=202604211" />
 </head>
-<body>
-  <div class="shell" role="application" aria-label="Learn Koine Greek dashboard">
-    <header class="topbar">
-      <div class="brand" aria-label="App title">
-        <div class="brandMark" aria-hidden="true">ðŸŒ€</div>
-        <div style="min-width:0">
-          <div class="brandTitle">Learn Koine Greek</div>
-          <div class="brandSub" id="subline">Bite-sized lessons. Big momentum.</div>
-        </div>
-      </div>
-      <div class="topActions">
-        <span class="chip" id="syncChip" aria-label="Sync status">Device only</span>
-        <button class="btn" id="signInBtn" type="button">Sign in</button>
-        <button class="btn btnGhost" id="signOutBtn" type="button" style="display:none">Log out</button>
+<body class="dark app-home">
+  <div class="app-shell">
+    <header class="app-topbar">
+      <a class="brand-lockup" href="index.html" aria-label="Back to start">
+        <span class="brand-mark">
+          <video class="mascot-video mascot-video--logo" src="assets/media/mascot-coach.mp4?v=202604211" autoplay muted loop playsinline aria-hidden="true"></video>
+        </span>
+        <span class="brand-copy">
+          <strong>Learn Koine Greek</strong>
+          <small>Focused path, clear progress, fast lessons</small>
+        </span>
+      </a>
+      <div class="topbar-actions">
+        <button id="hero-sign-in-btn" class="btn btn--sky" type="button">Sign in with Google</button>
+        <button id="hero-log-in-btn" class="btn ghost" type="button">Log in</button>
+        <button id="hero-logout-btn" class="btn ghost" type="button" style="display:none">Log out</button>
       </div>
     </header>
 
-    <main class="grid" aria-label="Dashboard content">
-      <section class="coach" aria-label="Coach message">
-        <div>
-          <h1 id="coachTitle">Welcome back</h1>
-          <p id="coachMsg">Continue where you left off with one clean lesson.</p>
+    <main class="dashboard">
+      <header class="hero hero--dashboard">
+        <div class="hero-copy">
+          <div class="hero-copy__top">
+            <p class="eyebrow">Welcome back</p>
+            <div class="hero-badges">
+              <span id="hero-rank-badge" class="hero-badge">Novice Scribe</span>
+              <span id="hero-sync-badge" class="hero-badge hero-badge--muted">Device only</span>
+            </div>
+          </div>
+          <h1>Learn Koine Greek</h1>
+          <p class="hero-tagline">Keep the home screen about learning: your lesson, your dictionary, and one clean path forward.</p>
+          <div class="hero-chip hero-chip--dictionary">
+            <p class="eyebrow">Dictionary / Status</p>
+            <div id="hero-status"></div>
+          </div>
         </div>
-        <div class="coachRight" aria-label="Quick stats">
-          <span class="pill pillSky" id="xpPill">XP 0</span>
-          <span class="pill pillViolet" id="levelPill">Level 1</span>
-          <span class="pill" id="nextPill">Next: Level 1</span>
+
+        <div class="hero-panel">
+          <div class="focus-strip">
+            <div class="focus-card">
+              <span class="eyebrow">Progress</span>
+              <strong id="focus-progress-value">0 / 25</strong>
+              <p id="focus-progress-note" class="muted">Your path starts at Level 1.</p>
+            </div>
+            <div class="focus-card">
+              <span class="eyebrow">Streak</span>
+              <strong id="focus-streak-value">0 days</strong>
+              <p id="focus-league-note" class="muted">Bronze League</p>
+            </div>
+            <div class="focus-card focus-card--accent">
+              <span class="eyebrow">Next up</span>
+              <strong id="focus-next-value">Level 1</strong>
+              <p id="focus-next-note" class="muted">Pick up where you left off.</p>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button id="continue-btn" class="btn" type="button">Continue path</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="utility-rail" aria-label="Navigation and quick actions">
+        <nav class="utility-nav">
+          <button id="map-btn" class="nav-btn" type="button">Map</button>
+          <button id="profile-btn" class="nav-btn" type="button">Profile</button>
+          <button id="leaderboard-btn" class="nav-btn" type="button">Leaderboard</button>
+          <button id="friends-btn" class="nav-btn" type="button">Friends</button>
+          <button id="options-btn" class="nav-btn" type="button">Options</button>
+          <button id="start-new-btn" class="nav-btn" type="button">Start new game</button>
+          <button id="about-btn" class="nav-btn" type="button">About</button>
+          <button id="contact-btn" class="nav-btn" type="button">Contact</button>
+        </nav>
+        <div class="hero-shortcuts hero-shortcuts--inline" aria-label="Quick access panels">
+          <button id="home-rewards-btn" class="hero-shortcut hero-shortcut--gold" type="button">
+            <span class="hero-shortcut__eyebrow">Reward pocket</span>
+            <strong>Rewards</strong>
+            <small id="reward-last-home">Finish a lesson to collect rewards.</small>
+          </button>
+          <button id="home-invite-btn" class="hero-shortcut hero-shortcut--sky" type="button">
+            <span class="hero-shortcut__eyebrow">Invite</span>
+            <strong>Invite friends</strong>
+            <small>Grow your study circle.</small>
+          </button>
+          <button id="home-gifts-btn" class="hero-shortcut hero-shortcut--mint" type="button">
+            <span class="hero-shortcut__eyebrow">Gifts</span>
+            <strong>Open gifts</strong>
+            <small>Send hearts and gems.</small>
+          </button>
+          <button id="home-quests-btn" class="hero-shortcut hero-shortcut--berry" type="button">
+            <span class="hero-shortcut__eyebrow">Quest board</span>
+            <strong>Daily goals</strong>
+            <small>Check your momentum.</small>
+          </button>
         </div>
       </section>
 
-      <section class="bento" aria-label="Bento grid">
-        <div class="card span7 row2" id="continueCard" role="button" tabindex="0" aria-label="Continue learning card">
-          <div class="cardTop">
-            <div>
-              <div class="eyebrow">Primary path</div>
-              <div class="cardTitle">Continue learning</div>
-            </div>
-            <span class="pill pillGold" id="ctaTag">Ready</span>
-          </div>
-          <div class="cardBody">
-            <p class="bigTitle" id="continueTitle">Continue path</p>
-            <p class="bigSub" id="continueSub">Pick up from your last saved activity.</p>
-            <div style="height:10px"></div>
-            <div class="cta">
-              <div>
-                <div class="eyebrow">Daily goal</div>
-                <div class="muted" id="goalText">0 / 1 lesson today</div>
-                <div class="bar" aria-label="Daily goal progress">
-                  <span id="goalBar"></span>
-                </div>
+      <section class="status-ribbon" aria-label="Current profile summary">
+        <div class="stat-row stat-row--summary">
+          <span id="stat-level">Level 1</span>
+          <span id="stat-xp">XP 0</span>
+          <span id="stat-hearts">Hearts 5</span>
+          <span id="stat-rank">Rank Novice</span>
+          <span id="stat-league">League Bronze</span>
+          <span id="stat-streak">Streak 0</span>
+        </div>
+        <div class="side-rewards side-rewards--summary">
+          <div class="side-reward-chip side-reward-chip--gold"><span>Gems</span><strong id="side-reward-gems">0</strong></div>
+          <div class="side-reward-chip side-reward-chip--mint"><span>Heart gifts</span><strong id="side-reward-hearts">0</strong></div>
+          <div class="side-reward-chip side-reward-chip--sky"><span>Crowns</span><strong id="side-reward-crowns">0</strong></div>
+        </div>
+      </section>
+
+      <section class="map-shell" aria-label="World map">
+        <div class="section-head">
+          <h2>Worlds & Levels</h2>
+          <div class="lesson-progress">
+            <div class="lesson-progress__meta">
+              <span id="lesson-category" class="eyebrow">Category: -</span>
+              <span id="lesson-progress-text" class="eyebrow">Lesson: -</span>
+              <div class="lesson-hearts-panel">
+                <span id="lesson-hearts" class="eyebrow">Hearts: 5</span>
+                <div id="lesson-hearts-diagram" class="heart-diagram" aria-label="5 of 5 hearts remaining"></div>
+                <span id="lesson-earned-xp" class="eyebrow lesson-earned-xp">XP this lesson: 0</span>
               </div>
-              <button class="btn" id="continueBtn" type="button">Continue</button>
             </div>
+            <div class="lesson-progress__bar"><span id="lesson-progress-bar"></span></div>
+          </div>
+        </div>
+        <div id="world-map" class="world-map"></div>
+      </section>
+
+      <section class="lesson-panel" id="lesson-panel" aria-label="Lesson play area">
+        <div class="lesson-header">
+          <div>
+            <p class="eyebrow" id="lesson-type">Choose a lesson to begin</p>
+            <h2 id="lesson-title">Welcome</h2>
+          </div>
+          <span id="lesson-xp" class="pill">+0 XP</span>
+        </div>
+
+        <div class="lesson-hud">
+          <div class="lesson-hud__card">
+            <span class="eyebrow">Activity</span>
+            <strong id="lesson-step-count">0 / 0</strong>
+            <p id="lesson-step-note" class="muted">Choose a lesson to begin.</p>
+          </div>
+          <div class="lesson-hud__card">
+            <span class="eyebrow">Accuracy</span>
+            <strong id="lesson-accuracy">0%</strong>
+            <p id="lesson-accuracy-note" class="muted">Warm up with your first answer.</p>
+          </div>
+          <div class="lesson-hud__card lesson-hud__card--quest">
+            <span class="eyebrow">Daily goal</span>
+            <strong id="daily-goal-value">1 lesson</strong>
+            <p id="daily-goal-note" class="muted">Complete one lesson today to keep momentum.</p>
           </div>
         </div>
 
-        <div class="card span5 row2" id="streakCard" role="button" tabindex="0" aria-label="Streak card">
-          <div class="cardTop">
-            <div>
-              <div class="eyebrow">Daily momentum</div>
-              <div class="cardTitle">Streak</div>
-            </div>
-            <div class="flame" id="flame" aria-hidden="true">ðŸ”¥</div>
+        <div id="lesson-feedback" class="lesson-feedback" aria-live="polite">
+          <span class="lesson-feedback__badge">Ready</span>
+          <p id="lesson-feedback-text">Start a lesson and let&apos;s build your streak with small wins.</p>
+        </div>
+
+        <div class="lesson-support-rail">
+          <div class="lesson-support-rail__copy">
+            <p class="eyebrow">Lesson support</p>
+            <strong>Dictionary first, then friends if you need more help.</strong>
+            <span class="muted">Keep the main screen focused on the lesson, and open the other sections only when you need them.</span>
           </div>
-          <div class="cardBody">
-            <p class="bigTitle" id="streakCount">0 days</p>
-            <p class="muted" id="streakMsg">Start your streak today. One lesson is enough.</p>
-            <div class="streakRow" id="streakRow" aria-label="7-day streak tracker"></div>
+          <div class="lesson-support-rail__actions">
+            <button id="lesson-dictionary-btn" class="btn btn--sky" type="button">Check dictionary</button>
+            <button id="lesson-ask-btn" class="btn ghost" type="button">Ask friends</button>
+            <button id="lesson-study-btn" class="btn btn--berry" type="button">Study together</button>
           </div>
         </div>
 
-        <div class="card span4" id="rewardsCard" role="button" tabindex="0" aria-label="Rewards chest card">
-          <div class="cardTop">
-            <div>
-              <div class="eyebrow">Chest system</div>
-              <div class="cardTitle">Rewards</div>
-            </div>
-          </div>
-          <div class="cardBody">
-            <div class="rewardBox">
-              <div>
-                <div class="muted">Daily chest</div>
-                <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
-                  <span class="pill pillGold" id="gemsPill">ðŸ’Ž 0 gems</span>
-                  <span class="pill pillMint">âœ¨ bonus</span>
-                </div>
-                <div class="muted" style="margin-top:6px">Tap to open and collect.</div>
-              </div>
-              <div class="chest" id="chest" aria-hidden="true">ðŸ§°</div>
-            </div>
+        <div class="mascot-cheer mascot-cheer--inline" aria-hidden="true">
+          <video class="mascot-video mascot-video--cheer" src="assets/media/mascot-coach.mp4?v=202604211" autoplay muted loop playsinline></video>
+        </div>
+
+        <div class="lesson-body" id="lesson-body">
+          <div class="welcome">
+            <h3>Tap a lesson node to start.</h3>
+            <p>Your lesson surface stays clean now. Rewards, gifts, invites, and quest details live behind the quick buttons above.</p>
           </div>
         </div>
 
-        <div class="card span4" id="progressCard" role="button" tabindex="0" aria-label="Progress card">
-          <div class="cardTop">
-            <div>
-              <div class="eyebrow">XP and levels</div>
-              <div class="cardTitle">Progress</div>
-            </div>
-            <span class="pill pillSky" id="xpMini">XP 0</span>
-          </div>
-          <div class="cardBody">
-            <div class="muted" id="progressNote">Next level in 50 XP</div>
-            <div style="height:8px"></div>
-            <div class="bar" aria-label="Level progress">
-              <span id="levelBar"></span>
-            </div>
-            <div style="height:10px"></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <span class="pill pillViolet" id="levelMini">Level 1</span>
-              <span class="pill" id="lessonMini">0 lessons</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card span4" id="practiceCard" role="button" tabindex="0" aria-label="Practice shortcuts card">
-          <div class="cardTop">
-            <div>
-              <div class="eyebrow">Shortcuts</div>
-              <div class="cardTitle">Practice</div>
-            </div>
-          </div>
-          <div class="cardBody">
-            <div class="grid3">
-              <button class="miniBtn miniMint" id="practiceReview" type="button">Review<small>Quick drill</small></button>
-              <button class="miniBtn miniSky" id="practiceListen" type="button">Listen<small>Quick drill</small></button>
-              <button class="miniBtn miniViolet" id="practiceSpeak" type="button">Speak<small>Quick drill</small></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card span12" id="notifCard" role="button" tabindex="0" aria-label="Notifications card">
-          <div class="cardTop">
-            <div>
-              <div class="eyebrow">Updates</div>
-              <div class="cardTitle">Notifications</div>
-            </div>
-            <span class="pill" id="notifCount">0</span>
-          </div>
-          <div class="cardBody">
-            <div class="notif" id="notifList"></div>
-          </div>
+        <div class="lesson-footer">
+          <button id="hint-btn" class="btn ghost" type="button" disabled>Hint</button>
+          <button id="check-btn" class="btn" type="button" disabled>Check</button>
+          <button id="skip-btn" class="btn ghost" type="button" disabled>Skip</button>
         </div>
       </section>
     </main>
-
-    <nav class="nav" aria-label="Bottom navigation">
-      <button class="navBtn navBtnActive" data-tab="home" type="button" aria-label="Home tab">ðŸ <small>Home</small></button>
-      <button class="navBtn" data-tab="practice" type="button" aria-label="Practice tab">âš¡<small>Practice</small></button>
-      <button class="navBtn" data-tab="profile" type="button" aria-label="Profile tab">ðŸ‘¤<small>Profile</small></button>
-      <button class="navBtn" data-tab="rewards" type="button" aria-label="Rewards tab">ðŸŽ’<small>Rewards</small></button>
-    </nav>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <div class="modalOverlay" id="modalOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modalHead">
-        <div>
-          <div class="eyebrow">Update</div>
-          <h3 id="modalTitle">Notice</h3>
-        </div>
-        <button class="btn btnGhost" id="modalClose" type="button">Close</button>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="tour-overlay" class="tour-overlay" aria-hidden="true">
+    <div class="tour-spotlight"></div>
+    <div class="tour-card">
+      <div class="mascot">
+        <div class="mascot-face"></div>
+        <div class="mascot-body"></div>
       </div>
-      <div class="modalBody" id="modalBody"></div>
-      <div class="modalActions">
-        <button class="btn" id="modalOk" type="button">OK</button>
+      <div class="tour-content">
+        <h3 id="tour-title">Welcome</h3>
+        <p id="tour-text">Let me show you around.</p>
+        <div class="tour-actions">
+          <button id="tour-skip" class="btn ghost" type="button">Skip</button>
+          <button id="tour-next" class="btn" type="button">Next</button>
+        </div>
       </div>
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="firebase.js?v=202604211"></script>
+  <script src="auth.js?v=202604211"></script>
+  <script src="spacedRepetition.js?v=202604211"></script>
+  <script src="speech.js?v=202604211"></script>
+  <script src="teacherCharacter.js?v=202604211"></script>
+  <script src="lessons.js?v=202604211"></script>
+  <script src="vocabIllustrations.js?v=202604211"></script>
+  <script src="map.js?v=202604211"></script>
+  <script src="social.js?v=202604211"></script>
+  <script src="game.js?v=202604211"></script>
   <script>
-    (function () {
-      "use strict";
-      const APP_VERSION = "2026.04.18.1";
-      const VERSION_KEY = "gq_dash_version";
-      const RELOAD_KEY = "gq_dash_reload_once";
-      function $(id){ return document.getElementById(id); }
-      function toast(msg){
-        const t = $("toast");
-        if (!t) return;
-        t.textContent = msg;
-        t.classList.add("toastShow");
-        window.clearTimeout(toast._tm);
-        toast._tm = window.setTimeout(() => t.classList.remove("toastShow"), 2200);
-      }
-      function openModal(title, body){
-        $("modalTitle").textContent = title;
-        $("modalBody").textContent = body;
-        const o = $("modalOverlay");
-        o.classList.add("show");
-        o.setAttribute("aria-hidden","false");
-      }
-      function closeModal(){
-        const o = $("modalOverlay");
-        o.classList.remove("show");
-        o.setAttribute("aria-hidden","true");
-      }
-      function safeJsonParse(raw){
-        try { return raw ? JSON.parse(raw) : null; } catch { return null; }
-      }
-      function readProgress(){
-        return safeJsonParse(localStorage.getItem("greekQuestProgress"));
-      }
-      function levelFromXp(xp){
-        const v = Number.isFinite(xp) ? xp : 0;
-        return Math.max(1, Math.floor(v / 50) + 1);
-      }
-      function dayLabel(d){
-        try { return new Intl.DateTimeFormat(undefined,{weekday:"short"}).format(d); } catch { return "Day"; }
-      }
-      function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
-      async function clearCachesAndReload(){
-        try{
-          if ("caches" in window){
-            const keys = await caches.keys();
-            await Promise.all(keys.map((k)=>caches.delete(k)));
-          }
-          if ("serviceWorker" in navigator){
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map((r)=>r.update().catch(()=>{})));
-            await Promise.all(regs.map((r)=>r.unregister()));
-          }
-        }catch{}
-        localStorage.setItem(VERSION_KEY, APP_VERSION);
-        const url = new URL(window.location.href);
-        url.searchParams.set("v", APP_VERSION);
-        window.location.replace(url.toString());
-      }
-      const prev = localStorage.getItem(VERSION_KEY);
-      const once = sessionStorage.getItem(RELOAD_KEY) === "1";
-      if (prev !== APP_VERSION && !once){
-        sessionStorage.setItem(RELOAD_KEY, "1");
-        clearCachesAndReload();
-        return;
-      }
-      localStorage.setItem(VERSION_KEY, APP_VERSION);
-      sessionStorage.removeItem(RELOAD_KEY);
-      if ("serviceWorker" in navigator){
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=" + encodeURIComponent(APP_VERSION))
-            .then((reg)=>reg.update().catch(()=>{}))
-            .catch(()=>{});
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js?v=202604211").catch((error) => {
+          console.error("Service worker registration failed:", error);
         });
-      }
-      function applyTab(tab){
-        document.querySelectorAll(".navBtn").forEach((btn)=>{
-          btn.classList.toggle("navBtnActive", btn.dataset.tab === tab);
-        });
-        if (tab === "practice") toast("Practice shortcuts are on Home. Tap Review / Listen / Speak.");
-        if (tab === "profile") toast("Profile lives in the lesson page for now. Tap Continue, then open Profile.");
-        if (tab === "rewards") toast("Rewards chest is on Home. Tap the Rewards card.");
-      }
-      function updateUI(progress){
-        const xp = Number.isFinite(progress?.xp) ? progress.xp : 0;
-        const completed = Array.isArray(progress?.completedLessons) ? progress.completedLessons.length : 0;
-        const hearts = Number.isFinite(progress?.hearts) ? progress.hearts : 5;
-        const activeLessonId = progress?.activeLessonId || null;
-        const activeIdx = Number.isFinite(progress?.activeExerciseIndex) ? progress.activeExerciseIndex : 0;
-        const lvl = levelFromXp(xp);
-        const within = xp % 50;
-        const pct = Math.round((within / 50) * 100);
-        $("xpPill").textContent = "XP " + xp;
-        $("xpMini").textContent = "XP " + xp;
-        $("levelPill").textContent = "Level " + lvl;
-        $("levelMini").textContent = "Level " + lvl;
-        $("lessonMini").textContent = completed + " lessons";
-        $("progressNote").textContent = "Next level in " + (50 - within) + " XP";
-        $("levelBar").style.width = pct + "%";
-        $("nextPill").textContent = activeLessonId ? ("Next: " + activeLessonId) : ("Next: Level " + (completed + 1));
-        $("coachMsg").textContent = activeLessonId
-          ? ("Continue where you left off: " + activeLessonId + " (step " + (activeIdx + 1) + ").")
-          : (completed ? "You have momentum. Continue your next unlocked lesson." : "Start with Level 1. Small wins first.");
-        $("coachTitle").textContent = activeLessonId ? "Welcome back" : "Ready to learn";
-        $("continueTitle").textContent = completed < 3 ? "Continue path" : "Keep your momentum";
-        $("continueSub").textContent = activeLessonId ? "We will open the exact activity you stopped on." : "One clean lesson keeps streak and progress moving.";
-        $("ctaTag").textContent = hearts <= 2 ? "Low hearts" : "Ready";
-        $("ctaTag").className = "pill " + (hearts <= 2 ? "pillBerry" : "pillGold");
-        $("goalText").textContent = "0 / 1 lesson today";
-        $("goalBar").style.width = "0%";
-        const gems = Number.isFinite(progress?.gems) ? progress.gems : 0;
-        $("gemsPill").textContent = "ðŸ’Ž " + gems + " gems";
-        const notes = [];
-        notes.push({t:"Sign in to sync", b:"Use Google sign-in in the lesson page to keep progress across devices."});
-        if (hearts <= 2) notes.push({t:"Low hearts", b:"Slow down and focus on accuracy, or return after a refill."});
-        $("syncChip").textContent = "Device only";
-        $("notifCount").textContent = String(notes.length);
-        const list = $("notifList");
-        list.innerHTML = "";
-        notes.slice(0,2).forEach((n)=>{
-          const div = document.createElement("div");
-          div.className = "note";
-          div.innerHTML = "<b>" + n.t + "</b><span>" + n.b + "</span>";
-          list.appendChild(div);
-        });
-      }
-      function renderStreak(){
-        const today = new Date();
-        const streak = Number(localStorage.getItem("gq_streak_days") || "0");
-        const missed = localStorage.getItem("gq_streak_missed") === "1";
-        $("streakCount").textContent = streak + " day" + (streak === 1 ? "" : "s");
-        $("streakMsg").textContent = missed
-          ? "You missed a day. Do one lesson today to restart."
-          : (streak ? "Keep it alive. One lesson today protects the streak." : "Start your streak today. One lesson is enough.");
-        $("flame").classList.toggle("flamePulse", !missed && streak > 0);
-        const row = $("streakRow");
-        row.innerHTML = "";
-        const filled = clamp(streak, 0, 7);
-        for (let i=0;i<7;i++){
-          const d = new Date(today);
-          d.setDate(today.getDate() - (6 - i));
-          const isToday = i === 6;
-          const on = i >= (7 - filled);
-          const wrap = document.createElement("div");
-          wrap.className = "streakDay";
-          const lbl = document.createElement("div");
-          lbl.className = "streakLbl";
-          lbl.textContent = dayLabel(d);
-          const dot = document.createElement("div");
-          dot.className = "dot" + (on ? " dotOn" : "") + (isToday ? " dotToday" : "");
-          wrap.appendChild(lbl);
-          wrap.appendChild(dot);
-          row.appendChild(wrap);
-        }
-      }
-      function wireCardActivate(el, fn){
-        el.addEventListener("click", fn);
-        el.addEventListener("keydown", (e)=>{
-          if (e.key === "Enter" || e.key === " "){
-            e.preventDefault();
-            fn();
-          }
-        });
-      }
-      $("signInBtn").addEventListener("click", () => {
-        toast("Opening lessonsâ€¦ sign in is available inside the lesson page.");
-        window.location.href = "home.html?from=dashboard";
       });
-      $("signOutBtn").addEventListener("click", () => {
-        toast("Log out is available inside the lesson page.");
-        window.location.href = "home.html?from=dashboard";
-      });
-      function goLesson(url){ window.location.href = url; }
-      $("continueBtn").addEventListener("click", () => goLesson("home.html?from=dashboard"));
-      wireCardActivate($("continueCard"), () => goLesson("home.html?from=dashboard"));
-      $("practiceReview").addEventListener("click", () => goLesson("home.html?practice=mixed&from=dashboard"));
-      $("practiceListen").addEventListener("click", () => goLesson("home.html?practice=listening&from=dashboard"));
-      $("practiceSpeak").addEventListener("click", () => goLesson("home.html?practice=speaking&from=dashboard"));
-      wireCardActivate($("practiceCard"), () => toast("Pick a practice mode: Review, Listen, or Speak."));
-      function openChest(){
-        const chest = $("chest");
-        chest.classList.add("chestOpen");
-        chest.textContent = "ðŸŽ";
-        window.setTimeout(() => {
-          chest.classList.remove("chestOpen");
-          chest.textContent = "ðŸ§°";
-        }, 900);
-        toast("Chest opened. Rewards are tracked in the lesson app.");
-      }
-      wireCardActivate($("rewardsCard"), openChest);
-      wireCardActivate($("progressCard"), () => openModal("Progress", "XP and level progress are calculated from your saved state. Finish lessons to level up."));
-      wireCardActivate($("notifCard"), () => openModal("Notifications", "This panel highlights the most important actions: sign in for sync, and keep hearts healthy by focusing on accuracy."));
-      wireCardActivate($("streakCard"), () => openModal("Streak", "Complete one lesson today to keep the streak alive."));
-      $("modalClose").addEventListener("click", closeModal);
-      $("modalOk").addEventListener("click", closeModal);
-      $("modalOverlay").addEventListener("click", (e)=>{ if (e.target === $("modalOverlay")) closeModal(); });
-      document.querySelectorAll(".navBtn").forEach((b)=> b.addEventListener("click", ()=>applyTab(b.dataset.tab)));
-      renderStreak();
-      updateUI(readProgress());
-      window.addEventListener("storage", (e) => { if (e.key === "greekQuestProgress") updateUI(readProgress()); });
-      window.setInterval(() => updateUI(readProgress()), 2000);
-    })();
+    }
   </script>
 </body>
 </html>
-

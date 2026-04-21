@@ -1,5 +1,7 @@
-const CACHE_NAME = "learn-koine-greek-v2026-04-17-202604171";
+const CACHE_NAME = "learn-koine-greek-v2026-04-21-202604211";
 const APP_SHELL = [
+  "./index.html",
+  "./dashboard.html",
   "./manifest.json",
   "./assets/media/mascot-coach.mp4",
   "./assets/images/icon-192.png",
@@ -55,7 +57,7 @@ self.addEventListener("fetch", (event) => {
             }
             return networkResponse;
           })
-          .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./home.html") || caches.match("./index.html")))
+           .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match("./dashboard.html") || caches.match("./index.html")))
       : caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
           return fetchFresh(event.request).then((networkResponse) => {
