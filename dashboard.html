@@ -1,16 +1,8 @@
-﻿<!--
-Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
-1) Bento dashboards win when they reduce cognitive load: fewer, larger cards; one primary CTA; progressive disclosure for secondary actions.
-2) Habit loops work best when feedback is immediate and emotional: streak flame + short motivational copy + small reward animations on completion.
-3) Micro-interactions should be transform/opacity based for smooth performance; respect prefers-reduced-motion and avoid heavy layout thrash.
-4) Dark mode engagement improves with high-contrast text, warm reward accents (gold/mint/violet), and soft glass layers instead of flat black.
-5) "Above the fold" zero-scroll layouts need strict height budgeting: fixed app shell, bottom nav, and cards that adapt via container rules.
--->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0b0f1a" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -24,318 +16,21 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
   <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604211" />
   <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604211" />
 
-  <style>
-    :root{
-      color-scheme: dark;
-      --bg0:#070A12;
-      --bg1:#0B0F1A;
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --muted:rgba(255,255,255,.68);
-      --muted2:rgba(255,255,255,.52);
-      --text:#ffffff;
-      --gold:#FFD166;
-      --mint:#06D6A0;
-      --violet:#9B5DE5;
-      --sky:#118AB2;
-      --berry:#EF476F;
-      --r24:24px;
-      --shadow:0 18px 60px rgba(0,0,0,.45);
-      --glow:0 0 0 1px rgba(255,255,255,.08) inset, 0 20px 70px rgba(0,0,0,.45);
-      --tap:transparent;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:
-        radial-gradient(1200px 650px at 20% 0%, rgba(17,138,178,.22), transparent 60%),
-        radial-gradient(900px 500px at 70% 15%, rgba(155,93,229,.22), transparent 55%),
-        radial-gradient(900px 520px at 35% 85%, rgba(6,214,160,.15), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-      -webkit-tap-highlight-color:var(--tap);
-      overflow:hidden;
-    }
-    button{font:inherit}
-    .shell{
-      height:100dvh;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      max-width:1100px;
-      margin:0 auto;
-      padding:14px 14px 12px;
-      gap:12px;
-    }
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:12px;
-      border-radius:var(--r24);
-      background:var(--card);
-      box-shadow:var(--glow);
-      border:1px solid var(--stroke);
-      backdrop-filter: blur(14px);
-    }
-    .brand{display:flex;align-items:center;gap:10px;min-width:0}
-    .brandMark{
-      width:40px;height:40px;border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      display:grid;place-items:center;
-    }
-    .brandTitle{font-weight:900;letter-spacing:.2px;line-height:1.05}
-    .brandSub{font-size:12px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .topActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05);
-      color:rgba(255,255,255,.85);
-      font-size:12px;
-    }
-    .btn{
-      border:0;border-radius:999px;
-      padding:10px 14px;
-      font-weight:900;cursor:pointer;
-      color:#081019;
-      background:var(--gold);
-      box-shadow:0 12px 35px rgba(0,0,0,.35);
-      transition:transform .12s ease, filter .12s ease;
-    }
-    .btn:active{transform:scale(.98)}
-    .btnGhost{
-      background:rgba(255,255,255,.06);
-      color:rgba(255,255,255,.86);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:none;
-    }
-    .btn:focus-visible,.btnGhost:focus-visible,.navBtn:focus-visible,.card:focus-visible{
-      outline:2px solid rgba(255,209,102,.70);
-      outline-offset:2px;
-    }
-    .grid{
-      height:100%;
-      display:grid;
-      gap:12px;
-      grid-template-columns:1fr;
-      grid-template-rows:auto 1fr;
-      min-height:0;
-    }
-    .coach{
-      border-radius:var(--r24);
-      background:var(--card);
-      border:1px solid var(--stroke);
-      box-shadow:var(--glow);
-      backdrop-filter: blur(14px);
-      padding:12px;
-      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-    }
-    .coach h1{margin:0;font-size:18px}
-    .coach p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.25}
-    .coachRight{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .pill{
-      padding:8px 10px;border-radius:999px;font-size:12px;font-weight:900;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:rgba(255,255,255,.85);
-    }
-    .pillGold{background:rgba(255,209,102,.18);border-color:rgba(255,209,102,.28);color:var(--gold)}
-    .pillMint{background:rgba(6,214,160,.18);border-color:rgba(6,214,160,.28);color:var(--mint)}
-    .pillViolet{background:rgba(155,93,229,.18);border-color:rgba(155,93,229,.28);color:var(--violet)}
-    .pillSky{background:rgba(17,138,178,.18);border-color:rgba(17,138,178,.28);color:var(--sky)}
-    .pillBerry{background:rgba(239,71,111,.18);border-color:rgba(239,71,111,.28);color:var(--berry)}
-    .bento{
-      min-height:0;
-      display:grid;
-      gap:12px;
-      grid-template-columns:1fr;
-      grid-template-rows:repeat(6, minmax(0, 1fr));
-    }
-    @media (min-width: 820px){
-      .bento{
-        grid-template-columns:repeat(12, minmax(0, 1fr));
-        grid-template-rows:repeat(3, minmax(0, 1fr));
-      }
-      .span7{grid-column:span 7}
-      .span5{grid-column:span 5}
-      .span4{grid-column:span 4}
-      .span12{grid-column:span 12}
-      .row2{grid-row:span 2}
-    }
-    .card{
-      border-radius:var(--r24);
-      background:var(--card);
-      border:1px solid var(--stroke);
-      box-shadow:var(--glow);
-      backdrop-filter: blur(14px);
-      padding:12px;
-      position:relative;
-      overflow:hidden;
-      cursor:pointer;
-      transition:transform .14s ease, filter .14s ease;
-    }
-    .card:hover{transform:translateY(-2px)}
-    .card:active{transform:translateY(-1px) scale(.99)}
-    .cardTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2)}
-    .cardTitle{margin:2px 0 0;font-weight:900;letter-spacing:.2px}
-    .cardBody{margin-top:10px;min-height:0}
-    .muted{color:var(--muted);font-size:13px;line-height:1.25}
-    .cta{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-    .bigTitle{font-size:20px;font-weight:900;letter-spacing:.2px;margin:0}
-    .bigSub{margin:8px 0 0;color:var(--muted);font-size:13px}
-    .bar{
-      height:10px;border-radius:999px;background:rgba(255,255,255,.08);
-      overflow:hidden;border:1px solid rgba(255,255,255,.10);
-    }
-    .bar > span{
-      display:block;height:100%;
-      background:linear-gradient(90deg, var(--sky), var(--violet), var(--berry));
-      width:0%;
-      transition:width .5s ease;
-    }
-    .streakRow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
-    .streakDay{display:flex;flex-direction:column;align-items:center;gap:6px}
-    .streakLbl{font-size:10px;color:var(--muted2)}
-    .dot{
-      width:14px;height:14px;border-radius:999px;
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .dotOn{background:rgba(6,214,160,.90);border-color:rgba(6,214,160,.38)}
-    .dotToday{box-shadow:0 0 0 3px rgba(255,255,255,.10)}
-    .flame{
-      width:38px;height:38px;border-radius:16px;
-      display:grid;place-items:center;
-      background:rgba(255,209,102,.16);
-      border:1px solid rgba(255,209,102,.24);
-    }
-    .flamePulse{animation:flame 1.25s ease-in-out infinite}
-    @keyframes flame{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-    .rewardBox{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .chest{
-      width:56px;height:56px;border-radius:18px;
-      display:grid;place-items:center;
-      background:rgba(255,209,102,.16);
-      border:1px solid rgba(255,209,102,.24);
-      font-size:26px;
-    }
-    .chestOpen{animation:chest .6s ease}
-    @keyframes chest{0%{transform:rotate(0) scale(1)}35%{transform:rotate(-7deg) scale(1.08)}70%{transform:rotate(7deg) scale(1.04)}100%{transform:rotate(0) scale(1)}}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .miniBtn{
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      padding:10px;
-      cursor:pointer;
-      color:rgba(255,255,255,.88);
-      font-weight:900;
-      transition:transform .12s ease;
-    }
-    .miniBtn:active{transform:scale(.98)}
-    .miniBtn small{display:block;margin-top:4px;font-size:11px;color:var(--muted2);font-weight:800}
-    .miniMint{background:rgba(6,214,160,.18);border-color:rgba(6,214,160,.26)}
-    .miniSky{background:rgba(17,138,178,.18);border-color:rgba(17,138,178,.26)}
-    .miniViolet{background:rgba(155,93,229,.18);border-color:rgba(155,93,229,.26)}
-    .notif{display:grid;gap:8px}
-    .note{
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      padding:10px;
-    }
-    .note b{display:block;font-size:13px}
-    .note span{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
-    .nav{
-      height:70px;
-      border-radius:var(--r24);
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(14px);
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:8px;
-      padding:8px;
-    }
-    .navBtn{
-      border-radius:18px;
-      border:0;
-      background:transparent;
-      color:rgba(255,255,255,.78);
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      padding:8px;
-      transition:background .12s ease, transform .12s ease;
-      font-weight:900;
-      line-height:1;
-    }
-    .navBtn small{margin-top:4px;font-size:11px;font-weight:800;color:rgba(255,255,255,.70)}
-    .navBtnActive{background:rgba(255,255,255,.10);color:#fff}
-    .navBtn:active{transform:scale(.98)}
-    .toast{
-      position:fixed;
-      left:50%;
-      transform:translateX(-50%);
-      bottom:92px;
-      max-width:min(520px, calc(100vw - 24px));
-      padding:10px 12px;
-      border-radius:16px;
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.14);
-      color:rgba(255,255,255,.92);
-      box-shadow:var(--shadow);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .2s ease, transform .2s ease;
-    }
-    .toastShow{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    .modalOverlay{
-      position:fixed;inset:0;
-      display:none;
-      place-items:center;
-      padding:14px;
-      background:rgba(0,0,0,.62);
-      z-index:50;
-    }
-    .modalOverlay.show{display:grid}
-    .modal{
-      width:min(520px, 100%);
-      border-radius:var(--r24);
-      background:rgba(11,15,26,.92);
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow:var(--shadow);
-      padding:14px;
-    }
-    .modalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .modalHead h3{margin:0;font-size:16px}
-    .modalBody{margin-top:10px;color:var(--muted);font-size:13px}
-    .modalActions{margin-top:14px;display:flex;justify-content:flex-end;gap:8px}
-    @media (max-height: 740px){
-      .shell{gap:10px;padding:12px 12px 10px}
-      .bento{gap:10px}
-      .card,.coach,.topbar{padding:10px}
-      .notif .note:nth-child(n+2){display:none}
-      .bigTitle{font-size:18px}
-    }
-    @media (prefers-reduced-motion: reduce){
-      *{animation:none !important;transition:none !important}
-    }
-  </style>
+  <link rel="stylesheet" href="css/main.css?v=202604211" />
+
+  <!-- Firebase is optional for dashboard profile sync. -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script defer src="firebase.js?v=202604211"></script>
+  <script defer src="js/main.js?v=202604211"></script>
 </head>
 <body>
   <div class="shell" role="application" aria-label="Learn Koine Greek dashboard">
     <header class="topbar">
       <div class="brand" aria-label="App title">
-        <div class="brandMark" aria-hidden="true">ðŸŒ€</div>
-        <div style="min-width:0">
+        <div class="brandMark" aria-hidden="true">🌐</div>
+        <div class="brandCopy">
           <div class="brandTitle">Learn Koine Greek</div>
           <div class="brandSub" id="subline">Bite-sized lessons. Big momentum.</div>
         </div>
@@ -349,7 +44,7 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
 
     <main class="grid" aria-label="Dashboard content">
       <section class="coach" aria-label="Coach message">
-        <div>
+        <div class="coachLeft">
           <h1 id="coachTitle">Welcome back</h1>
           <p id="coachMsg">Continue where you left off with one clean lesson.</p>
         </div>
@@ -372,9 +67,9 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
           <div class="cardBody">
             <p class="bigTitle" id="continueTitle">Continue path</p>
             <p class="bigSub" id="continueSub">Pick up from your last saved activity.</p>
-            <div style="height:10px"></div>
+            <div class="spacer"></div>
             <div class="cta">
-              <div>
+              <div class="ctaMeta">
                 <div class="eyebrow">Daily goal</div>
                 <div class="muted" id="goalText">0 / 1 lesson today</div>
                 <div class="bar" aria-label="Daily goal progress">
@@ -392,7 +87,7 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
               <div class="eyebrow">Daily momentum</div>
               <div class="cardTitle">Streak</div>
             </div>
-            <div class="flame" id="flame" aria-hidden="true">ðŸ”¥</div>
+            <div class="flame" id="flame" aria-hidden="true">🔥</div>
           </div>
           <div class="cardBody">
             <p class="bigTitle" id="streakCount">0 days</p>
@@ -412,13 +107,13 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
             <div class="rewardBox">
               <div>
                 <div class="muted">Daily chest</div>
-                <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
-                  <span class="pill pillGold" id="gemsPill">ðŸ’Ž 0 gems</span>
-                  <span class="pill pillMint">âœ¨ bonus</span>
+                <div class="rewardPills">
+                  <span class="pill pillGold" id="gemsPill">💎 0 gems</span>
+                  <span class="pill pillMint">✨ bonus</span>
                 </div>
-                <div class="muted" style="margin-top:6px">Tap to open and collect.</div>
+                <div class="muted rewardHint">Tap to open and collect.</div>
               </div>
-              <div class="chest" id="chest" aria-hidden="true">ðŸ§°</div>
+              <div class="chest" id="chest" aria-hidden="true">🧰</div>
             </div>
           </div>
         </div>
@@ -433,12 +128,12 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
           </div>
           <div class="cardBody">
             <div class="muted" id="progressNote">Next level in 50 XP</div>
-            <div style="height:8px"></div>
+            <div class="spacerSm"></div>
             <div class="bar" aria-label="Level progress">
               <span id="levelBar"></span>
             </div>
-            <div style="height:10px"></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div class="spacerSm"></div>
+            <div class="pillRow">
               <span class="pill pillViolet" id="levelMini">Level 1</span>
               <span class="pill" id="lessonMini">0 lessons</span>
             </div>
@@ -477,10 +172,10 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
     </main>
 
     <nav class="nav" aria-label="Bottom navigation">
-      <button class="navBtn navBtnActive" data-tab="home" type="button" aria-label="Home tab">ðŸ <small>Home</small></button>
-      <button class="navBtn" data-tab="practice" type="button" aria-label="Practice tab">âš¡<small>Practice</small></button>
-      <button class="navBtn" data-tab="profile" type="button" aria-label="Profile tab">ðŸ‘¤<small>Profile</small></button>
-      <button class="navBtn" data-tab="rewards" type="button" aria-label="Rewards tab">ðŸŽ’<small>Rewards</small></button>
+      <button class="navBtn navBtnActive" data-tab="home" type="button" aria-label="Home tab">🏠<small>Home</small></button>
+      <button class="navBtn" data-tab="practice" type="button" aria-label="Practice tab">⚡<small>Practice</small></button>
+      <button class="navBtn" data-tab="profile" type="button" aria-label="Profile tab">👤<small>Profile</small></button>
+      <button class="navBtn" data-tab="rewards" type="button" aria-label="Rewards tab">🎒<small>Rewards</small></button>
     </nav>
   </div>
 
@@ -501,213 +196,6 @@ Top 5 2024-2025 UI/UX insights applied (sources Jan 2024+):
       </div>
     </div>
   </div>
-
-  <script>
-    (function () {
-      "use strict";
-      const APP_VERSION = "2026.04.21.1";
-      const VERSION_KEY = "gq_dash_version";
-      const RELOAD_KEY = "gq_dash_reload_once";
-      function $(id){ return document.getElementById(id); }
-      function toast(msg){
-        const t = $("toast");
-        if (!t) return;
-        t.textContent = msg;
-        t.classList.add("toastShow");
-        window.clearTimeout(toast._tm);
-        toast._tm = window.setTimeout(() => t.classList.remove("toastShow"), 2200);
-      }
-      function openModal(title, body){
-        $("modalTitle").textContent = title;
-        $("modalBody").textContent = body;
-        const o = $("modalOverlay");
-        o.classList.add("show");
-        o.setAttribute("aria-hidden","false");
-      }
-      function closeModal(){
-        const o = $("modalOverlay");
-        o.classList.remove("show");
-        o.setAttribute("aria-hidden","true");
-      }
-      function safeJsonParse(raw){
-        try { return raw ? JSON.parse(raw) : null; } catch { return null; }
-      }
-      function readProgress(){
-        return safeJsonParse(localStorage.getItem("greekQuestProgress"));
-      }
-      function levelFromXp(xp){
-        const v = Number.isFinite(xp) ? xp : 0;
-        return Math.max(1, Math.floor(v / 50) + 1);
-      }
-      function dayLabel(d){
-        try { return new Intl.DateTimeFormat(undefined,{weekday:"short"}).format(d); } catch { return "Day"; }
-      }
-      function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
-      async function clearCachesAndReload(){
-        try{
-          if ("caches" in window){
-            const keys = await caches.keys();
-            await Promise.all(keys.map((k)=>caches.delete(k)));
-          }
-          if ("serviceWorker" in navigator){
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map((r)=>r.update().catch(()=>{})));
-            await Promise.all(regs.map((r)=>r.unregister()));
-          }
-        }catch{}
-        localStorage.setItem(VERSION_KEY, APP_VERSION);
-        const url = new URL(window.location.href);
-        url.searchParams.set("v", APP_VERSION);
-        window.location.replace(url.toString());
-      }
-      const prev = localStorage.getItem(VERSION_KEY);
-      const once = sessionStorage.getItem(RELOAD_KEY) === "1";
-      if (prev !== APP_VERSION && !once){
-        sessionStorage.setItem(RELOAD_KEY, "1");
-        clearCachesAndReload();
-        return;
-      }
-      localStorage.setItem(VERSION_KEY, APP_VERSION);
-      sessionStorage.removeItem(RELOAD_KEY);
-      if ("serviceWorker" in navigator){
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js?v=" + encodeURIComponent(APP_VERSION))
-            .then((reg)=>reg.update().catch(()=>{}))
-            .catch(()=>{});
-        });
-      }
-      function applyTab(tab){
-        document.querySelectorAll(".navBtn").forEach((btn)=>{
-          btn.classList.toggle("navBtnActive", btn.dataset.tab === tab);
-        });
-        if (tab === "practice") toast("Practice shortcuts are on Home. Tap Review / Listen / Speak.");
-        if (tab === "profile") toast("Profile lives in the lesson page for now. Tap Continue, then open Profile.");
-        if (tab === "rewards") toast("Rewards chest is on Home. Tap the Rewards card.");
-      }
-      function updateUI(progress){
-        const xp = Number.isFinite(progress?.xp) ? progress.xp : 0;
-        const completed = Array.isArray(progress?.completedLessons) ? progress.completedLessons.length : 0;
-        const hearts = Number.isFinite(progress?.hearts) ? progress.hearts : 5;
-        const activeLessonId = progress?.activeLessonId || null;
-        const activeIdx = Number.isFinite(progress?.activeExerciseIndex) ? progress.activeExerciseIndex : 0;
-        const lvl = levelFromXp(xp);
-        const within = xp % 50;
-        const pct = Math.round((within / 50) * 100);
-        $("xpPill").textContent = "XP " + xp;
-        $("xpMini").textContent = "XP " + xp;
-        $("levelPill").textContent = "Level " + lvl;
-        $("levelMini").textContent = "Level " + lvl;
-        $("lessonMini").textContent = completed + " lessons";
-        $("progressNote").textContent = "Next level in " + (50 - within) + " XP";
-        $("levelBar").style.width = pct + "%";
-        $("nextPill").textContent = activeLessonId ? ("Next: " + activeLessonId) : ("Next: Level " + (completed + 1));
-        $("coachMsg").textContent = activeLessonId
-          ? ("Continue where you left off: " + activeLessonId + " (step " + (activeIdx + 1) + ").")
-          : (completed ? "You have momentum. Continue your next unlocked lesson." : "Start with Level 1. Small wins first.");
-        $("coachTitle").textContent = activeLessonId ? "Welcome back" : "Ready to learn";
-        $("continueTitle").textContent = completed < 3 ? "Continue path" : "Keep your momentum";
-        $("continueSub").textContent = activeLessonId ? "We will open the exact activity you stopped on." : "One clean lesson keeps streak and progress moving.";
-        $("ctaTag").textContent = hearts <= 2 ? "Low hearts" : "Ready";
-        $("ctaTag").className = "pill " + (hearts <= 2 ? "pillBerry" : "pillGold");
-        $("goalText").textContent = "0 / 1 lesson today";
-        $("goalBar").style.width = "0%";
-        const gems = Number.isFinite(progress?.gems) ? progress.gems : 0;
-        $("gemsPill").textContent = "ðŸ’Ž " + gems + " gems";
-        const notes = [];
-        notes.push({t:"Sign in to sync", b:"Use Google sign-in in the lesson page to keep progress across devices."});
-        if (hearts <= 2) notes.push({t:"Low hearts", b:"Slow down and focus on accuracy, or return after a refill."});
-        $("syncChip").textContent = "Device only";
-        $("notifCount").textContent = String(notes.length);
-        const list = $("notifList");
-        list.innerHTML = "";
-        notes.slice(0,2).forEach((n)=>{
-          const div = document.createElement("div");
-          div.className = "note";
-          div.innerHTML = "<b>" + n.t + "</b><span>" + n.b + "</span>";
-          list.appendChild(div);
-        });
-      }
-      function renderStreak(){
-        const today = new Date();
-        const streak = Number(localStorage.getItem("gq_streak_days") || "0");
-        const missed = localStorage.getItem("gq_streak_missed") === "1";
-        $("streakCount").textContent = streak + " day" + (streak === 1 ? "" : "s");
-        $("streakMsg").textContent = missed
-          ? "You missed a day. Do one lesson today to restart."
-          : (streak ? "Keep it alive. One lesson today protects the streak." : "Start your streak today. One lesson is enough.");
-        $("flame").classList.toggle("flamePulse", !missed && streak > 0);
-        const row = $("streakRow");
-        row.innerHTML = "";
-        const filled = clamp(streak, 0, 7);
-        for (let i=0;i<7;i++){
-          const d = new Date(today);
-          d.setDate(today.getDate() - (6 - i));
-          const isToday = i === 6;
-          const on = i >= (7 - filled);
-          const wrap = document.createElement("div");
-          wrap.className = "streakDay";
-          const lbl = document.createElement("div");
-          lbl.className = "streakLbl";
-          lbl.textContent = dayLabel(d);
-          const dot = document.createElement("div");
-          dot.className = "dot" + (on ? " dotOn" : "") + (isToday ? " dotToday" : "");
-          wrap.appendChild(lbl);
-          wrap.appendChild(dot);
-          row.appendChild(wrap);
-        }
-      }
-      function wireCardActivate(el, fn){
-        el.addEventListener("click", fn);
-        el.addEventListener("keydown", (e)=>{
-          if (e.key === "Enter" || e.key === " "){
-            e.preventDefault();
-            fn();
-          }
-        });
-      }
-      // Lessons live on lesson.html (not home.html). Dashboard remains the default.
-      function goLesson(qs){
-        const url = new URL("lesson.html", window.location.href);
-        if (qs){
-          const params = new URLSearchParams(qs.replace(/^\?/, ""));
-          params.forEach((v,k)=>url.searchParams.set(k,v));
-        }
-        url.searchParams.set("from", "dashboard");
-        window.location.href = url.toString();
-      }
-
-      $("signInBtn").addEventListener("click", () => goLesson("signin=1"));
-      $("signOutBtn").addEventListener("click", () => goLesson("signout=1"));
-      $("continueBtn").addEventListener("click", () => goLesson(""));
-      wireCardActivate($("continueCard"), () => goLesson(""));
-      $("practiceReview").addEventListener("click", () => goLesson("practice=mixed"));
-      $("practiceListen").addEventListener("click", () => goLesson("practice=listening"));
-      $("practiceSpeak").addEventListener("click", () => goLesson("practice=speaking"));
-      wireCardActivate($("practiceCard"), () => toast("Pick a practice mode: Review, Listen, or Speak."));
-      function openChest(){
-        const chest = $("chest");
-        chest.classList.add("chestOpen");
-        chest.textContent = "ðŸŽ";
-        window.setTimeout(() => {
-          chest.classList.remove("chestOpen");
-          chest.textContent = "ðŸ§°";
-        }, 900);
-        toast("Chest opened. Rewards are tracked in the lesson app.");
-      }
-      wireCardActivate($("rewardsCard"), openChest);
-      wireCardActivate($("progressCard"), () => openModal("Progress", "XP and level progress are calculated from your saved state. Finish lessons to level up."));
-      wireCardActivate($("notifCard"), () => openModal("Notifications", "This panel highlights the most important actions: sign in for sync, and keep hearts healthy by focusing on accuracy."));
-      wireCardActivate($("streakCard"), () => openModal("Streak", "Complete one lesson today to keep the streak alive."));
-      $("modalClose").addEventListener("click", closeModal);
-      $("modalOk").addEventListener("click", closeModal);
-      $("modalOverlay").addEventListener("click", (e)=>{ if (e.target === $("modalOverlay")) closeModal(); });
-      document.querySelectorAll(".navBtn").forEach((b)=> b.addEventListener("click", ()=>applyTab(b.dataset.tab)));
-      renderStreak();
-      updateUI(readProgress());
-      window.addEventListener("storage", (e) => { if (e.key === "greekQuestProgress") updateUI(readProgress()); });
-      window.setInterval(() => updateUI(readProgress()), 2000);
-    })();
-  </script>
 </body>
 </html>
 

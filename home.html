@@ -2,40 +2,201 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0f1a" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="theme-color" content="#0b0f1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek" />
   <title>Learn Koine Greek</title>
-  <style>
-    html,body{height:100%}
-    body{
-      margin:0;
-      display:grid;
-      place-items:center;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:#0b0f1a;
-      color:#fff;
-      padding:24px;
-      text-align:center;
-    }
-    a{color:#FFD166}
-  </style>
-  <script>
-    // `home.html` is deprecated. Keep this file only as a safe landing page for old links/caches.
-    // The app now lives in `dashboard.html`.
-    window.location.replace("dashboard.html");
-  </script>
+
+  <!-- Home is an alias of dashboard (single source of truth = css/main.css + js/main.js). -->
+  <link rel="manifest" href="manifest.json?v=202604211" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604211" />
+  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604211" />
+
+  <link rel="stylesheet" href="css/main.css?v=202604211" />
+
+  <!-- Firebase is optional for dashboard profile sync. -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script defer src="firebase.js?v=202604211"></script>
+  <script defer src="js/main.js?v=202604211"></script>
 </head>
 <body>
-  <main>
-    <h1>Loading…</h1>
-    <p>If you are not redirected automatically, open <a href="dashboard.html">dashboard.html</a>.</p>
-  </main>
-  <noscript>
-    <p>JavaScript is required. Open <a href="dashboard.html">dashboard.html</a>.</p>
-  </noscript>
+  <div class="shell" role="application" aria-label="Learn Koine Greek dashboard">
+    <header class="topbar">
+      <div class="brand" aria-label="App title">
+        <div class="brandMark" aria-hidden="true">🌐</div>
+        <div class="brandCopy">
+          <div class="brandTitle">Learn Koine Greek</div>
+          <div class="brandSub" id="subline">Bite-sized lessons. Big momentum.</div>
+        </div>
+      </div>
+      <div class="topActions">
+        <span class="chip" id="syncChip" aria-label="Sync status">Device only</span>
+        <button class="btn" id="signInBtn" type="button">Sign in</button>
+        <button class="btn btnGhost" id="signOutBtn" type="button" style="display:none">Log out</button>
+      </div>
+    </header>
+
+    <main class="grid" aria-label="Dashboard content">
+      <section class="coach" aria-label="Coach message">
+        <div class="coachLeft">
+          <h1 id="coachTitle">Welcome back</h1>
+          <p id="coachMsg">Continue where you left off with one clean lesson.</p>
+        </div>
+        <div class="coachRight" aria-label="Quick stats">
+          <span class="pill pillSky" id="xpPill">XP 0</span>
+          <span class="pill pillViolet" id="levelPill">Level 1</span>
+          <span class="pill" id="nextPill">Next: Level 1</span>
+        </div>
+      </section>
+
+      <section class="bento" aria-label="Bento grid">
+        <div class="card span7 row2" id="continueCard" role="button" tabindex="0" aria-label="Continue learning card">
+          <div class="cardTop">
+            <div>
+              <div class="eyebrow">Primary path</div>
+              <div class="cardTitle">Continue learning</div>
+            </div>
+            <span class="pill pillGold" id="ctaTag">Ready</span>
+          </div>
+          <div class="cardBody">
+            <p class="bigTitle" id="continueTitle">Continue path</p>
+            <p class="bigSub" id="continueSub">Pick up from your last saved activity.</p>
+            <div class="spacer"></div>
+            <div class="cta">
+              <div class="ctaMeta">
+                <div class="eyebrow">Daily goal</div>
+                <div class="muted" id="goalText">0 / 1 lesson today</div>
+                <div class="bar" aria-label="Daily goal progress">
+                  <span id="goalBar"></span>
+                </div>
+              </div>
+              <button class="btn" id="continueBtn" type="button">Continue</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span5 row2" id="streakCard" role="button" tabindex="0" aria-label="Streak card">
+          <div class="cardTop">
+            <div>
+              <div class="eyebrow">Daily momentum</div>
+              <div class="cardTitle">Streak</div>
+            </div>
+            <div class="flame" id="flame" aria-hidden="true">🔥</div>
+          </div>
+          <div class="cardBody">
+            <p class="bigTitle" id="streakCount">0 days</p>
+            <p class="muted" id="streakMsg">Start your streak today. One lesson is enough.</p>
+            <div class="streakRow" id="streakRow" aria-label="7-day streak tracker"></div>
+          </div>
+        </div>
+
+        <div class="card span4" id="rewardsCard" role="button" tabindex="0" aria-label="Rewards chest card">
+          <div class="cardTop">
+            <div>
+              <div class="eyebrow">Chest system</div>
+              <div class="cardTitle">Rewards</div>
+            </div>
+          </div>
+          <div class="cardBody">
+            <div class="rewardBox">
+              <div>
+                <div class="muted">Daily chest</div>
+                <div class="rewardPills">
+                  <span class="pill pillGold" id="gemsPill">💎 0 gems</span>
+                  <span class="pill pillMint">✨ bonus</span>
+                </div>
+                <div class="muted rewardHint">Tap to open and collect.</div>
+              </div>
+              <div class="chest" id="chest" aria-hidden="true">🧰</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span4" id="progressCard" role="button" tabindex="0" aria-label="Progress card">
+          <div class="cardTop">
+            <div>
+              <div class="eyebrow">XP and levels</div>
+              <div class="cardTitle">Progress</div>
+            </div>
+            <span class="pill pillSky" id="xpMini">XP 0</span>
+          </div>
+          <div class="cardBody">
+            <div class="muted" id="progressNote">Next level in 50 XP</div>
+            <div class="spacerSm"></div>
+            <div class="bar" aria-label="Level progress">
+              <span id="levelBar"></span>
+            </div>
+            <div class="spacerSm"></div>
+            <div class="pillRow">
+              <span class="pill pillViolet" id="levelMini">Level 1</span>
+              <span class="pill" id="lessonMini">0 lessons</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span4" id="practiceCard" role="button" tabindex="0" aria-label="Practice shortcuts card">
+          <div class="cardTop">
+            <div>
+              <div class="eyebrow">Shortcuts</div>
+              <div class="cardTitle">Practice</div>
+            </div>
+          </div>
+          <div class="cardBody">
+            <div class="grid3">
+              <button class="miniBtn miniMint" id="practiceReview" type="button">Review<small>Quick drill</small></button>
+              <button class="miniBtn miniSky" id="practiceListen" type="button">Listen<small>Quick drill</small></button>
+              <button class="miniBtn miniViolet" id="practiceSpeak" type="button">Speak<small>Quick drill</small></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span12" id="notifCard" role="button" tabindex="0" aria-label="Notifications card">
+          <div class="cardTop">
+            <div>
+              <div class="eyebrow">Updates</div>
+              <div class="cardTitle">Notifications</div>
+            </div>
+            <span class="pill" id="notifCount">0</span>
+          </div>
+          <div class="cardBody">
+            <div class="notif" id="notifList"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="nav" aria-label="Bottom navigation">
+      <button class="navBtn navBtnActive" data-tab="home" type="button" aria-label="Home tab">🏠<small>Home</small></button>
+      <button class="navBtn" data-tab="practice" type="button" aria-label="Practice tab">⚡<small>Practice</small></button>
+      <button class="navBtn" data-tab="profile" type="button" aria-label="Profile tab">👤<small>Profile</small></button>
+      <button class="navBtn" data-tab="rewards" type="button" aria-label="Rewards tab">🎒<small>Rewards</small></button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modalOverlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modalHead">
+        <div>
+          <div class="eyebrow">Update</div>
+          <h3 id="modalTitle">Notice</h3>
+        </div>
+        <button class="btn btnGhost" id="modalClose" type="button">Close</button>
+      </div>
+      <div class="modalBody" id="modalBody"></div>
+      <div class="modalActions">
+        <button class="btn" id="modalOk" type="button">OK</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 
