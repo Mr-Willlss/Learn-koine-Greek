@@ -2,6 +2,7 @@ const CACHE_NAME = "learn-koine-greek-v2026-04-21-202604211";
 const APP_SHELL = [
   "./index.html",
   "./dashboard.html",
+  "./lesson.html",
   "./manifest.json",
   "./assets/media/mascot-coach.mp4",
   "./assets/images/icon-192.png",

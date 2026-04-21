@@ -5,7 +5,7 @@
   "description": "Learn Koine Greek through lessons, vocabulary review, and guided practice.",
   "lang": "en",
   "dir": "ltr",
-  "start_url": "/Learn-koine-Greek/",
+  "start_url": "/Learn-koine-Greek/dashboard.html",
   "scope": "/Learn-koine-Greek/",
   "display": "standalone",
   "orientation": "portrait",
