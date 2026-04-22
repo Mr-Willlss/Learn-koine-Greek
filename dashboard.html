@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -52,7 +52,7 @@
       --sw: 200px;
     }
 
-    /* ── RESET & BASE ── */
+    /* â”€â”€ RESET & BASE â”€â”€ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%;
@@ -79,10 +79,10 @@
     input:focus, textarea:focus, select:focus { border-color: var(--purple); }
     a { color: inherit; text-decoration: none; }
 
-    /* ── APP SHELL ── */
+    /* â”€â”€ APP SHELL â”€â”€ */
     #app { display: flex; height: 100vh; overflow: hidden; }
 
-    /* ── SIDEBAR ── */
+    /* â”€â”€ SIDEBAR â”€â”€ */
     #sidebar {
       width: var(--sw);
       min-width: var(--sw);
@@ -189,10 +189,10 @@
     }
     .sb-signout:hover { color: var(--red); }
 
-    /* ── MAIN WRAPPER ── */
+    /* â”€â”€ MAIN WRAPPER â”€â”€ */
     #main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 
-    /* ── TOP BAR ── */
+    /* â”€â”€ TOP BAR â”€â”€ */
     #top-bar {
       height: 56px;
       background: var(--bg-sidebar);
@@ -278,7 +278,7 @@
     .tb-user-level { font-size: 11px; color: var(--tm); }
     .tb-chevron { font-size: 10px; color: var(--tm); }
 
-    /* ── CONTENT / VIEWS ── */
+    /* â”€â”€ CONTENT / VIEWS â”€â”€ */
     #content {
       flex: 1;
       overflow-y: auto;
@@ -289,7 +289,7 @@
     .view { display: none; }
     .view.active { display: block; }
 
-    /* ── SECTION HEADING ── */
+    /* â”€â”€ SECTION HEADING â”€â”€ */
     .section-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
     .section-h h2 { font-size: 17px; font-weight: 700; color: var(--tw); display: flex; align-items: center; gap: 8px; }
     .view-all-btn {
@@ -308,7 +308,7 @@
     }
     .view-all-btn:hover { color: var(--ts); border-color: var(--border2); }
 
-    /* ── PROFILE VIEW ── */
+    /* â”€â”€ PROFILE VIEW â”€â”€ */
     .profile-header-card {
       background: linear-gradient(135deg, #1a1f35 0%, #1d1540 60%, #1a2035 100%);
       border: 1px solid var(--border);
@@ -664,6 +664,25 @@
     }
     .btn-go-profile:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
+    /* Simple lists for practice/quests/lessons */
+    .qa-shell{display:flex;flex-direction:column;gap:12px}
+    .qa-note{font-size:13px;color:var(--tm);line-height:1.6;margin-top:-4px}
+    .qa-item{border:1px solid var(--border);background:var(--bg-card2);border-radius:var(--r2);overflow:hidden}
+    .qa-item summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none}
+    .qa-item summary::-webkit-details-marker{display:none}
+    .qa-q{font-size:13px;font-weight:800;color:var(--tw)}
+    .qa-meta{font-size:11px;color:var(--tm);white-space:nowrap}
+    .qa-body{padding:0 14px 12px}
+    .qa-answer{margin:0;padding:10px 12px;border-radius:var(--r1);border:1px solid var(--border);background:rgba(0,0,0,.15);color:var(--ts);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,\"Liberation Mono\",monospace;font-size:12px;line-height:1.65;white-space:pre-wrap}
+    .lesson-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(max-width:800px){.lesson-grid{grid-template-columns:1fr}}
+    .lesson-card{border:1px solid var(--border);background:var(--bg-card2);border-radius:var(--r3);padding:14px;display:flex;flex-direction:column;gap:10px}
+    .lesson-card strong{font-size:13px;color:var(--tw)}
+    .lesson-card .muted{font-size:12px;color:var(--tm);line-height:1.55}
+    .lesson-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border-radius:var(--r1);border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--ts);font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;user-select:none}
+    .btn-link:hover{border-color:var(--border2);color:var(--tw)}
+
     /* Edit modal */
     .modal-overlay {
       position: fixed;
@@ -768,40 +787,40 @@
   <div id="app">
     <aside id="sidebar" aria-label="Primary navigation">
       <div class="sb-logo">
-        <div class="sb-logo-icon" aria-hidden="true">Ω</div>
+        <div class="sb-logo-icon" aria-hidden="true">Î©</div>
         <div class="sb-logo-text">Learn<span>Koine Greek</span></div>
       </div>
 
       <div class="sb-section">
         <div class="sb-section-label">Main</div>
-        <div class="sb-item" data-view="dashboard"><span class="sb-icon">🏠</span><span>Dashboard</span></div>
-        <div class="sb-item" data-view="practice"><span class="sb-icon">🎯</span><span>Practice</span></div>
-        <div class="sb-item" data-view="lessons"><span class="sb-icon">📚</span><span>Lessons</span></div>
-        <div class="sb-item" data-view="quests"><span class="sb-icon">⚔️</span><span>Quests</span></div>
+        <div class="sb-item" data-view="dashboard"><span class="sb-icon">ðŸ </span><span>Dashboard</span></div>
+        <div class="sb-item" data-view="practice"><span class="sb-icon">ðŸŽ¯</span><span>Practice</span></div>
+        <div class="sb-item" data-view="lessons"><span class="sb-icon">ðŸ“š</span><span>Lessons</span></div>
+        <div class="sb-item" data-view="quests"><span class="sb-icon">âš”ï¸</span><span>Quests</span></div>
       </div>
 
       <div class="sb-section">
         <div class="sb-section-label">Learn</div>
-        <div class="sb-item" data-view="vocab"><span class="sb-icon">🔤</span><span>Vocabulary</span></div>
-        <div class="sb-item" data-view="leaderboard"><span class="sb-icon">🏆</span><span>Leaderboard</span></div>
-        <div class="sb-item" data-view="rewards"><span class="sb-icon">🎁</span><span>Rewards</span></div>
+        <div class="sb-item" data-view="vocab"><span class="sb-icon">ðŸ”¤</span><span>Vocabulary</span></div>
+        <div class="sb-item" data-view="leaderboard"><span class="sb-icon">ðŸ†</span><span>Leaderboard</span></div>
+        <div class="sb-item" data-view="rewards"><span class="sb-icon">ðŸŽ</span><span>Rewards</span></div>
       </div>
 
       <div class="sb-section">
         <div class="sb-section-label">Account</div>
-        <div class="sb-item active" data-view="profile"><span class="sb-icon">👤</span><span>Profile</span></div>
-        <div class="sb-item" data-view="settings"><span class="sb-icon">⚙️</span><span>Settings</span></div>
+        <div class="sb-item active" data-view="profile"><span class="sb-icon">ðŸ‘¤</span><span>Profile</span></div>
+        <div class="sb-item" data-view="settings"><span class="sb-icon">âš™ï¸</span><span>Settings</span></div>
       </div>
 
       <div class="sb-upgrade" aria-label="Premium teaser">
-        <div class="sb-upgrade-icon" aria-hidden="true">💎</div>
+        <div class="sb-upgrade-icon" aria-hidden="true">ðŸ’Ž</div>
         <div class="sb-upgrade-title">Go Premium</div>
         <div class="sb-upgrade-sub">Unlock unlimited lessons, advanced stats and more rewards.</div>
         <button class="btn-upgrade" type="button">Upgrade Now</button>
       </div>
 
       <div class="sb-signout" data-action="signout" role="button" tabindex="0">
-        <span aria-hidden="true">↩</span><span>Sign Out</span>
+        <span aria-hidden="true">â†©</span><span>Sign Out</span>
       </div>
     </aside>
 
@@ -813,12 +832,12 @@
         </div>
         <div class="tb-right">
           <div class="tb-streak" aria-label="Streak">
-            <span aria-hidden="true">🔥</span>
+            <span aria-hidden="true">ðŸ”¥</span>
             <span class="tb-streak-num" id="tb-streak-num">0</span>
             <span class="tb-streak-lbl">Day Streak</span>
           </div>
           <div class="tb-bell" id="tb-bell" role="button" tabindex="0" aria-label="Notifications">
-            🔔
+            ðŸ””
             <div class="tb-bell-dot" aria-hidden="true"></div>
           </div>
           <div class="tb-user" id="tb-user" role="button" tabindex="0" aria-label="User menu">
@@ -827,7 +846,7 @@
               <div class="tb-user-name" id="tb-user-name">Samuel Williams</div>
               <div class="tb-user-level" id="tb-user-level">Level 1</div>
             </div>
-            <div class="tb-chevron" aria-hidden="true">▼</div>
+            <div class="tb-chevron" aria-hidden="true">â–¼</div>
           </div>
         </div>
       </header>
@@ -840,19 +859,19 @@
                 <img id="ph-avatar-img" alt="Profile photo" />
                 <span id="ph-avatar-text">SW</span>
               </div>
-              <div class="ph-cam-btn" id="ph-cam-btn" role="button" tabindex="0" aria-label="Change photo">📷</div>
+              <div class="ph-cam-btn" id="ph-cam-btn" role="button" tabindex="0" aria-label="Change photo">ðŸ“·</div>
             </div>
 
             <div class="ph-info">
               <div class="ph-name-row">
                 <span class="ph-name" id="ph-name">Samuel Williams</span>
-                <button class="btn-edit-profile" id="btn-edit-profile" type="button">✏ Edit Profile</button>
+                <button class="btn-edit-profile" id="btn-edit-profile" type="button">âœ Edit Profile</button>
               </div>
               <div class="ph-handle"><span class="dot" aria-hidden="true"></span><span id="ph-handle">@samuelw</span></div>
               <div class="ph-meta-row">
-                <div class="ph-meta-item"><span class="ph-meta-icon" aria-hidden="true">✉</span><span id="ph-email">samiduvimo@gmail.com</span></div>
-                <div class="ph-meta-item"><span class="ph-meta-icon" aria-hidden="true">📅</span><span id="ph-joined">Joined May 12, 2024</span></div>
-                <div class="ph-meta-item"><span class="ph-meta-icon" aria-hidden="true">❤</span><span id="ph-bio">Loves learning Koine Greek and ancient languages.</span></div>
+                <div class="ph-meta-item"><span class="ph-meta-icon" aria-hidden="true">âœ‰</span><span id="ph-email">samiduvimo@gmail.com</span></div>
+                <div class="ph-meta-item"><span class="ph-meta-icon" aria-hidden="true">ðŸ“…</span><span id="ph-joined">Joined May 12, 2024</span></div>
+                <div class="ph-meta-item"><span class="ph-meta-icon" aria-hidden="true">â¤</span><span id="ph-bio">Loves learning Koine Greek and ancient languages.</span></div>
               </div>
             </div>
 
@@ -865,32 +884,32 @@
 
           <section class="stats-row" aria-label="Stats">
             <div class="stat-card">
-              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">⭐</span><span class="stat-name">XP</span></div>
+              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">â­</span><span class="stat-name">XP</span></div>
               <div class="stat-value" id="stat-xp">0</div>
               <div class="stat-sub">Total XP</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">🔥</span><span class="stat-name">Streak</span></div>
+              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">ðŸ”¥</span><span class="stat-name">Streak</span></div>
               <div class="stat-value" id="stat-streak">0</div>
               <div class="stat-sub">Days</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">❤️</span><span class="stat-name">Hearts</span></div>
+              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">â¤ï¸</span><span class="stat-name">Hearts</span></div>
               <div class="stat-value" id="stat-hearts">5</div>
               <div class="stat-sub">/5 Full</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">🏆</span><span class="stat-name">Rank</span></div>
-              <div class="stat-value" id="stat-rank">—</div>
+              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">ðŸ†</span><span class="stat-name">Rank</span></div>
+              <div class="stat-value" id="stat-rank">â€”</div>
               <div class="stat-sub">League</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">📖</span><span class="stat-name">Lessons</span></div>
+              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">ðŸ“–</span><span class="stat-name">Lessons</span></div>
               <div class="stat-value" id="stat-lessons">0</div>
               <div class="stat-sub">Completed</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">🎯</span><span class="stat-name">Accuracy</span></div>
+              <div class="stat-icon-row"><span class="stat-icon" aria-hidden="true">ðŸŽ¯</span><span class="stat-name">Accuracy</span></div>
               <div class="stat-value" id="stat-accuracy">0%</div>
               <div class="stat-sub">Overall</div>
             </div>
@@ -898,7 +917,7 @@
 
           <section class="level-progress-card" aria-label="Level progress">
             <div class="lp-header">
-              <div class="lp-title">⭐ <span id="lp-title-text">Level 1 Progress</span></div>
+              <div class="lp-title">â­ <span id="lp-title-text">Level 1 Progress</span></div>
               <span class="lp-xp-label" id="lp-xp-label">0 / 50 XP</span>
             </div>
             <div class="lp-bar-wrap" aria-label="Progress bar">
@@ -908,7 +927,7 @@
               <div class="lp-away">You're <span id="lp-away">50 XP</span> away from <span id="lp-next-level">Level 2</span></div>
               <div class="lp-right">
                 <div class="lp-next-reward" aria-label="Next reward">
-                  <span class="lp-reward-icon" aria-hidden="true">💎</span>
+                  <span class="lp-reward-icon" aria-hidden="true">ðŸ’Ž</span>
                   <div>
                     <div class="lp-reward-title" id="lp-reward-title">50 Gems</div>
                     <div class="lp-reward-sub" id="lp-reward-sub">At next level</div>
@@ -924,11 +943,11 @@
           <section class="two-col" aria-label="Activity and achievements">
             <section class="content-card" aria-label="Learning activity">
               <div class="section-h">
-                <h2>📅 Learning Activity</h2>
-                <div class="view-all-btn" id="btn-activity-viewall">View All ▾</div>
+                <h2>ðŸ“… Learning Activity</h2>
+                <div class="view-all-btn" id="btn-activity-viewall">View All â–¾</div>
               </div>
               <div class="activity-item">
-                <div class="ai-icon" style="background: rgba(59,130,246,.15)">📖</div>
+                <div class="ai-icon" style="background: rgba(59,130,246,.15)">ðŸ“–</div>
                 <div class="ai-info">
                   <div class="ai-title">Current Lesson</div>
                   <div class="ai-sub" id="activity-current-lesson">Open a lesson to keep your streak alive.</div>
@@ -938,7 +957,7 @@
                 </div>
               </div>
               <div class="activity-item">
-                <div class="ai-icon" style="background: rgba(34,197,94,.15)">✅</div>
+                <div class="ai-icon" style="background: rgba(34,197,94,.15)">âœ…</div>
                 <div class="ai-info">
                   <div class="ai-title">Lessons Completed</div>
                   <div class="ai-sub" id="activity-lessons-sub">0 lessons</div>
@@ -946,7 +965,7 @@
                 <div class="ai-right"><div class="ai-value" style="color:#22c55e" id="activity-lessons-delta">+0 this week</div></div>
               </div>
               <div class="activity-item">
-                <div class="ai-icon" style="background: rgba(124,92,252,.15)">✏️</div>
+                <div class="ai-icon" style="background: rgba(124,92,252,.15)">âœï¸</div>
                 <div class="ai-info">
                   <div class="ai-title">Practice Sessions</div>
                   <div class="ai-sub">7 sessions</div>
@@ -954,56 +973,56 @@
                 <div class="ai-right"><div class="ai-value" style="color:#22c55e">+2 this week</div></div>
               </div>
               <div class="activity-item">
-                <div class="ai-icon" style="background: rgba(249,115,22,.15)">🎯</div>
+                <div class="ai-icon" style="background: rgba(249,115,22,.15)">ðŸŽ¯</div>
                 <div class="ai-info">
                   <div class="ai-title">Accuracy</div>
-                  <div class="ai-sub" id="activity-accuracy-sub">—</div>
+                  <div class="ai-sub" id="activity-accuracy-sub">â€”</div>
                 </div>
                 <div class="ai-right"><div class="ai-value" style="color:#22c55e">+5% improved</div></div>
               </div>
               <div class="activity-item">
-                <div class="ai-icon" style="background: rgba(148,163,184,.1)">🕐</div>
+                <div class="ai-icon" style="background: rgba(148,163,184,.1)">ðŸ•</div>
                 <div class="ai-info">
                   <div class="ai-title">Last Active</div>
-                  <div class="ai-sub" id="activity-last-active">—</div>
+                  <div class="ai-sub" id="activity-last-active">â€”</div>
                 </div>
-                <div class="ai-right"><div class="ai-value" style="color: var(--tm)">—</div></div>
+                <div class="ai-right"><div class="ai-value" style="color: var(--tm)">â€”</div></div>
               </div>
             </section>
 
             <section class="content-card" aria-label="Achievements">
               <div class="section-h">
-                <h2>⭐ Achievements</h2>
+                <h2>â­ Achievements</h2>
                 <div class="view-all-btn" id="btn-achievements-viewall">View All</div>
               </div>
               <div class="achieve-grid">
                 <div class="achieve-item">
-                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#22c55e,#16a34a)">🦶</div>
+                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#22c55e,#16a34a)">ðŸ¦¶</div>
                   <div class="achieve-name">First Steps</div>
                   <div class="achieve-req">Complete 1 lesson</div>
                 </div>
                 <div class="achieve-item">
-                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#f97316,#ea580c)">🔥</div>
+                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#f97316,#ea580c)">ðŸ”¥</div>
                   <div class="achieve-name">Consistent</div>
                   <div class="achieve-req">7 day streak</div>
                 </div>
                 <div class="achieve-item">
-                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#3b82f6,#1d4ed8)">📚</div>
+                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#3b82f6,#1d4ed8)">ðŸ“š</div>
                   <div class="achieve-name">Word Collector</div>
                   <div class="achieve-req">Learn 100 words</div>
                 </div>
                 <div class="achieve-item">
-                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#a855f7,#7c3aed)">⚡</div>
+                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#a855f7,#7c3aed)">âš¡</div>
                   <div class="achieve-name">Quick Learner</div>
                   <div class="achieve-req">Complete 10 lessons</div>
                 </div>
                 <div class="achieve-item">
-                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#eab308,#ca8a04)">🏆</div>
+                  <div class="achieve-icon unlocked" style="background: linear-gradient(135deg,#eab308,#ca8a04)">ðŸ†</div>
                   <div class="achieve-name">Accuracy Master</div>
                   <div class="achieve-req">Get 90% accuracy</div>
                 </div>
                 <div class="achieve-item">
-                  <div class="achieve-icon locked">🔒</div>
+                  <div class="achieve-icon locked">ðŸ”’</div>
                   <div class="achieve-name">More Coming</div>
                   <div class="achieve-req">Keep learning!</div>
                 </div>
@@ -1014,11 +1033,11 @@
           <section class="two-col" aria-label="Recent activity and settings">
             <section class="content-card" aria-label="Recent activity">
               <div class="section-h">
-                <h2>📅 Recent Activity</h2>
-                <div class="view-all-btn" id="btn-recent-viewall">View All ▾</div>
+                <h2>ðŸ“… Recent Activity</h2>
+                <div class="view-all-btn" id="btn-recent-viewall">View All â–¾</div>
               </div>
               <div class="recent-item">
-                <div class="ri-icon" style="background: rgba(34,197,94,.15)">📖</div>
+                <div class="ri-icon" style="background: rgba(34,197,94,.15)">ðŸ“–</div>
                 <div class="ri-info">
                   <div class="ri-title">Completed Lesson</div>
                   <div class="ri-time" id="recent-lesson">Level 1: The Alphabet Temple</div>
@@ -1026,7 +1045,7 @@
                 <div class="ri-xp" id="recent-lesson-xp">+0 XP</div>
               </div>
               <div class="recent-item">
-                <div class="ri-icon" style="background: rgba(59,130,246,.15)">🎯</div>
+                <div class="ri-icon" style="background: rgba(59,130,246,.15)">ðŸŽ¯</div>
                 <div class="ri-info">
                   <div class="ri-title">Perfect Practice</div>
                   <div class="ri-time">Today, 9:30 AM</div>
@@ -1034,7 +1053,7 @@
                 <div class="ri-xp">+10 XP</div>
               </div>
               <div class="recent-item">
-                <div class="ri-icon" style="background: rgba(249,115,22,.15)">🔥</div>
+                <div class="ri-icon" style="background: rgba(249,115,22,.15)">ðŸ”¥</div>
                 <div class="ri-info">
                   <div class="ri-title">Streak Check-in</div>
                   <div class="ri-time">Keep it up!</div>
@@ -1042,7 +1061,7 @@
                 <div class="ri-xp">+20 XP</div>
               </div>
               <div class="recent-item">
-                <div class="ri-icon" style="background: rgba(234,179,8,.15)">🏆</div>
+                <div class="ri-icon" style="background: rgba(234,179,8,.15)">ðŸ†</div>
                 <div class="ri-info">
                   <div class="ri-title">New Achievement</div>
                   <div class="ri-time">Consistent - 7 day streak</div>
@@ -1053,114 +1072,114 @@
 
             <section class="content-card" aria-label="Account settings">
               <div class="section-h">
-                <h2>⚙️ Account Settings</h2>
+                <h2>âš™ï¸ Account Settings</h2>
               </div>
               <div class="settings-item" id="settings-personal">
-                <div class="si-icon">👤</div>
+                <div class="si-icon">ðŸ‘¤</div>
                 <div class="si-info">
                   <div class="si-title">Personal Information</div>
                   <div class="si-sub">Update your name, email and profile picture</div>
                 </div>
-                <div class="si-arrow" aria-hidden="true">→</div>
+                <div class="si-arrow" aria-hidden="true">â†’</div>
               </div>
               <div class="settings-item">
-                <div class="si-icon">🔒</div>
+                <div class="si-icon">ðŸ”’</div>
                 <div class="si-info">
                   <div class="si-title">Change Password</div>
                   <div class="si-sub">Update your password</div>
                 </div>
-                <div class="si-arrow" aria-hidden="true">→</div>
+                <div class="si-arrow" aria-hidden="true">â†’</div>
               </div>
               <div class="settings-item">
-                <div class="si-icon">🔔</div>
+                <div class="si-icon">ðŸ””</div>
                 <div class="si-info">
                   <div class="si-title">Notification Preferences</div>
                   <div class="si-sub">Manage your email and app notifications</div>
                 </div>
-                <div class="si-arrow" aria-hidden="true">→</div>
+                <div class="si-arrow" aria-hidden="true">â†’</div>
               </div>
               <div class="settings-item">
-                <div class="si-icon">🛡</div>
+                <div class="si-icon">ðŸ›¡</div>
                 <div class="si-info">
                   <div class="si-title">Privacy Settings</div>
                   <div class="si-sub">Manage your privacy and data</div>
                 </div>
-                <div class="si-arrow" aria-hidden="true">→</div>
+                <div class="si-arrow" aria-hidden="true">â†’</div>
               </div>
-              <button class="btn-signout-red" id="btn-signout-red" type="button">↩ Sign Out</button>
+              <button class="btn-signout-red" id="btn-signout-red" type="button">â†© Sign Out</button>
             </section>
           </section>
 
           <section class="quote-footer" aria-label="Motivational quote">
-            <div class="quote-mark" aria-hidden="true">❝</div>
+            <div class="quote-mark" aria-hidden="true">â</div>
             <div class="quote-text">Well done! Every lesson brings you closer to mastery.</div>
             <div class="quote-sub">Keep the momentum and make it a daily habit.</div>
-            <div class="quote-deco" aria-hidden="true">🏛</div>
+            <div class="quote-deco" aria-hidden="true">ðŸ›</div>
           </section>
         </div>
 
         <div id="view-dashboard" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">🏠</div>
+            <div class="placeholder-icon">ðŸ </div>
             <div class="placeholder-title">Dashboard</div>
             <div class="placeholder-sub">Coming soon! Your dashboard content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-practice" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">🎯</div>
+            <div class="placeholder-icon">ðŸŽ¯</div>
             <div class="placeholder-title">Practice</div>
             <div class="placeholder-sub">Coming soon! Your practice content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-lessons" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">📚</div>
+            <div class="placeholder-icon">ðŸ“š</div>
             <div class="placeholder-title">Lessons</div>
             <div class="placeholder-sub">Open lessons in the lesson page for now.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-quests" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">⚔️</div>
+            <div class="placeholder-icon">âš”ï¸</div>
             <div class="placeholder-title">Quests</div>
             <div class="placeholder-sub">Coming soon! Your quests content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-vocab" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">🔤</div>
+            <div class="placeholder-icon">ðŸ”¤</div>
             <div class="placeholder-title">Vocabulary</div>
             <div class="placeholder-sub">Coming soon! Your vocabulary content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-leaderboard" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">🏆</div>
+            <div class="placeholder-icon">ðŸ†</div>
             <div class="placeholder-title">Leaderboard</div>
             <div class="placeholder-sub">Coming soon! Your leaderboard content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-rewards" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">🎁</div>
+            <div class="placeholder-icon">ðŸŽ</div>
             <div class="placeholder-title">Rewards</div>
             <div class="placeholder-sub">Coming soon! Your rewards content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
         <div id="view-settings" class="view">
           <div class="placeholder-view">
-            <div class="placeholder-icon">⚙️</div>
+            <div class="placeholder-icon">âš™ï¸</div>
             <div class="placeholder-title">Settings</div>
             <div class="placeholder-sub">Coming soon! Your settings content will appear here.</div>
-            <button class="btn-go-profile" type="button" data-go="profile">← Back to Profile</button>
+            <button class="btn-go-profile" type="button" data-go="profile">â† Back to Profile</button>
           </div>
         </div>
       </main>
@@ -1260,12 +1279,42 @@
       }, { capture: true });
 
       const XP_PER_LEVEL = 50;
+      const PRACTICE_QUESTIONS_B64 = [
+        "eyJzb3VyY2UiOiJncmVla19wcmFjdGljZV9hbnN3ZXJzLTEuZG9jeCIsImNvdW50IjoxNSwicXVlc3Rpb25zIjpbeyJpZCI6MSwidGl0bGUiOiJXcml0ZSBhbGwgdGhlIEdyZWVrIEFscGhhYmV0cyIsImFuc3dlclRleHQiOiIjXG5VcHBlcmNhc2Vcbkxvd2VyY2FzZVxuTmFtZVxuVHJhbnNsaXRlcmF0aW9uXG4xXG7OkVxuzrFcbkFscGhhXG5hXG4yXG7OklxuzrJcbkJldGFcbmJcbjNcbs6TXG7Os1xuR2FtbWFcbmdcbjRcbs6UXG7OtFxuRGVsdGFcbmRcbjVcbs6VXG7OtVxuRXBzaWxvblxuZSAoc2hvcnQpXG42XG7OllxuzrZcblpldGFcbnpcbjdcbs6XXG7Ot1xuRXRhXG7EkyAobG9uZylcbjhcbs6YXG7OuFxuVGhldGFcbnRoXG45XG7OmVxuzrlcbklvdGFcbmlcbjEwXG7OmlxuzrpcbkthcHBhXG5rXG4xMVxuzptcbs67XG5MYW1iZGFcbmxcbjEyXG7OnFxuzrxcbk11XG5tXG4xM1xuzp1cbs69XG5OdVxublxuMTRcbs6eXG7OvlxuWGlcbnhcbjE1XG7On1xuzr9cbk9taWNyb25cbm8gKHNob3J0KVxuMTZcbs6gXG7PgFxu",
+        "UGlcbnBcbjE3XG7OoVxuz4FcblJob1xuclxuMThcbs6jXG7Pgy/PglxuU2lnbWFcbnNcbjE5XG7OpFxuz4RcblRhdVxudFxuMjBcbs6lXG7PhVxuVXBzaWxvblxudS95XG4yMVxuzqZcbs+GXG5QaGlcbnBoXG4yMlxuzqdcbs+HXG5DaGlcbmNoXG4yM1xuzqhcbs+IXG5Qc2lcbnBzXG4yNFxuzqlcbs+JXG5PbWVnYVxuxY0gKGxvbmcpIn0seyJpZCI6MiwidGl0bGUiOiJDYXNlcyBXZSBIYXZlIGluIEdyZWVrIiwiYW5zd2VyVGV4dCI6IlRoZXJlIGFyZSBmaXZlICg1KSBjYXNlcyBpbiBHcmVlazpcbk5vbWluYXRpdmUg4oCUIHRoZSBzdWJqZWN0IG9mIHRoZSBzZW50ZW5jZVxuR2VuaXRpdmUg4oCUIHNob3dzIHBvc3Nlc3Npb24gKCdvZicpXG5EYXRpdmUg4oCUIHRoZSBpbmRpcmVjdCBvYmplY3QgKCd0by9mb3InKVxuQWNjdXNhdGl2ZSDigJQgdGhlIGRpcmVjdCBvYmplY3RcblZvY2F0aXZlIOKAlCB1c2VkIGZvciBkaXJlY3QgYWRkcmVzcyJ9LHsiaWQiOjMsInRpdGxlIjoiR2VuZGVycyBpbiBHcmVlayIsImFuc3dlclRl",
+        "eHQiOiJUaGVyZSBhcmUgdGhyZWUgKDMpIGdlbmRlcnMgaW4gR3JlZWs6XG5NYXNjdWxpbmVcbkZlbWluaW5lXG5OZXV0ZXIifSx7ImlkIjo0LCJ0aXRsZSI6IkZpdmUgVGhpbmdzIHRvIExvb2sgZm9yIFdoZW4gQW5hbHl6aW5nIGEgR3JlZWsgVmVyYiIsImFuc3dlclRleHQiOiJQZXJzb24g4oCUIDFzdCwgMm5kLCBvciAzcmRcbk51bWJlciDigJQgU2luZ3VsYXIgb3IgUGx1cmFsXG5UZW5zZSDigJQgUHJlc2VudCwgSW1wZXJmZWN0LCBGdXR1cmUsIEFvcmlzdCwgUGVyZmVjdCwgUGx1cGVyZmVjdFxuVm9pY2Ug4oCUIEFjdGl2ZSwgTWlkZGxlLCBvciBQYXNzaXZlXG5Nb29kIOKAlCBJbmRpY2F0aXZlLCBTdWJqdW5jdGl2ZSwgT3B0YXRpdmUsIEltcGVyYXRpdmUsIEluZmluaXRpdmUsIFBhcnRpY2lwbGUifSx7ImlkIjo1LCJ0aXRsZSI6IkdyZWVrIFZvd2VscyIsImFuc3dlclRleHQiOiJUaGVyZSBhcmUgc2V2ZW4gKDcpIHZvd2VscyBpbiBHcmVlazpcbs6xLCDOtSwgzrcsIM65LCDOvywgz4UsIM+JXG5TaG9ydCB2b3dl",
+        "bHM6IM61LCDOvyAoYWx3YXlzIHNob3J0KTsgzrEsIM65LCDPhSAoY2FuIGJlIHNob3J0KVxuTG9uZyB2b3dlbHM6IM63LCDPiSAoYWx3YXlzIGxvbmcpOyDOsSwgzrksIM+FIChjYW4gYmUgbG9uZykifSx7ImlkIjo2LCJ0aXRsZSI6IkRpcGh0aG9uZ3MiLCJhbnN3ZXJUZXh0IjoiRGVmaW5pdGlvbjogQSBkaXBodGhvbmcgaXMgdGhlIGNvbWJpbmF0aW9uIG9mIHR3byB2b3dlbHMgdGhhdCBhcmUgcHJvbm91bmNlZCB0b2dldGhlciBhcyBhIHNpbmdsZSBzb3VuZC5cbkdyZWVrIERpcGh0aG9uZ3M6XG5EaXBodGhvbmdcblNvdW5kIC8gUHJvbnVuY2lhdGlvblxuzrHOuVxubGlrZSAnYWlzbGUnXG7Otc65XG5saWtlICdlaWdodCdcbs6/zrlcbmxpa2UgJ29pbCdcbs+Fzrlcbmxpa2UgJ3dlJ1xuzrHPhVxubGlrZSAnbm93J1xuzrXPhVxubGlrZSAnZmV1ZCdcbs6/z4Vcbmxpa2UgJ2Zvb2QnXG7Ot8+FXG5yYXJlOyBsb25nIGV1IHNvdW5kIn0seyJpZCI6NywidGl0bGUiOiJUaHJlZSBLaW5kcyBvZiBBY2NlbnRzIGluIEdyZWVr",
+        "IiwiYW5zd2VyVGV4dCI6IkFjdXRlICggzoQgKSDigJQg4b2Azr7OteG/ls6xIOKAlCBjYW4gYXBwZWFyIG9uIGFueSBvZiB0aGUgbGFzdCB0aHJlZSBzeWxsYWJsZXMgKGUuZy4sIOG8hM69zrjPgc+Jz4DOv8+CKVxuR3JhdmUgKCBgICkg4oCUIM6yzrHPgc614b+WzrEg4oCUIHJlcGxhY2VzIGFuIGFjdXRlIG9uIHRoZSBmaW5hbCBzeWxsYWJsZSB3aGVuIGZvbGxvd2VkIGJ5IGFub3RoZXIgd29yZCAoZS5nLiwgzrrOsc674b24z4Ig4byEzr3OuM+Bz4nPgM6/z4IpXG5DaXJjdW1mbGV4ICggzYIgKSDigJQgz4DOtc+BzrnPg8+Az4nOvM6tzr3OtyDigJQgYXBwZWFycyBvbmx5IG9uIGxvbmcgc3lsbGFibGVzOyBvbmx5IG9uIHRoZSBsYXN0IHR3byBzeWxsYWJsZXMgKGUuZy4sIM60zr/hv6bOu86/z4IpIn0seyJpZCI6OCwidGl0bGUiOiJFbmdsaXNoIE1lYW5pbmdzIG9mIEdyZWVrIFdvcmRzIiwiYW5zd2VyVGV4dCI6IkdyZWVrIFdvcmRcbkVuZ2xpc2ggTWVhbmluZ1xu4byAzrTOtc67z4bPjM+CXG5icm90aGVyXG7hvITO",
+        "vc64z4HPic+Azr/PglxubWFuIC8gaHVtYW4gYmVpbmdcbs6yzrvOrc+Az4lcbkkgc2VlIC8gSSBsb29rXG7hvJTPh8+JXG5JIGhhdmVcbs66zrHOr1xuYW5kIC8gYWxzbyAvIGV2ZW5cbs67zq3Os8+JXG5JIHNheSAvIEkgc3BlYWtcbs+HzrHhv5bPgc61XG5yZWpvaWNlIC8gZ3JlZXRpbmdzXG7hvITPgc+Ezr/PglxuYnJlYWRcbuG8kM+DzrjOr8+JXG5JIGVhdFxuzrrOsc+Bz4DPjM+CXG5mcnVpdFxuz4DOuc+Dz4TOtc+Nz4lcbkkgYmVsaWV2ZVxuz4bOrc+Bz4lcbkkgY2FycnkgLyBJIGJlYXJcbuG8gM+Az4xcbmZyb20gLyBhd2F5IGZyb21cbuG8gM+Bzr3Or86/zr1cbmxhbWJcbs6zzqzPgVxuZm9yIC8gYmVjYXVzZVxuzrTOteG/ls+Azr3Ov869XG5zdXBwZXIgLyBkaW5uZXJcbs60zr/hv6bOu86/z4JcbnNsYXZlIC8gc2VydmFudFxuzrXhvLDPglxuaW50byAvIHRvXG7hvJDOulxub3V0IG9mIC8gZnJvbVxu4byQzr1cbmluIC8gYW1vbmdcbs66zrHOu8+Mz4Jcbmdvb2QgLyBiZWF1dGlmdWxcbuG8gM67zrvOrFxuYnV0",
+        "XG7OtM6vzrrOsc65zr/PglxucmlnaHRlb3VzIC8ganVzdFxuzrTPic+BzrXOrFxuZ2lmdFxu4byQzrvOtc+NzrjOtc+Bzr/PglxuZnJlZVxu4byQz4DOuc64z4XOvM6vzrFcbmRlc2lyZSAvIGx1c3Rcbs66zrHPgc60zq/OsVxuaGVhcnRcbuG8tM60zrnOv8+CXG5vbmUncyBvd25cbs+AzrHPgc+BzrfPg86vzrFcbmJvbGRuZXNzIC8gY29uZmlkZW5jZVxuzrzOsc66zqzPgc65zr/PglxuYmxlc3NlZCAvIGhhcHB5XG7Ov+G9kM66zq3PhM65XG5ubyBsb25nZXJcbs+Hz4HOtc6vzrFcbm5lZWQgLyBuZWNlc3NpdHlcbs66z4zPg868zr/Pglxud29ybGRcbs694b+mzr1cbm5vd1xuz4DOrM69z4TOv8+EzrVcbmFsd2F5c1xuz4PPjc69XG53aXRoXG7OuuG/hs+Azr/PglxuZ2FyZGVuXG7Ov+G8ts66zr/PglxuaG91c2Vcbs6/4by2zr3Ov8+CXG53aW5lXG7hvYDPiM6sz4HOuc6/zr1cbmZpc2hcbs+Azq3OvM+Az4lcbkkgc2VuZFxuz4DOr869z4lcbkkgZHJpbmtcbs+Azr/PhM6uz4HOuc6/zr1cbmN1cFxuz4TOrc66zr3Ov869XG5j",
+        "aGlsZFxu4byAz4DOv867z43PiVxuSSByZWxlYXNlIC8gZGlzbWlzc1xuzrTOv8+FzrvOtc+Nz4lcbkkgc2VydmVcbs64zrXPgc6xz4DOtc+Nz4lcbkkgaGVhbFxu4bywz4PPh8+Nz4lcbkkgYW0gc3Ryb25nIC8gYWJsZVxuzrrOsc66z4zPglxuYmFkIC8gZXZpbFxu4b2Fz4TOuVxudGhhdCAvIGJlY2F1c2Vcbs+Az4XPgc61z4TPjM+CXG5mZXZlclxu4byEzrPOs861zrvOv8+CXG5hbmdlbCAvIG1lc3NlbmdlclxuzrXhvLDOvM6vXG5JIGFtXG7hvJDOu8+Azq/Ots+JXG5JIGhvcGVcbs64zq3Ou8+JXG5JIHdpc2ggLyBJIHdhbnRcbs68zrnOus+Bz4zPglxuc21hbGwgLyBsaXR0bGVcbs68zr3Ot868zr/Ovc61z43PiVxuSSByZW1lbWJlclxu4b2BzrzOv+G/plxudG9nZXRoZXJcbuG9hc+EzrVcbndoZW5cbs+AzqzOu865zr1cbmFnYWluXG7PhM+Mz4TOtVxudGhlblxu4byAzrrOv8+Nz4lcbkkgaGVhclxuzrPOtc+Jz4HOs8+Mz4JcbmZhcm1lclxuzrzOtc+EzqxcbndpdGggLyBhZnRlclxuz4DOtc+Bzq9cbmFib3V0IC8gY29u",
+        "Y2VybmluZ1xuz4POrs68zrXPgc6/zr1cbnRvZGF5XG7Pg866zr/PhM6vzrFcbmRhcmtuZXNzXG7hvIDOu86uzrjOtc65zrFcbnRydXRoXG7Ous+OzrzOt1xudmlsbGFnZVxuz4DOu86/4b+mz4TOv8+CXG53ZWFsdGggLyByaWNoZXNcbs+Az4nPglxuc29tZWhvd1xuz4PPgM6uzrvOsc65zr/OvVxuY2F2ZSAvIGRlblxu4byEzrPPiVxuSSBsZWFkIC8gSSBicmluZ1xu4byAz4DOv864zr3Ors+DzrrPiVxuSSBkaWVcbs67zrHOvM6yzqzOvc+JXG5JIHRha2UgLyBJIHJlY2VpdmVcbs64zrXPjM+CXG5Hb2Rcbs+F4byxz4zPglxuc29uXG7Phs+MzrLOv8+CXG5mZWFyXG7PhM6vz4Ivz4TOr1xud2hvPyAvIHdoYXQ/IChpbnRlcnJvZ2F0aXZlKVxuz4TOuc+CL8+EzrlcbnNvbWVvbmUgLyBzb21ldGhpbmcgKGluZGVmaW5pdGUpXG7hvJHPgM+EzqxcbnNldmVuXG7hvJTPgc+Hzr/OvM6xzrlcbkkgY29tZSAvIEkgZ29cbuG8lM+EzrdcbnllYXJzXG7hvLjPic+Dzq7PhlxuSm9zZXBoXG7hvYHPgc6sz4lcbkkgc2VlXG7Pg+G/ls+Ezr/P",
+        "glxuZ3JhaW4gLyB3aGVhdFxuz4PPhc69zqzOs8+JXG5JIGdhdGhlciB0b2dldGhlclxuzrHhvZTPgc65zr/OvVxudG9tb3Jyb3dcbs6zzrvhv7bPg8+DzrFcbnRvbmd1ZSAvIGxhbmd1YWdlXG7hvJDPh864zq3PglxueWVzdGVyZGF5XG7OtM65zqxcbnRocm91Z2ggLyBiZWNhdXNlIG9mXG7OtM65zrTOrM+DzrrOsc67zr/PglxudGVhY2hlclxuzrTOuc60zqzPg866z4lcbkkgdGVhY2hcbs60z43Ovc6xzrzOsc65XG5JIGFtIGFibGUgLyBJIGNhblxuzrvOr86xzr1cbnZlcnkgbXVjaCAvIGdyZWF0bHlcbs68zrHOvc64zqzOvc+JXG5JIGxlYXJuXG7PgM6/4b+mXG53aGVyZT9cbuG8kM66zrXhv5ZcbnRoZXJlXG7hvafOtM61XG5oZXJlXG7Pg8+Fzr3Osc6zz4nOs86uXG5zeW5hZ29ndWVcbuG8gM+Azq3Pgc+Hzr/OvM6xzrlcbkkgZ28gYXdheSAvIGRlcGFydFxuzpLOtc69zrnOsc68zq/OvVxuQmVuamFtaW5cbs69zrXPjs+EzrXPgc6/z4JcbnlvdW5nZXJcbuG8uM6xzrrPjs6yXG5KYWNvYlxu4by4zr/Pjc60zrHPglxuSnVk",
+        "YXMgLyBKdWRhaFxu4b+szrHPh86uzrtcblJhY2hlbFxuz4DOrM67zrHOuVxubG9uZyBhZ28gLyBmb3JtZXJseSJ9LHsiaWQiOjksInRpdGxlIjoiQ29uanVnYXRlIM+AzrnPg8+EzrXPjc+JIChCRUxJRVZFKSIsImFuc3dlclRleHQiOiJBLiBQcmVzZW50IEFjdGl2ZSBJbmRpY2F0aXZlXG5QZXJzb25cblNpbmd1bGFyXG5FbmdsaXNoXG5QbHVyYWxcbkVuZ2xpc2hcbjFzdFxuz4DOuc+Dz4TOtc+Nz4lcbkkgYmVsaWV2ZVxuz4DOuc+Dz4TOtc+Nzr/OvM61zr1cbldlIGJlbGlldmVcbjJuZFxuz4DOuc+Dz4TOtc+NzrXOuc+CXG5Zb3UgYmVsaWV2ZVxuz4DOuc+Dz4TOtc+NzrXPhM61XG5Zb3UgKHBsLikgYmVsaWV2ZVxuM3JkXG7PgM65z4PPhM61z43Otc65XG5IZS9TaGUvSXQgYmVsaWV2ZXNcbs+AzrnPg8+EzrXPjc6/z4XPg865KM69KVxuVGhleSBiZWxpZXZlXG5CLiBQcmVzZW50IEFjdGl2ZSBJbXBlcmF0aXZlXG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjJuZFxuz4DOr8+Dz4TOtc+FzrUgKEJlbGlldmUhKVxuz4DO",
+        "uc+Dz4TOtc+NzrXPhM61IChCZWxpZXZlISlcbjNyZFxuz4DOuc+Dz4TOtc+Fzq3PhM+JIChMZXQgaGltL2hlciBiZWxpZXZlKVxuz4DOuc+Dz4TOtc+Fzq3PhM+Jz4POsc69IChMZXQgdGhlbSBiZWxpZXZlKVxuQy4gRnV0dXJlIEFjdGl2ZSBJbmRpY2F0aXZlXG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjFzdFxuz4DOuc+Dz4TOtc+Nz4PPiVxuz4DOuc+Dz4TOtc+Nz4POv868zrXOvVxuMm5kXG7PgM65z4PPhM61z43Pg861zrnPglxuz4DOuc+Dz4TOtc+Nz4POtc+EzrVcbjNyZFxuz4DOuc+Dz4TOtc+Nz4POtc65XG7PgM65z4PPhM61z43Pg86/z4XPg865KM69KVxuRC4gRmlyc3QgQW9yaXN0IEFjdGl2ZSBJbmRpY2F0aXZlXG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjFzdFxu4byQz4DOr8+Dz4TOtc+Fz4POsVxu4byQz4DOuc+Dz4TOtc+Nz4POsc68zrXOvVxuMm5kXG7hvJDPgM6vz4PPhM61z4XPg86xz4JcbuG8kM+AzrnPg8+EzrXPjc+DzrHPhM61XG4zcmRcbuG8kM+Azq/Pg8+EzrXPhc+DzrUozr0pXG7hvJDP",
+        "gM6vz4PPhM61z4XPg86xzr1cbkUuIEZpcnN0IEFvcmlzdCBBY3RpdmUgSW1wZXJhdGl2ZVxuUGVyc29uXG5TaW5ndWxhclxuUGx1cmFsXG4ybmRcbs+Azq/Pg8+EzrXPhc+Dzr/OvVxuz4DOuc+Dz4TOtc+Nz4POsc+EzrVcbjNyZFxuz4DOuc+Dz4TOtc+Fz4POrM+Ez4lcbs+AzrnPg8+EzrXPhc+DzqzPhM+Jz4POsc69In0seyJpZCI6MTAsInRpdGxlIjoiRGVjbGVuc2lvbiBvZiBHcmVlayBXb3JkcyIsImFuc3dlclRleHQiOiJBLiDOtM6vzrrOsc65zr/PgiDigJQgUklHSFRFT1VTIC8gSlVTVFxuQ2FzZVxuTWFzYy4gU2dcbk1hc2MuIFBsXG5GZW0uIFNnXG5GZW0uIFBsXG5OZXV0LiBTZ1xuTmV1dC4gUGxcbk5vbS5cbs60zq/Ous6xzrnOv8+CXG7OtM6vzrrOsc65zr/OuVxuzrTOuc66zrHOr86xXG7OtM6vzrrOsc65zrHOuVxuzrTOr866zrHOuc6/zr1cbs60zq/Ous6xzrnOsVxuR2VuLlxuzrTOuc66zrHOr86/z4Vcbs60zrnOus6xzq/Pic69XG7OtM65zrrOsc6vzrHPglxuzrTOuc66zrHOr8+Jzr1cbs60zrnOus6xzq/O",
+        "v8+FXG7OtM65zrrOsc6vz4nOvVxuRGF0LlxuzrTOuc66zrHOr+G/s1xuzrTOuc66zrHOr86/zrnPglxuzrTOuc66zrHOr+G+s1xuzrTOuc66zrHOr86xzrnPglxuzrTOuc66zrHOr+G/s1xuzrTOuc66zrHOr86/zrnPglxuQWNjLlxuzrTOr866zrHOuc6/zr1cbs60zrnOus6xzq/Ov8+Fz4Jcbs60zrnOus6xzq/Osc69XG7OtM65zrrOsc6vzrHPglxuzrTOr866zrHOuc6/zr1cbs60zq/Ous6xzrnOsVxuVm9jLlxuzrTOr866zrHOuc61XG7OtM6vzrrOsc65zr/OuVxuzrTOuc66zrHOr86xXG7OtM6vzrrOsc65zrHOuVxuzrTOr866zrHOuc6/zr1cbs60zq/Ous6xzrnOsVxuQi4gzr/hvZfPhM6/z4Ig4oCUIFRISVNcbkNhc2Vcbk1hc2MuIFNnXG5NYXNjLiBQbFxuRmVtLiBTZ1xuRmVtLiBQbFxuTmV1dC4gU2dcbk5ldXQuIFBsXG5Ob20uXG7Ov+G9l8+Ezr/Pglxuzr/hvZfPhM6/zrlcbs6x4b2Vz4TOt1xuzrHhvZfPhM6xzrlcbs+Ezr/hv6bPhM6/XG7PhM6x4b+mz4TOsVxuR2VuLlxuz4TOv8+Nz4TOv8+FXG7PhM6/z43PhM+J",
+        "zr1cbs+EzrHPjc+EzrfPglxuz4TOv8+Nz4TPic69XG7PhM6/z43PhM6/z4Vcbs+Ezr/Pjc+Ez4nOvVxuRGF0Llxuz4TOv8+Nz4Thv7Ncbs+Ezr/Pjc+Ezr/Ouc+CXG7PhM6xz43PhOG/g1xuz4TOsc+Nz4TOsc65z4Jcbs+Ezr/Pjc+E4b+zXG7PhM6/z43PhM6/zrnPglxuQWNjLlxuz4TOv+G/ps+Ezr/OvVxuz4TOv8+Nz4TOv8+Fz4Jcbs+EzrHPjc+EzrfOvVxuz4TOsc+Nz4TOsc+CXG7PhM6/4b+mz4TOv1xuz4TOseG/ps+EzrFcbkMuIOG8kM66zrXhv5bOvc6/z4Ig4oCUIFRIQVRcbkNhc2Vcbk1hc2MuIFNnXG5NYXNjLiBQbFxuRmVtLiBTZ1xuRmVtLiBQbFxuTmV1dC4gU2dcbk5ldXQuIFBsXG5Ob20uXG7hvJDOus614b+Wzr3Ov8+CXG7hvJDOus614b+Wzr3Ov865XG7hvJDOus61zq/Ovc63XG7hvJDOus614b+Wzr3Osc65XG7hvJDOus614b+Wzr3Ov1xu4byQzrrOteG/ls69zrFcbkdlbi5cbuG8kM66zrXOr869zr/PhVxu4byQzrrOtc6vzr3Pic69XG7hvJDOus61zq/Ovc63z4JcbuG8kM66zrXOr869z4nOvVxu4byQzrrO",
+        "tc6vzr3Ov8+FXG7hvJDOus61zq/Ovc+Jzr1cbkRhdC5cbuG8kM66zrXOr8694b+zXG7hvJDOus61zq/Ovc6/zrnPglxu4byQzrrOtc6vzr3hv4NcbuG8kM66zrXOr869zrHOuc+CXG7hvJDOus61zq/OveG/s1xu4byQzrrOtc6vzr3Ov865z4JcbkFjYy5cbuG8kM66zrXhv5bOvc6/zr1cbuG8kM66zrXOr869zr/Phc+CXG7hvJDOus61zq/Ovc63zr1cbuG8kM66zrXOr869zrHPglxu4byQzrrOteG/ls69zr9cbuG8kM66zrXhv5bOvc6xXG5ELiDOseG9kM+Ez4zPgiDigJQgSEUgLyBTSEUgLyBJVCAvIFNBTUVcbkNhc2Vcbk1hc2MuIFNnXG5NYXNjLiBQbFxuRmVtLiBTZ1xuRmVtLiBQbFxuTmV1dC4gU2dcbk5ldXQuIFBsXG5Ob20uXG7OseG9kM+Ez4zPglxuzrHhvZDPhM6/zq9cbs6x4b2Qz4TOrlxuzrHhvZDPhM6xzq9cbs6x4b2Qz4TPjFxuzrHhvZDPhM6sXG5HZW4uXG7OseG9kM+Ezr/hv6Zcbs6x4b2Qz4Thv7bOvVxuzrHhvZDPhOG/hs+CXG7OseG9kM+E4b+2zr1cbs6x4b2Qz4TOv+G/plxuzrHhvZDPhOG/ts69XG5EYXQu",
+        "XG7OseG9kM+E4b+3XG7OseG9kM+Ezr/hv5bPglxuzrHhvZDPhOG/h1xuzrHhvZDPhM6x4b+Wz4Jcbs6x4b2Qz4Thv7dcbs6x4b2Qz4TOv+G/ls+CXG5BY2MuXG7OseG9kM+Ez4zOvVxuzrHhvZDPhM6/z43PglxuzrHhvZDPhM6uzr1cbs6x4b2Qz4TOrM+CXG7OseG9kM+Ez4xcbs6x4b2Qz4TOrCJ9LHsiaWQiOjExLCJ0aXRsZSI6IkxpcXVpZCBWZXJicyIsImFuc3dlclRleHQiOiJBLiBEZWZpbml0aW9uXG5MaXF1aWQgdmVyYnMgYXJlIHZlcmJzIHdob3NlIHN0ZW0gZW5kcyBpbiBhIGxpcXVpZCBjb25zb25hbnQ6IM67LCDOvCwgzr0sIG9yIM+BLiBUaGV5IGZvcm0gdGhlaXIgZnV0dXJlIHRlbnNlIGJ5IGFkZGluZyAtzrXPgy0gKHdoaWNoIHRoZW4gY29udHJhY3RzKSwgYW5kIHRoZWlyIGFvcmlzdCB3aXRob3V0IHRoZSB0eXBpY2FsIM+DIHN1ZmZpeCwgaW5zdGVhZCBsZW5ndGhlbmluZyB0aGUgc3RlbSB2b3dlbC5cbkIuIFRocmVlIEV4YW1wbGVzOiDOvM6tzr3PiSwgzrrPgc6vzr3PiSwgzrHhvLTPgc+JXG5pLiDOvM6t",
+        "zr3PiSAoSSByZW1haW4gLyBJIHN0YXkpXG5QcmVzZW50IEFjdGl2ZSBJbmRpY2F0aXZlOlxuUGVyc29uXG5TaW5ndWxhclxuUGx1cmFsXG4xc3Rcbs68zq3Ovc+JXG7OvM6tzr3Ov868zrXOvVxuMm5kXG7OvM6tzr3Otc65z4Jcbs68zq3Ovc61z4TOtVxuM3JkXG7OvM6tzr3Otc65XG7OvM6tzr3Ov8+Fz4POuSjOvSlcblByZXNlbnQgQWN0aXZlIEltcGVyYXRpdmU6XG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjJuZFxuzrzOrc69zrVcbs68zq3Ovc61z4TOtVxuM3JkXG7OvM61zr3Orc+Ez4lcbs68zrXOvc6tz4TPic+DzrHOvVxuUHJlc2VudCBBY3RpdmUgSW5maW5pdGl2ZTogzrzOrc69zrXOuc69XG5paS4gzrrPgc6vzr3PiSAoSSBqdWRnZSlcblByZXNlbnQgQWN0aXZlIEluZGljYXRpdmU6XG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjFzdFxuzrrPgc6vzr3PiVxuzrrPgc6vzr3Ov868zrXOvVxuMm5kXG7Ous+Bzq/Ovc61zrnPglxuzrrPgc6vzr3Otc+EzrVcbjNyZFxuzrrPgc6vzr3Otc65XG7Ous+Bzq/Ovc6/",
+        "z4XPg865KM69KVxuUHJlc2VudCBBY3RpdmUgSW1wZXJhdGl2ZTpcblBlcnNvblxuU2luZ3VsYXJcblBsdXJhbFxuMm5kXG7Ous+B4b+Wzr3OtVxuzrrPgc6vzr3Otc+EzrVcbjNyZFxuzrrPgc65zr3Orc+Ez4lcbs66z4HOuc69zq3PhM+Jz4POsc69XG5QcmVzZW50IEFjdGl2ZSBJbmZpbml0aXZlOiDOus+Bzq/Ovc61zrnOvVxuaWlpLiDOseG8tM+Bz4kgKEkgdGFrZSB1cCAvIEkgcmFpc2UpXG5QcmVzZW50IEFjdGl2ZSBJbmRpY2F0aXZlOlxuUGVyc29uXG5TaW5ndWxhclxuUGx1cmFsXG4xc3Rcbs6x4by0z4HPiVxuzrHhvLTPgc6/zrzOtc69XG4ybmRcbs6x4by0z4HOtc65z4Jcbs6x4by0z4HOtc+EzrVcbjNyZFxuzrHhvLTPgc61zrlcbs6x4by0z4HOv8+Fz4POuSjOvSlcblByZXNlbnQgQWN0aXZlIEltcGVyYXRpdmU6XG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjJuZFxuzrHhvLbPgc61XG7OseG8tM+BzrXPhM61XG4zcmRcbs6x4bywz4HOrc+Ez4lcbs6x4bywz4HOrc+Ez4nPg86xzr1cblByZXNlbnQgQWN0aXZl",
+        "IEluZmluaXRpdmU6IM6x4by0z4HOtc65zr0ifSx7ImlkIjoxMiwidGl0bGUiOiJEZWNsaW5lIEludGVycm9nYXRpdmUgJiBJbmRlZmluaXRlIFByb25vdW5zIiwiYW5zd2VyVGV4dCI6IkEuIM+Ezq/PgiAvIM+Ezq8g4oCUIFdITz8gLyBXSElDSD8gLyBXSEFUPyAoSW50ZXJyb2dhdGl2ZSlcbkNhc2Vcbk1hc2MuL0ZlbS4gU2dcbk1hc2MuL0ZlbS4gUGxcbk5ldXQuIFNnXG5OZXV0LiBQbFxuTm9tLlxuz4TOr8+CXG7PhM6vzr3Otc+CXG7PhM6vXG7PhM6vzr3OsVxuR2VuLlxuz4TOr869zr/Pglxuz4TOr869z4nOvVxuz4TOr869zr/Pglxuz4TOr869z4nOvVxuRGF0Llxuz4TOr869zrlcbs+Ezq/Pg865KM69KVxuz4TOr869zrlcbs+Ezq/Pg865KM69KVxuQWNjLlxuz4TOr869zrFcbs+Ezq/Ovc6xz4Jcbs+Ezq9cbs+Ezq/Ovc6xXG5CLiDPhM65z4IgLyDPhM65IOKAlCBTT01FT05FIC8gU09NRVRISU5HIC8gQU5ZT05FIChJbmRlZmluaXRlKVxuQ2FzZVxuTWFzYy4vRmVtLiBTZ1xuTWFzYy4vRmVtLiBQbFxuTmV1dC4gU2dc",
+        "bk5ldXQuIFBsXG5Ob20uXG7PhM65z4Jcbs+EzrnOvc6tz4Jcbs+Ezrlcbs+EzrnOvc6sXG5HZW4uXG7PhM65zr3PjM+CXG7PhM65zr3hv7bOvVxuz4TOuc69z4zPglxuz4TOuc694b+2zr1cbkRhdC5cbs+EzrnOvc6vXG7PhM65z4POryjOvSlcbs+EzrnOvc6vXG7PhM65z4POryjOvSlcbkFjYy5cbs+EzrnOvc6sXG7PhM65zr3OrM+CXG7PhM65XG7PhM65zr3OrCJ9LHsiaWQiOjEzLCJ0aXRsZSI6IkRlcG9uZW50IFZlcmJzIiwiYW5zd2VyVGV4dCI6IkRlZmluaXRpb25cbkRlcG9uZW50IHZlcmJzIGFyZSB2ZXJicyB0aGF0IGhhdmUgTWlkZGxlIG9yIFBhc3NpdmUgZm9ybXMgYnV0IGNhcnJ5IEFjdGl2ZSBtZWFuaW5ncy4gVGhleSBoYXZlIG5vIGFjdGl2ZSB2b2ljZSBmb3JtcywgeWV0IHRoZXkgYXJlIHRyYW5zbGF0ZWQgYWN0aXZlbHkgaW4gRW5nbGlzaC5cbkZpdmUgRXhhbXBsZXMgd2l0aCBDb25qdWdhdGlvbnNcbjEuIOG8lM+Bz4fOv868zrHOuSDigJQgSSBjb21lIC8gSSBnb1xuSW5kaWNhdGl2ZSAoUHJlc2VudCBN",
+        "aWRkbGUvUGFzc2l2ZSk6XG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjFzdFxu4byUz4HPh86/zrzOsc65XG7hvJDPgc+Hz4zOvM61zrjOsVxuMm5kXG7hvJTPgc+H4b+DXG7hvJTPgc+HzrXPg864zrVcbjNyZFxu4byUz4HPh861z4TOsc65XG7hvJTPgc+Hzr/Ovc+EzrHOuVxuSW1wZXJhdGl2ZTpcblBlcnNvblxuU2luZ3VsYXJcblBsdXJhbFxuMm5kXG7hvJTPgc+Hzr/PhVxu4byUz4HPh861z4POuM61XG4zcmRcbuG8kM+Bz4fOrc+DzrjPiVxu4byQz4HPh86tz4POuM+Jz4POsc69XG5JbmZpbml0aXZlOiDhvJTPgc+HzrXPg864zrHOuVxuMi4gzrPOr869zr/OvM6xzrkg4oCUIEkgYmVjb21lIC8gSSBhbVxuSW5kaWNhdGl2ZTpcblBlcnNvblxuU2luZ3VsYXJcblBsdXJhbFxuMXN0XG7Os86vzr3Ov868zrHOuVxuzrPOuc69z4zOvM61zrjOsVxuMm5kXG7Os86vzr3hv4Ncbs6zzq/Ovc61z4POuM61XG4zcmRcbs6zzq/Ovc61z4TOsc65XG7Os86vzr3Ov869z4TOsc65XG5JbXBlcmF0aXZlOlxuUGVyc29uXG5TaW5ndWxh",
+        "clxuUGx1cmFsXG4ybmRcbs6zzq/Ovc6/z4Vcbs6zzq/Ovc61z4POuM61XG4zcmRcbs6zzrnOvc6tz4POuM+JXG7Os865zr3Orc+DzrjPic+DzrHOvVxuSW5maW5pdGl2ZTogzrPOr869zrXPg864zrHOuVxuMy4gzrTPjc69zrHOvM6xzrkg4oCUIEkgYW0gYWJsZSAvIEkgY2FuXG5JbmRpY2F0aXZlOlxuUGVyc29uXG5TaW5ndWxhclxuUGx1cmFsXG4xc3Rcbs60z43Ovc6xzrzOsc65XG7OtM+Fzr3OrM68zrXOuM6xXG4ybmRcbs60z43Ovc6xz4POsc65XG7OtM+Nzr3Osc+DzrjOtVxuM3JkXG7OtM+Nzr3Osc+EzrHOuVxuzrTPjc69zrHOvc+EzrHOuVxuSW1wZXJhdGl2ZTpcblBlcnNvblxuU2luZ3VsYXJcblBsdXJhbFxuMm5kXG7OtM+Nzr3Osc+Dzr9cbs60z43Ovc6xz4POuM61XG4zcmRcbs60z4XOvc6sz4POuM+JXG7OtM+Fzr3OrM+DzrjPic+DzrHOvVxuSW5maW5pdGl2ZTogzrTPjc69zrHPg864zrHOuVxuNC4g4byAz4DOv866z4HOr869zr/OvM6xzrkg4oCUIEkgYW5zd2VyXG5JbmRpY2F0aXZlOlxuUGVyc29uXG5TaW5n",
+        "dWxhclxuUGx1cmFsXG4xc3RcbuG8gM+Azr/Ous+Bzq/Ovc6/zrzOsc65XG7hvIDPgM6/zrrPgc65zr3PjM68zrXOuM6xXG4ybmRcbuG8gM+Azr/Ous+Bzq/OveG/g1xu4byAz4DOv866z4HOr869zrXPg864zrVcbjNyZFxu4byAz4DOv866z4HOr869zrXPhM6xzrlcbuG8gM+Azr/Ous+Bzq/Ovc6/zr3PhM6xzrlcbkltcGVyYXRpdmU6XG5QZXJzb25cblNpbmd1bGFyXG5QbHVyYWxcbjJuZFxu4byAz4DOv866z4HOr869zr/PhVxu4byAz4DOv866z4HOr869zrXPg864zrVcbjNyZFxu4byAz4DOv866z4HOuc69zq3Pg864z4lcbuG8gM+Azr/Ous+BzrnOvc6tz4POuM+Jz4POsc69XG5JbmZpbml0aXZlOiDhvIDPgM6/zrrPgc6vzr3Otc+DzrjOsc65XG41LiDPgM6/z4HOtc+Nzr/OvM6xzrkg4oCUIEkgZ28gLyBJIHRyYXZlbFxuSW5kaWNhdGl2ZTpcblBlcnNvblxuU2luZ3VsYXJcblBsdXJhbFxuMXN0XG7PgM6/z4HOtc+Nzr/OvM6xzrlcbs+Azr/Pgc61z4XPjM68zrXOuM6xXG4ybmRcbs+Azr/Pgc61z43hv4Ncbs+Azr/Pgc61",
+        "z43Otc+DzrjOtVxuM3JkXG7PgM6/z4HOtc+NzrXPhM6xzrlcbs+Azr/Pgc61z43Ov869z4TOsc65XG5JbXBlcmF0aXZlOlxuUGVyc29uXG5TaW5ndWxhclxuUGx1cmFsXG4ybmRcbs+Azr/Pgc61z43Ov8+FXG7PgM6/z4HOtc+NzrXPg864zrVcbjNyZFxuz4DOv8+BzrXPhc6tz4POuM+JXG7PgM6/z4HOtc+Fzq3Pg864z4nPg86xzr1cbkluZmluaXRpdmU6IM+Azr/Pgc61z43Otc+DzrjOsc65In0seyJpZCI6MTQsInRpdGxlIjoiQ29uanVnYXRlIEdyZWVrIFZlcmJzIGluIFByZXNlbnQsIEZ1dHVyZSwgQW9yaXN0ICYgUGVyZmVjdCIsImFuc3dlclRleHQiOiJpLiBTRU5EIC8gU0VORCBBV0FZIC8gU0VORCBGT1JUSFxuVGVuc2Vcbs+Azq3OvM+Az4kgKFNlbmQpXG7hvIDPgM6/zrvPjc+JIChTZW5kIEF3YXkpXG7hvIDPgM6/z4PPhM6tzrvOu8+JIChTZW5kIEZvcnRoKVxuUHJlc2VudFxuz4DOrc68z4DPiVxu4byAz4DOv867z43PiVxu4byAz4DOv8+Dz4TOrc67zrvPiVxuRnV0dXJlXG7PgM6tzrzPiM+JXG7hvIDPgM6/zrvP",
+        "jc+Dz4lcbuG8gM+Azr/Pg8+EzrXOu+G/tlxuQW9yaXN0XG7hvJTPgM61zrzPiM6xXG7hvIDPgM6tzrvPhc+DzrFcbuG8gM+Azq3Pg8+EzrXOuc67zrFcblBlcmZlY3Rcbs+Azq3PgM6/zrzPhs6xXG7hvIDPgM6/zrvOrc67z4XOus6xXG7hvIDPgM6tz4PPhM6xzrvOus6xXG5paS4gTEVBRCAvIEJSSU5HXG5UZW5zZVxu4byEzrPPiSAoTGVhZClcbs+Gzq3Pgc+JIChCcmluZy9DYXJyeSlcblByZXNlbnRcbuG8hM6zz4lcbs+Gzq3Pgc+JXG5GdXR1cmVcbuG8hM6+z4lcbs6/4by0z4PPiVxuQW9yaXN0XG7hvKTOs86xzrPOv869XG7hvKTOvc61zrPOus6xXG5QZXJmZWN0XG7hvKbPh86xXG7hvJDOvc6uzr3Ov8+HzrFcbmlpaS4gSEVBUiAvIExJU1RFTlxuVGVuc2VcbuG8gM66zr/Pjc+JIChIZWFyIC8gTGlzdGVuKVxuUHJlc2VudFxu4byAzrrOv8+Nz4lcbkZ1dHVyZVxu4byAzrrOv8+Nz4PPiVxuQW9yaXN0XG7hvKTOus6/z4XPg86xXG5QZXJmZWN0XG7hvIDOus6uzrrOv86xIn0seyJpZCI6MTUsInRpdGxlIjoiQW5hbHl6ZSB0",
+        "aGUgR3JlZWsgV29yZHMiLCJhbnN3ZXJUZXh0IjoiV29yZFxuTGV4aWNhbCBGb3JtXG5UZW5zZVxuVm9pY2Vcbk1vb2RcblBlcnNvblxuTnVtYmVyXG5UcmFuc2xhdGlvblxu4bygz4POuM6vzrXPhM61XG7hvJDPg864zq/PiVxuSW1wZXJmZWN0XG5BY3RpdmVcbkluZGljYXRpdmVcbjJuZFxuUGx1cmFsXG5Zb3UgKHBsKSB3ZXJlIGVhdGluZ1xu4byQzrTOv8+FzrvOtc+Nz4POsc68zrXOvVxuzrTOv8+FzrvOtc+Nz4lcbjFzdCBBb3Jpc3RcbkFjdGl2ZVxuSW5kaWNhdGl2ZVxuMXN0XG5QbHVyYWxcbldlIHNlcnZlZFxu4bykzrPOsc6zzr/OvVxu4byEzrPPiVxuMm5kIEFvcmlzdFxuQWN0aXZlXG5JbmRpY2F0aXZlXG4zcmQvMXN0XG5QbC4gb3IgU2cuXG5UaGV5IGxlZCAvIEkgbGVkXG7Ou86xzrzOss6szr3Otc65zr1cbs67zrHOvM6yzqzOvc+JXG5QcmVzZW50XG5BY3RpdmVcbkluZmluaXRpdmVcbuKAlFxuVG8gdGFrZSAvIHRvIHJlY2VpdmVcbs614by2z4DOv869XG7Ou86tzrPPiVxuMm5kIEFvcmlzdFxuQWN0aXZlXG5J",
+        "bmRpY2F0aXZlXG4zcmQvMXN0XG5QbC4gb3IgU2cuXG5UaGV5IHNhaWQgLyBJIHNhaWRcbuKAlCBFTkQgT0YgQU5TV0VSUyDigJQifV19"
+      ].join("");
 
       const PF = [
         { key: "pf_name", label: "Full Name", type: "text", def: "Samuel Williams" },
         { key: "pf_user", label: "Username", type: "text", def: "samuelw" },
         { key: "pf_email", label: "Email", type: "email", def: "samiduvimo@gmail.com" },
-        { key: "pf_loc", label: "Location", type: "text", def: "— not set —" },
+        { key: "pf_loc", label: "Location", type: "text", def: "â€” not set â€”" },
         { key: "pf_bio", label: "Bio", type: "textarea", def: "Loves learning Koine Greek and ancient languages." },
         { key: "pf_goal", label: "Daily Goal", type: "select", opts: ["3 min/day", "10 min/day", "15 min/day", "30 min/day"], def: "10 min/day" },
         { key: "pf_since", label: "Learning Since", type: "text", def: "May 12, 2024" }
@@ -1273,6 +1322,18 @@
 
       function safeJsonParse(value) {
         try { return JSON.parse(value); } catch (_) { return null; }
+      }
+
+      function decodeB64Json(b64) {
+        try {
+          const bin = atob(String(b64 || ""));
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+          const text = new TextDecoder("utf-8").decode(bytes);
+          return JSON.parse(text);
+        } catch (_) {
+          return null;
+        }
       }
 
       function gf(f) {
@@ -1289,6 +1350,41 @@
 
       function readProgress() {
         return safeJsonParse(localStorage.getItem("greekQuestProgress")) || {};
+      }
+
+      function readDailyQuest() {
+        const today = new Date().toISOString().slice(0, 10);
+        const raw = localStorage.getItem("gqDailyQuest");
+        if (!raw) return { day: today, completed: false };
+        const parsed = safeJsonParse(raw) || {};
+        if (parsed.day === today) return { day: today, completed: !!parsed.completed };
+        return { day: today, completed: false };
+      }
+
+      function getWeekKey(date) {
+        const d = date ? new Date(date) : new Date();
+        const copy = new Date(d);
+        const day = copy.getDay();
+        const diff = (day + 6) % 7;
+        copy.setDate(copy.getDate() - diff);
+        return copy.toISOString().slice(0, 10);
+      }
+
+      function readHabitStats() {
+        const today = new Date().toISOString().slice(0, 10);
+        const week = getWeekKey(new Date());
+        const raw = localStorage.getItem("gqHabitStats");
+        const fallback = { today, week, lessonsToday: 0, lessonsWeek: 0, practiceToday: 0, lastAccuracy: 0 };
+        if (!raw) return fallback;
+        const parsed = safeJsonParse(raw) || {};
+        return {
+          today,
+          week,
+          lessonsToday: parsed.today === today ? Number(parsed.lessonsToday || 0) : 0,
+          lessonsWeek: parsed.week === week ? Number(parsed.lessonsWeek || 0) : 0,
+          practiceToday: parsed.today === today ? Number(parsed.practiceToday || 0) : 0,
+          lastAccuracy: Number(parsed.lastAccuracy || 0)
+        };
       }
 
       function computeLevelFromXp(xp) {
@@ -1373,7 +1469,10 @@
         const storedLevel = Number.isFinite(progress.level) ? progress.level : null;
         const lvl = storedLevel || computeLevelFromXp(xp);
         const hearts = Number.isFinite(progress.hearts) ? progress.hearts : 5;
-        const streak = Number(localStorage.getItem("gq_streak_days") || "0");
+        const habit = readHabitStats();
+        const daily = readDailyQuest();
+        const storedStreak = Number(localStorage.getItem("gq_streak_days") || "0");
+        const streak = storedStreak || (daily.completed ? 1 : 0);
         const lessonsCompleted = Array.isArray(progress.completedLessons) ? progress.completedLessons.length : 0;
         const accuracy = computeAccuracy(progress);
         const rank = rankFromXp(xp);
@@ -1383,11 +1482,11 @@
         const pct = Math.round((within / XP_PER_LEVEL) * 100);
         const away = Math.max(0, XP_PER_LEVEL - within);
 
-        document.getElementById("ph-name").textContent = profile.displayName || "—";
+        document.getElementById("ph-name").textContent = profile.displayName || "â€”";
         document.getElementById("ph-handle").textContent = "@" + (profile.username || "user");
         document.getElementById("ph-email").textContent = profile.email || "(sign in to sync)";
-        document.getElementById("ph-joined").textContent = "Joined " + (profile.learningSince || "—");
-        document.getElementById("ph-bio").textContent = profile.bio || "—";
+        document.getElementById("ph-joined").textContent = "Joined " + (profile.learningSince || "â€”");
+        document.getElementById("ph-bio").textContent = profile.bio || "â€”";
 
         document.getElementById("tb-user-name").textContent = profile.displayName || "Profile";
         document.getElementById("tb-user-level").textContent = "Level " + String(lvl);
@@ -1413,11 +1512,36 @@
         document.getElementById("activity-accuracy-sub").textContent = String(accuracy) + "% average";
 
         const updatedAt = Number(progress.updatedAt || 0);
-        document.getElementById("activity-last-active").textContent = updatedAt ? new Date(updatedAt).toLocaleString() : "—";
+        document.getElementById("activity-last-active").textContent = updatedAt ? new Date(updatedAt).toLocaleString() : "â€”";
 
         // Recent activity uses the active lesson XP earned when available.
         const lastXp = Number.isFinite(progress.activeLessonXpEarned) ? progress.activeLessonXpEarned : 0;
         document.getElementById("recent-lesson-xp").textContent = "+" + String(lastXp) + " XP";
+
+        const questsSummary = document.getElementById("quests-summary");
+        if (questsSummary) {
+          questsSummary.innerHTML = `
+            <div class="qa-item" style="background:var(--bg-card);">
+              <div class="qa-body" style="padding:14px">
+                <div style="display:flex;gap:14px;flex-wrap:wrap">
+                  <div><div class="qa-meta">Daily lesson</div><div class="qa-q">${daily.completed ? "Complete" : "Not yet"}</div></div>
+                  <div><div class="qa-meta">Lessons today</div><div class="qa-q">${Math.max(0, habit.lessonsToday || 0)}</div></div>
+                  <div><div class="qa-meta">Lessons this week</div><div class="qa-q">${Math.max(0, habit.lessonsWeek || 0)}</div></div>
+                  <div><div class="qa-meta">Practice today</div><div class="qa-q">${Math.max(0, habit.practiceToday || 0)}</div></div>
+                  <div><div class="qa-meta">Last accuracy</div><div class="qa-q">${Math.max(0, Math.min(100, habit.lastAccuracy || 0))}%</div></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        const lessonsContinueNote = document.getElementById("lessons-continue-note");
+        if (lessonsContinueNote) {
+          const next = Array.isArray(progress.completedLessons) ? (progress.completedLessons.length + 1) : 1;
+          lessonsContinueNote.textContent = lessonsCompleted
+            ? `You have completed ${lessonsCompleted} lessons. Next suggested lesson: Level ${Math.min(25, next)}.`
+            : "You have not completed any lessons yet. Start with Level 1.";
+        }
 
         // Avatars
         const phAvatar = document.getElementById("ph-avatar");
@@ -1434,6 +1558,248 @@
         }
 
         animateProgressBar(pct);
+      }
+
+      function escapeHtml(text) {
+        return String(text || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function ensureViewShells() {
+        const practice = document.getElementById("view-practice");
+        if (practice && !practice.dataset.mounted) {
+          practice.dataset.mounted = "1";
+          practice.innerHTML = `
+            <section class="content-card">
+              <div class="section-h">
+                <h2>&#127919; Practice</h2>
+                <div class="view-all-btn" id="btn-practice-refresh">Refresh</div>
+              </div>
+              <p class="qa-note">These practice questions come from your uploaded document and are stored locally so they work offline.</p>
+              <div class="qa-shell"><div id="practice-list"></div></div>
+            </section>
+            <div style="height:16px"></div>
+            <section class="content-card">
+              <div class="section-h">
+                <h2>&#9889; Quick Actions</h2>
+                <div class="view-all-btn" id="btn-open-lesson">Open Lesson Player</div>
+              </div>
+              <p class="qa-note">The full interactive lessons are in <code>lesson.html</code>.</p>
+              <div class="lesson-actions">
+                <a class="btn-link" href="lesson.html">Open lesson.html</a>
+                <button class="btn-link" type="button" data-go="profile">&#8592; Back to Profile</button>
+              </div>
+            </section>
+          `;
+        }
+
+        const lessons = document.getElementById("view-lessons");
+        if (lessons && !lessons.dataset.mounted) {
+          lessons.dataset.mounted = "1";
+          lessons.innerHTML = `
+            <section class="content-card">
+              <div class="section-h">
+                <h2>&#128218; Lessons</h2>
+                <div class="view-all-btn" id="btn-lessons-open">Open Player</div>
+              </div>
+              <p class="qa-note">Until we locate the original \"Greek\" lessons document, this view uses the app's built-in path (25 lessons across 5 worlds).</p>
+              <div class="lesson-grid" id="lessons-grid"></div>
+            </section>
+            <div style="height:16px"></div>
+            <section class="content-card">
+              <div class="section-h">
+                <h2>&#128204; Continue</h2>
+                <div class="view-all-btn" id="btn-lessons-continue">Continue</div>
+              </div>
+              <p class="qa-note" id="lessons-continue-note">Loading your progress...</p>
+              <div class="lesson-actions">
+                <a class="btn-link" href="lesson.html">Continue in lesson.html</a>
+                <button class="btn-link" type="button" data-go="profile">&#8592; Back to Profile</button>
+              </div>
+            </section>
+          `;
+        }
+
+        const quests = document.getElementById("view-quests");
+        if (quests && !quests.dataset.mounted) {
+          quests.dataset.mounted = "1";
+          quests.innerHTML = `
+            <section class="content-card">
+              <div class="section-h">
+                <h2>&#9876;&#65039; Quests</h2>
+                <div class="view-all-btn" id="btn-quests-refresh">Refresh</div>
+              </div>
+              <p class="qa-note">Progress is calculated from <code>gqDailyQuest</code> and <code>gqHabitStats</code>.</p>
+              <div class="qa-shell"><div id="quests-summary"></div></div>
+            </section>
+            <div style="height:16px"></div>
+            <section class="content-card">
+              <div class="section-h">
+                <h2>&#128221; Quest Bank (From Practice Doc)</h2>
+                <div class="view-all-btn" id="btn-quests-pick">Pick 3</div>
+              </div>
+              <p class="qa-note">Tap to open. Use these as revision quests.</p>
+              <div class="qa-shell"><div id="quests-bank"></div></div>
+            </section>
+          `;
+        }
+
+        // Shared handlers inside dynamic views.
+        document.querySelectorAll('[data-go=\"profile\"]').forEach((btn) => {
+          if (btn.dataset.wired) return;
+          btn.dataset.wired = "1";
+          btn.addEventListener("click", () => showView("profile"));
+        });
+
+        const btnOpenLesson = document.getElementById("btn-open-lesson");
+        if (btnOpenLesson && !btnOpenLesson.dataset.wired) {
+          btnOpenLesson.dataset.wired = "1";
+          btnOpenLesson.addEventListener("click", () => { window.location.href = "lesson.html"; });
+        }
+        const btnLessonsOpen = document.getElementById("btn-lessons-open");
+        if (btnLessonsOpen && !btnLessonsOpen.dataset.wired) {
+          btnLessonsOpen.dataset.wired = "1";
+          btnLessonsOpen.addEventListener("click", () => { window.location.href = "lesson.html"; });
+        }
+        const btnLessonsContinue = document.getElementById("btn-lessons-continue");
+        if (btnLessonsContinue && !btnLessonsContinue.dataset.wired) {
+          btnLessonsContinue.dataset.wired = "1";
+          btnLessonsContinue.addEventListener("click", () => { window.location.href = "lesson.html"; });
+        }
+        const btnPracticeRefresh = document.getElementById("btn-practice-refresh");
+        if (btnPracticeRefresh && !btnPracticeRefresh.dataset.wired) {
+          btnPracticeRefresh.dataset.wired = "1";
+          btnPracticeRefresh.addEventListener("click", () => renderPracticeAndQuestBank());
+        }
+        const btnQuestsRefresh = document.getElementById("btn-quests-refresh");
+        if (btnQuestsRefresh && !btnQuestsRefresh.dataset.wired) {
+          btnQuestsRefresh.dataset.wired = "1";
+          btnQuestsRefresh.addEventListener("click", () => loadProfile());
+        }
+      }
+
+      function fixIcons() {
+        const logo = document.querySelector(".sb-logo-icon");
+        if (logo) logo.textContent = "\u03A9";
+
+        const sbMap = {
+          dashboard: "\u{1F3E0}",
+          practice: "\u{1F3AF}",
+          lessons: "\u{1F4DA}",
+          quests: "\u2694",
+          vocab: "\u{1F524}",
+          leaderboard: "\u{1F3C6}",
+          rewards: "\u{1F381}",
+          profile: "\u{1F464}",
+          settings: "\u2699"
+        };
+        document.querySelectorAll(".sb-item[data-view]").forEach((it) => {
+          const view = it.getAttribute("data-view");
+          const icon = it.querySelector(".sb-icon");
+          if (icon && sbMap[view]) icon.textContent = sbMap[view];
+        });
+
+        const upgradeIcon = document.querySelector(".sb-upgrade-icon");
+        if (upgradeIcon) upgradeIcon.textContent = "\u{1F48E}";
+        const signoutIcon = document.querySelector(".sb-signout span");
+        if (signoutIcon) signoutIcon.textContent = "\u21A9";
+
+        const streakIcon = document.querySelector(".tb-streak span[aria-hidden='true']");
+        if (streakIcon) streakIcon.textContent = "\u{1F525}";
+        const bell = document.getElementById("tb-bell");
+        if (bell) bell.firstChild && (bell.firstChild.nodeType === 3) && (bell.firstChild.nodeValue = "\u{1F514}");
+
+        const cam = document.getElementById("ph-cam-btn");
+        if (cam) cam.textContent = "\u{1F4F7}";
+
+        const quoteMark = document.querySelector(".quote-mark");
+        if (quoteMark) quoteMark.textContent = "\u275D";
+        const quoteDeco = document.querySelector(".quote-deco");
+        if (quoteDeco) quoteDeco.textContent = "\u{1F3DB}";
+      }
+
+      function renderPracticeAndQuestBank() {
+        ensureViewShells();
+        const data = decodeB64Json(PRACTICE_QUESTIONS_B64);
+        if (!data || !Array.isArray(data.questions)) return;
+
+        const list = document.getElementById("practice-list");
+        if (list) {
+          list.innerHTML = data.questions.map((q) => {
+            const title = escapeHtml(q.title);
+            const ans = escapeHtml(q.answerText);
+            return `
+              <details class="qa-item">
+                <summary>
+                  <span class="qa-q">Question ${q.id}: ${title}</span>
+                  <span class="qa-meta">Tap to open</span>
+                </summary>
+                <div class="qa-body"><pre class="qa-answer">${ans}</pre></div>
+              </details>
+            `;
+          }).join("");
+        }
+
+        const bank = document.getElementById("quests-bank");
+        if (bank) {
+          const pick = (count) => {
+            const qs = [...data.questions];
+            for (let i = qs.length - 1; i > 0; i -= 1) {
+              const j = Math.floor(Math.random() * (i + 1));
+              const tmp = qs[i]; qs[i] = qs[j]; qs[j] = tmp;
+            }
+            return qs.slice(0, Math.max(1, Math.min(count, qs.length)));
+          };
+          const render = (items) => {
+            bank.innerHTML = items.map((q) => {
+              const title = escapeHtml(q.title);
+              const ans = escapeHtml(q.answerText);
+              return `
+                <details class="qa-item">
+                  <summary>
+                    <span class="qa-q">&#127919; Quest: ${title}</span>
+                    <span class="qa-meta">Question ${q.id}</span>
+                  </summary>
+                  <div class="qa-body"><pre class="qa-answer">${ans}</pre></div>
+                </details>
+              `;
+            }).join("");
+          };
+          render(pick(3));
+
+          const pickBtn = document.getElementById("btn-quests-pick");
+          if (pickBtn && !pickBtn.dataset.wired) {
+            pickBtn.dataset.wired = "1";
+            pickBtn.addEventListener("click", () => render(pick(3)));
+          }
+        }
+      }
+
+      function renderLessonsList() {
+        ensureViewShells();
+        const grid = document.getElementById("lessons-grid");
+        if (!grid) return;
+        const worlds = [
+          { title: "World 1: The Alphabet Temple", range: [1, 5] },
+          { title: "World 2: First Words & Basic Sentences", range: [6, 10] },
+          { title: "World 3: Grammar Foundations - Nouns & Verbs", range: [11, 15] },
+          { title: "World 4: Expanding Grammar - Cases, Tenses & Articles", range: [16, 20] },
+          { title: "World 5: Advanced Structures - Pronouns & Moods", range: [21, 25] }
+        ];
+        grid.innerHTML = worlds.map((w) => {
+          return `
+            <div class="lesson-card">
+              <strong>${escapeHtml(w.title)}</strong>
+              <div class="muted">Lessons: Level ${w.range[0]} to Level ${w.range[1]}.</div>
+              <div class="lesson-actions">
+                <a class="btn-link" href="lesson.html">Open player</a>
+                <button class="btn-link" type="button" data-go="profile">&#8592; Profile</button>
+              </div>
+            </div>
+          `;
+        }).join("");
       }
 
       function setTopBarForView(name) {
@@ -1466,7 +1832,10 @@
         });
 
         setTopBarForView(name);
-        if (name === "profile") loadProfile();
+        ensureViewShells();
+        if (name === "practice" || name === "quests") renderPracticeAndQuestBank();
+        if (name === "lessons") renderLessonsList();
+        loadProfile();
       }
 
       // Wire sidebar items
@@ -1498,7 +1867,7 @@
 
       // Camera button -> placeholder toast
       const camBtn = document.getElementById("ph-cam-btn");
-      if (camBtn) camBtn.addEventListener("click", () => showToast("Photo upload coming soon! 📷", "info"));
+      if (camBtn) camBtn.addEventListener("click", () => showToast("Photo upload coming soon!", "info"));
 
       // Edit profile button
       const editBtn = document.getElementById("btn-edit-profile");
@@ -1593,9 +1962,15 @@
       window.showToast = showToast;
 
       // Init
+      ensureViewShells();
+      fixIcons();
+      renderLessonsList();
+      renderPracticeAndQuestBank();
       showView("profile");
-      loadProfile();
     });
   </script>
 </body>
 </html>
+
+
+
