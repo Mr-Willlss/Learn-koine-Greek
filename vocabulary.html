@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
+  <title>Vocabulary • Learn Koine Greek</title>
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--green2:#16a34a;--orange:#f97316;--gold:#eab308;--gold2:#ca8a04;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;
+      --sw:220px;
+      --t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+    button{appearance:none;border:0;background:none;color:inherit;cursor:pointer}
+    #app{min-height:100%;display:flex}
+    #sidebar{width:var(--sw);flex:0 0 var(--sw);background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));border-right:1px solid var(--border);padding:14px;position:sticky;top:0;height:100vh;overflow:auto}
+    .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
+    .sbLogo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg, var(--purple), var(--blue));border:1px solid rgba(255,255,255,0.12)}
+    .sbLogo span{font-family:'Times New Roman',Georgia,serif;font-weight:900;color:white;font-size:20px}
+    .sbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;line-height:1.1}
+    .sbSub{font-size:12px;color:var(--tm);margin-top:2px}
+    .sbGroup{margin-top:14px}
+    .sbGroup h3{margin:12px 8px 8px 8px;color:rgba(226,232,240,0.72);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
+    .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
+    .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
+    body[data-page="dashboard"] .nav a[href="dashboard.html"],
+    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="profile"] .nav a[href="profile.html"]{
+      background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
+      border-color:rgba(124,92,252,0.3);
+      color:var(--tw);
+    }
+    .nav .ic{width:26px;display:flex;justify-content:center}
+    #main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+    #top-bar{position:sticky;top:0;z-index:50;background:rgba(15,17,23,0.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .tbLeft{min-width:0}
+    .tbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .tbSub{color:var(--tm);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tbRight{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .pill b{color:var(--tw)}
+    .avatar{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));display:grid;place-items:center;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .miniName{display:flex;flex-direction:column;line-height:1.1}
+    .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
+    .miniName .l{color:var(--tm);font-size:11px}
+    #content{padding:14px;max-width:1100px;width:100%;margin:0 auto}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .input{flex:1 1 240px;min-width:220px;padding:12px 12px;border-radius:16px;border:1px solid var(--border);background:var(--bg-input);color:var(--ts);outline:none}
+    .select{padding:12px 12px;border-radius:16px;border:1px solid var(--border);background:var(--bg-input);color:var(--ts);outline:none}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);font-weight:900;color:var(--tw)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .btnPrimary{border-color:rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.20), rgba(34,197,94,0.08))}
+    .btnPrimary:hover{border-color:rgba(34,197,94,0.75);box-shadow:0 18px 35px rgba(34,197,94,0.15)}
+    .tabsBar{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+    .tabBtn{padding:10px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.9);font-weight:900;transition:transform var(--t1), border-color var(--t1), background var(--t1)}
+    .tabBtn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.14);background:rgba(255,255,255,0.04)}
+    .tabBtn.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    .stats{margin-top:10px;color:var(--tm);font-size:12px}
+
+    .grid{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .card{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
+      border-radius:22px;padding:14px;
+      box-shadow:0 18px 50px rgba(0,0,0,0.25);
+      position:relative;overflow:hidden;
+      min-height:120px;
+      transition:transform var(--t1), border-color var(--t1), background var(--t1), box-shadow var(--t1);
+    }
+    .card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);box-shadow:0 16px 32px rgba(0,0,0,0.34)}
+    .gr{font-family:'Times New Roman',Georgia,serif;font-size:26px;color:var(--tw);font-weight:700}
+    .en{margin-top:6px;color:rgba(226,232,240,0.92);font-weight:800}
+    .ex{margin-top:6px;color:var(--tm);font-size:12px;line-height:1.45;white-space:pre-wrap}
+    .meta{margin-top:8px;color:rgba(226,232,240,0.8);font-size:11px}
+    .star{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:14px;border:1px solid var(--border);background:rgba(0,0,0,0.18);display:grid;place-items:center;font-size:16px;transition:transform var(--t1), border-color var(--t1), background var(--t1)}
+    .star.on{border-color:rgba(234,179,8,0.45);background:rgba(234,179,8,0.12)}
+    .star:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.14)}
+
+    .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
+    .toast{pointer-events:auto;max-width:min(560px,100%);border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:16px;padding:10px 12px;box-shadow:0 22px 40px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;transform:translateY(20px);opacity:0;transition:transform var(--t2), opacity var(--t2)}
+    .toast.show{transform:translateY(0);opacity:1}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.info{background:var(--cyan)}
+    .dot.good{background:var(--green)}
+    .dot.bad{background:var(--red)}
+    .bell{position:relative}
+    .bellI{display:inline-block;line-height:1}
+    .bellBadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:900;color:white;background:var(--red);border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 24px rgba(0,0,0,0.45)}
+    .notifBackdrop{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0.25);display:none}
+    .notifPanel{position:fixed;z-index:130;top:64px;right:14px;width:min(420px, calc(100% - 28px));max-height:min(70vh, 540px);overflow:auto;border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 26px 64px rgba(0,0,0,0.55);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform var(--t2), opacity var(--t2)}
+    .notifPanel.open{transform:translateY(0);opacity:1;pointer-events:auto}
+    .notifHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)}
+    .notifHead .t{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
+    .notifHead .actions{display:flex;gap:8px}
+    .nBtn{padding:7px 10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.92);font-size:12px;font-weight:800;transition:transform var(--t1), background var(--t1), border-color var(--t1);white-space:nowrap}
+    .nBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.03);border-color:var(--border2)}
+    .nBtn.primary{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.12)}
+    .notifBody{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .nItem{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .nItem .meta{color:var(--tm);font-size:12px;margin-top:4px}
+    .nItem .msg{color:rgba(226,232,240,0.92);font-size:12px}
+    .nItem .left{min-width:0}
+    .nItem .right{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+    .nTag{font-weight:900;color:var(--tw)}
+    .nEmpty{border:1px dashed var(--border);border-radius:14px;padding:14px;color:var(--tm);text-align:center}
+    .bottomTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(15,17,23,0.86);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
+    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
+      border-color:rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.10);
+      color:var(--tw);
+    }
+    @media (max-width: 980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width: 640px){.grid{grid-template-columns:1fr}}
+    @media (max-width: 768px){
+      :root{--sw:56px}
+      #sidebar{padding:12px 8px}
+      .sbTitle,.sbSub,.sbGroup h3,.nav .tx{display:none}
+      .sbBrand{justify-content:center}
+      .nav a{justify-content:center}
+      .nav .ic{width:auto}
+      .tbSub{display:none}
+      #content{padding-bottom:90px}
+      .bottomTabs{display:block}
+      .toastWrap{bottom:92px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .btn,.tabBtn,.card,.toast,.star{transition:none}
+    }
+  </style>
+</head>
+<body data-page="vocabulary">
+  <div id="app">
+    <aside id="sidebar" aria-label="Sidebar navigation">
+      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
+        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+        <div>
+          <div class="sbTitle">Koine Greek</div>
+          <div class="sbSub">Duolingo-style</div>
+        </div>
+      </a>
+      <div class="sbGroup">
+        <h3>Main</h3>
+        <nav class="nav">
+          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Learn</h3>
+        <nav class="nav">
+          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Social</h3>
+        <nav class="nav">
+          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Account</h3>
+        <nav class="nav">
+          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
+          <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
+        </nav>
+      </div>
+    </aside>
+
+    <div id="main-wrapper">
+      <header id="top-bar">
+        <div class="tbLeft">
+          <div class="tbTitle">Vocabulary</div>
+          <div class="tbSub">Browse • Search • Favorites • Flashcards</div>
+        </div>
+        <div class="tbRight">
+          <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
+          <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
+          <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar" id="avatar"><span>👤</span></div>
+            <div class="miniName">
+              <div class="n" id="userName">Guest</div>
+              <div class="l" id="userLevel">Level —</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="content">
+        <div class="toolbar" aria-label="Vocabulary toolbar">
+          <input class="input" id="search" placeholder="Search Greek / English…" autocomplete="off" />
+          <select class="select" id="lessonFilter" aria-label="Filter by lesson">
+            <option value="all">All lessons</option>
+          </select>
+          <select class="select" id="typeFilter" aria-label="Filter by word type">
+            <option value="all">All types</option>
+            <option value="verb">Verb</option>
+            <option value="noun">Noun</option>
+            <option value="adjective">Adjective</option>
+            <option value="particle">Particle</option>
+          </select>
+          <button class="btn" id="flashBtn" type="button">Flashcard mode →</button>
+        </div>
+
+        <div class="tabsBar">
+          <button class="tabBtn active" id="tabBrowse" type="button">Browse</button>
+          <button class="tabBtn" id="tabFav" type="button">My Words</button>
+        </div>
+
+        <div class="stats" id="stats">Loading…</div>
+        <section class="grid" id="grid" aria-label="Vocabulary cards"></section>
+      </main>
+    </div>
+  </div>
+
+  <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
+    <div class="tabs">
+      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+    </div>
+  </div>
+
+  <div class="notifBackdrop" id="notifBackdrop" aria-hidden="true"></div>
+  <section class="notifPanel" id="notifPanel" aria-label="Notifications" aria-hidden="true">
+    <div class="notifHead">
+      <div class="t">Notifications</div>
+      <div class="actions">
+        <button class="nBtn" id="notifMarkAll" type="button">Mark all read</button>
+        <button class="nBtn primary" id="notifClose" type="button">Close</button>
+      </div>
+    </div>
+    <div class="notifBody" id="notifBody"></div>
+  </section>
+
+  <div class="toastWrap" aria-live="polite" aria-atomic="true">
+    <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    document.addEventListener('click', function(e) {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const bad = ['lesson.html','home.html'];
+      if (bad.some(b => a.getAttribute('href') === b)) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    function showToast(msg, type='info', title='Notice') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      const t = document.getElementById('toastTitle');
+      const m = document.getElementById('toastMsg');
+      dot.className = 'dot ' + (type === 'good' ? 'good' : type === 'bad' ? 'bad' : 'info');
+      t.textContent = title;
+      m.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function calcLevel(xp) {
+      const thresholds = [0,100,250,500,900,1400,2000,2800,3800,5000];
+      const titles = ["Newcomer","Letter Keeper","Word Seeker","Novice Scribe","Scribe","Scholar","Grammarian","Interpreter","Theologian","Master"];
+      let level = 1;
+      for (let i = 0; i < thresholds.length; i++) if (xp >= thresholds[i]) level = i + 1;
+      return { level, title: titles[level-1] };
+    }
+
+    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
+
+    function wireSignOut(user){
+      const link = document.getElementById('signOutLink');
+      if (!link) return;
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        localStorage.removeItem('gk_guest');
+        try{ if (user && auth) await auth.signOut(); }catch(_){}
+        location.href = 'index.html';
+      });
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+      authDomain: "learn-basic-greek.firebaseapp.com",
+      projectId: "learn-basic-greek",
+      storageBucket: "learn-basic-greek.firebasestorage.app",
+      messagingSenderId: "628557836662",
+      appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+      measurementId: "G-6BYGXRJFT",
+      databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
+    };
+    let auth=null, db=null;
+    function initFirebase(){
+      if (!window.firebase) return false;
+      if (firebase.apps && firebase.apps.length===0) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps) firebase.initializeApp(firebaseConfig);
+      auth=firebase.auth(); db=firebase.firestore(); return true;
+    }
+
+    async function loadLessonData() {
+      if (window.__LESSON_DATA) return window.__LESSON_DATA;
+      const txt = await fetch('lesson-player.html', { cache:'no-store' }).then(r => r.text());
+      const m = txt.match(/const\\s+LESSON_DATA\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});\\s*\\n\\s*\\n\\s*const\\s+firebaseConfig/);
+      if (!m) throw new Error("Could not load lesson data.");
+      const obj = (new Function('return ' + m[1]))();
+      window.__LESSON_DATA = obj;
+      return obj;
+    }
+
+    function vocabFromLessons(LESSON_DATA, lessonsCompleted) {
+      const out = [];
+      for (let i=1;i<=lessonsCompleted;i++){
+        const v = (LESSON_DATA[i] && LESSON_DATA[i].vocabulary) || [];
+        v.forEach(x => out.push({ ...x, lessonId:i }));
+      }
+      return out;
+    }
+
+    function romanizeGreek(text) {
+      const t = (text || '')
+        .normalize('NFD')
+        .replace(/[\\u0300-\\u036f]/g,'')
+        .replace(/[᾿῀῾··΄`͂]/g,'');
+      const map = {
+        'α':'a','β':'b','γ':'g','δ':'d','ε':'e','ζ':'z','η':'e','θ':'th','ι':'i','κ':'k','λ':'l','μ':'m','ν':'n','ξ':'x','ο':'o','π':'p','ρ':'r','σ':'s','ς':'s','τ':'t','υ':'u','φ':'ph','χ':'ch','ψ':'ps','ω':'o',
+        'Α':'a','Β':'b','Γ':'g','Δ':'d','Ε':'e','Ζ':'z','Η':'e','Θ':'th','Ι':'i','Κ':'k','Λ':'l','Μ':'m','Ν':'n','Ξ':'x','Ο':'o','Π':'p','Ρ':'r','Σ':'s','Τ':'t','Υ':'u','Φ':'ph','Χ':'ch','Ψ':'ps','Ω':'o'
+      };
+      let out = '';
+      for (const ch of t) out += (map[ch] != null) ? map[ch] : ch;
+      return out.toLowerCase();
+    }
+
+    function guessType(v) {
+      const en = (v.english || '').trim().toLowerCase();
+      if (en.startsWith('i ')) return 'verb';
+      const particles = new Set([
+        'and / also','and / also / even','but','for / because','that / because','that','because',
+        'now','then','today','tomorrow','yesterday','where?','where','here','there','again','always','no longer'
+      ]);
+      if (particles.has(en)) return 'particle';
+      const adjectives = new Set(['free','good / beautiful','righteous / just','blessed / happy','bad / evil','small / little',"one's own",'younger','very much / greatly']);
+      if (adjectives.has(en)) return 'adjective';
+      return 'noun';
+    }
+
+    function keyOf(v){ return `${v.greek}|${v.english}`; }
+
+    function setTopUser(user, data) {
+      const xp = Number.isFinite(data?.xp) ? data.xp : 0;
+      const lvl = calcLevel(xp);
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
+      document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
+      const av = document.getElementById('avatar');
+      const url = data?.photoURL || user?.photoURL;
+      if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
+    }
+
+    function setTab(active){
+      document.getElementById('tabBrowse').classList.toggle('active', active === 'browse');
+      document.getElementById('tabFav').classList.toggle('active', active === 'fav');
+    }
+
+    async function initPage(user){
+      wireSignOut(user);
+      const state = { user, userData:{}, lessonsCompleted:0, vocab:[], favorites:new Set(), tab:'browse' };
+
+      if (user) {
+        const snap = await db.collection('users').doc(user.uid).get();
+        state.userData = snap.exists ? (snap.data() || {}) : {};
+        state.lessonsCompleted = Number.isFinite(state.userData.lessonsCompleted) ? state.userData.lessonsCompleted : 0;
+        const favArr = Array.isArray(state.userData.favorites) ? state.userData.favorites : [];
+        state.favorites = new Set(favArr);
+        setTopUser(user, state.userData);
+      } else {
+        setTopUser(null, { hearts:5, streak:0 });
+        state.lessonsCompleted = 0;
+        state.favorites = new Set(JSON.parse(sessionStorage.getItem('gk_fav') || '[]'));
+      }
+
+      let LESSON_DATA = null;
+      try { LESSON_DATA = await loadLessonData(); }
+      catch(e){ console.error(e); showToast("Could not load lesson content.", "bad", "Data error"); }
+      if (LESSON_DATA) state.vocab = vocabFromLessons(LESSON_DATA, state.lessonsCompleted);
+
+      // Populate lesson filter
+      const lf = document.getElementById('lessonFilter');
+      lf.innerHTML = `<option value="all">All lessons</option>` + Array.from({length:state.lessonsCompleted},(_,i)=>`<option value="${i+1}">Lesson ${i+1}</option>`).join('');
+
+      function filtered() {
+        const q = (document.getElementById('search').value || '').trim().toLowerCase();
+        const lesson = document.getElementById('lessonFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const source = state.tab === 'fav'
+          ? state.vocab.filter(v => state.favorites.has(keyOf(v)))
+          : state.vocab;
+        return source.filter(v => {
+          if (lesson !== 'all' && String(v.lessonId) !== lesson) return false;
+          if (type !== 'all' && guessType(v) !== type) return false;
+          if (!q) return true;
+          const g = (v.greek || '').toLowerCase();
+          const e = (v.english || '').toLowerCase();
+          const ex = (v.example || '').toLowerCase();
+          const r = romanizeGreek(v.greek || '');
+          return g.includes(q) || e.includes(q) || ex.includes(q) || r.includes(q);
+        });
+      }
+
+      function render() {
+        const grid = document.getElementById('grid');
+        const list = filtered();
+        const total = state.vocab.length;
+        const favCount = [...state.favorites].length;
+        document.getElementById('stats').textContent =
+          total ? `You know ${list.length} of ${total} words from completed lessons • Favorites: ${favCount}` :
+            "Complete at least 1 lesson to unlock vocabulary.";
+        grid.innerHTML = '';
+        if (!total) return;
+        if (!list.length) {
+          grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="en">No matches</div><div class="ex">Try a different search or filter.</div></div>`;
+          return;
+        }
+        list.forEach(v => {
+          const k = keyOf(v);
+          const fav = state.favorites.has(k);
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <button class="star ${fav ? 'on':''}" type="button" title="${fav ? 'Unstar' : 'Star'}">${fav ? '★' : '☆'}</button>
+            <div class="gr">${v.greek}</div>
+            <div class="en">${v.english}</div>
+            <div class="ex">${v.example || ''}</div>
+            <div class="meta">Lesson ${v.lessonId} • Audio: (coming soon)</div>
+          `;
+          card.querySelector('button.star').addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (fav) state.favorites.delete(k); else state.favorites.add(k);
+            if (state.user) {
+              try{
+                await db.collection('users').doc(state.user.uid).set({ favorites: [...state.favorites] }, { merge:true });
+              }catch(err){
+                console.error(err);
+                showToast("Could not save favorite.", "bad", "Save failed");
+              }
+            } else {
+              sessionStorage.setItem('gk_fav', JSON.stringify([...state.favorites]));
+            }
+            render();
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      document.getElementById('search').addEventListener('input', render);
+      document.getElementById('lessonFilter').addEventListener('change', render);
+      document.getElementById('typeFilter').addEventListener('change', render);
+      document.getElementById('tabBrowse').addEventListener('click', () => { state.tab='browse'; setTab('browse'); render(); });
+      document.getElementById('tabFav').addEventListener('click', () => { state.tab='fav'; setTab('fav'); render(); });
+      document.getElementById('flashBtn').addEventListener('click', () => { location.href = 'practice.html'; });
+
+      setTab('browse');
+      render();
+    }
+
+    const isGuestAllowed = true;
+    (function boot(){
+      const ok = initFirebase();
+      if (!ok) { showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase"); initPage(null); return; }
+      firebase.auth().onAuthStateChanged(function(user){
+        if (!user && !isGuestAllowed && !isGuest()) { window.location.href='index.html'; return; }
+        if (!user && isGuest()) initPage(null);
+        else initPage(user);
+      });
+    })();
+  </script>
+</body>
+</html>

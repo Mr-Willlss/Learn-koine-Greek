@@ -1,11 +1,3 @@
-<!--
-Top 5 research findings applied (2024–2025):
-1) Bento-grid dashboards are most effective when each card is highly scannable (one primary metric + one supportive line), with consistent spacing/radius, and a clear hierarchy (hero card + supporting cards) that stacks cleanly on mobile.
-2) Micro-interactions should communicate state changes (correct/wrong, progress movement, loading) and stay subtle; excessive motion feels gimmicky. Always support reduced-motion preferences.
-3) Streaks are effective habit scaffolds when tied to meaningful learning; “one lesson a day” aligns with distributed practice (spacing) for better long-term retention than cramming.
-4) Social learning works best with lightweight patterns: visible friend presence, simple requests/challenges, and shared sessions (study rooms) rather than heavy community feeds.
-5) Greek alphabet UX commonly focuses on rapid symbol↔name↔sound drills, uppercase/lowercase mapping, immediate feedback quizzes, and optional mnemonics/audio—ideal for early-world lessons.
--->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +7,7 @@ Top 5 research findings applied (2024–2025):
   <meta name="theme-color" content="#7c5cfc">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
-  <title>Dashboard • Learn Koine Greek</title>
+  <title>Lessons • Learn Koine Greek</title>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -103,115 +95,68 @@ Top 5 research findings applied (2024–2025):
     .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
     .miniName .l{color:var(--tm);font-size:11px}
     #content{padding:14px;max-width:1100px;width:100%;margin:0 auto}
-    .banner{
-      border:1px solid var(--border);
-      background:radial-gradient(900px 400px at 30% 10%, rgba(34,197,94,0.14), transparent 60%),
-        radial-gradient(900px 400px at 70% 20%, rgba(124,92,252,0.14), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
-      border-radius:24px;
-      padding:16px;
-      box-shadow:0 26px 70px rgba(0,0,0,0.35);
+    .path{
+      display:flex;flex-direction:column;gap:12px;
     }
-    .bannerTop{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
-    .banner h1{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.03em;font-size:22px}
-    .banner p{margin:6px 0 0 0;color:var(--tm);font-size:13px}
-    .cta{
+    .worldCard{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
+      border-radius:22px;
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+      box-shadow:0 18px 50px rgba(0,0,0,0.28);
+    }
+    .worldCard.locked{opacity:0.65;filter:saturate(0.85)}
+    .wTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .wTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .wMeta{color:var(--tm);font-size:12px;margin-top:4px}
+    .wBadge{padding:7px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,0.18);font-size:12px;color:rgba(226,232,240,0.92)}
+    .bar{height:10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);overflow:hidden;margin-top:12px}
+    .bar>div{height:100%;width:0%;border-radius:999px;transition:width 0.8s ease}
+    .wBtn{
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      padding:12px 14px;border-radius:16px;
-      border:1px solid rgba(34,197,94,0.45);
-      background:linear-gradient(180deg, rgba(34,197,94,0.22), rgba(34,197,94,0.10));
+      padding:10px 12px;border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
       font-weight:900;color:var(--tw);
-      transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1);
+      transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);
       white-space:nowrap
     }
-    .cta:hover{transform:translateY(-2px);box-shadow:0 18px 35px rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.7)}
-    .meta{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
-    .chip{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
-    .chip b{color:var(--tw)}
-    .bento{margin-top:12px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
-    .card{
-      border:1px solid var(--border);
-      background:linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.014));
-      border-radius:18px;
-      padding:12px;
-      transition:transform var(--t1), border-color var(--t1), box-shadow var(--t1);
-      position:relative;
-      overflow:hidden;
-      min-height:92px;
-    }
-    .card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.14);box-shadow:0 16px 32px rgba(0,0,0,0.34)}
-    .k{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
-    .v{color:var(--tm);font-size:12px;margin-top:4px}
-    .bar{height:10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);overflow:hidden;margin-top:10px}
-    .bar > div{height:100%;width:0%;background:linear-gradient(90deg, var(--purple), var(--blue));border-radius:999px;transition:width 0.8s ease}
-    .hearts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-    .heart{
-      width:18px;height:18px;display:grid;place-items:center;
-      border-radius:6px;border:1px solid var(--border);
-      background:rgba(255,255,255,0.02);
-      transition:transform var(--t1), filter var(--t1), opacity var(--t1)
-    }
-    .heart.on{border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.12)}
-    .heart.off{opacity:0.45;filter:grayscale(1)}
-    .flame{display:inline-block;transform-origin:50% 80%;animation:flame 1.4s ease-in-out infinite}
-    @keyframes flame{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
-    .section{margin-top:14px;display:grid;grid-template-columns:1.2fr 0.8fr;gap:10px}
-    .panel{
+    .wBtn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .wBtn:disabled{opacity:0.5;cursor:not-allowed}
+    .lessonStrip{
+      margin-top:14px;
       border:1px solid var(--border);
       background:rgba(255,255,255,0.02);
       border-radius:18px;
-      padding:12px;
-      overflow:hidden
+      padding:10px;
     }
-    .panel h2{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:14px}
-    .feed{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .rowItem{
+    .stripTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:14px}
+    .stripSub{color:var(--tm);font-size:12px;margin-top:3px}
+    .hScroll{
+      margin-top:10px;
+      display:flex;gap:8px;
+      overflow:auto;
+      padding-bottom:6px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .lessonChip{
+      flex:0 0 auto;
+      padding:10px 10px;border-radius:16px;
       border:1px solid var(--border);
       background:rgba(255,255,255,0.02);
-      border-radius:14px;padding:10px;
-      display:flex;align-items:flex-start;justify-content:space-between;gap:10px
+      min-width:170px;
+      transition:transform var(--t1), border-color var(--t1), background var(--t1);
     }
-    .rowItem .d{color:var(--tm);font-size:12px}
-    .rowItem .t{color:rgba(226,232,240,0.9);font-size:12px}
-    .skel{
-      position:relative;
-      overflow:hidden;
-      background:rgba(255,255,255,0.03);
-      border-color:transparent;
-    }
-    .skel::after{
-      content:"";
-      position:absolute;inset:-40px;
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-      transform:translateX(-40%);
-      animation:shimmer 1.1s ease-in-out infinite;
-    }
-    @keyframes shimmer{0%{transform:translateX(-55%)}100%{transform:translateX(55%)}}
-    .bottomTabs{
-      display:none;
-      position:fixed;left:0;right:0;bottom:0;z-index:80;
-      background:rgba(15,17,23,0.86);
-      backdrop-filter:blur(10px);
-      border-top:1px solid var(--border);
-      padding:8px 10px;
-    }
-    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-    .tab{
-      display:flex;flex-direction:column;align-items:center;gap:4px;
-      padding:8px 6px;border-radius:14px;border:1px solid transparent;
-      color:rgba(226,232,240,0.82);font-size:11px
-    }
-    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
-    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
-    body[data-page="practice"] .bottomTabs a[href="practice.html"],
-    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
-    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
-    body[data-page="friends"] .bottomTabs a[href="friends.html"],
-    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
-      border-color:rgba(124,92,252,0.35);
-      background:rgba(124,92,252,0.10);
-      color:var(--tw);
-    }
+    .lessonChip:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .lessonChip.locked{opacity:0.55;filter:saturate(0.9);pointer-events:none}
+    .lessonChip.done{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08)}
+    .lessonChip.next{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10)}
+    .lcTop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .lcNum{font-weight:900;color:var(--tw)}
+    .lcStat{font-size:12px;color:rgba(226,232,240,0.88)}
+    .lcTitle{margin-top:6px;color:rgba(226,232,240,0.9);font-size:12px;line-height:1.35}
     .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
     .toast{
       pointer-events:auto;
@@ -234,71 +179,37 @@ Top 5 research findings applied (2024–2025):
     .dot.bad{background:var(--red)}
     .bell{position:relative}
     .bellI{display:inline-block;line-height:1}
-    .bellBadge{
-      position:absolute;top:-6px;right:-6px;
-      min-width:18px;height:18px;padding:0 6px;
-      border-radius:999px;
-      display:grid;place-items:center;
-      font-size:11px;font-weight:900;
-      color:white;
-      background:var(--red);
-      border:1px solid rgba(255,255,255,0.18);
-      box-shadow:0 10px 24px rgba(0,0,0,0.45);
-    }
+    .bellBadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:900;color:white;background:var(--red);border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 24px rgba(0,0,0,0.45)}
     .notifBackdrop{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0.25);display:none}
-    .notifPanel{
-      position:fixed;z-index:130;
-      top:64px;right:14px;
-      width:min(420px, calc(100% - 28px));
-      max-height:min(70vh, 540px);
-      overflow:auto;
-      border:1px solid var(--border);
-      background:rgba(15,17,23,0.92);
-      backdrop-filter:blur(10px);
-      border-radius:18px;
-      box-shadow:0 26px 64px rgba(0,0,0,0.55);
-      transform:translateY(-8px);
-      opacity:0;
-      pointer-events:none;
-      transition:transform var(--t2), opacity var(--t2);
-    }
+    .notifPanel{position:fixed;z-index:130;top:64px;right:14px;width:min(420px, calc(100% - 28px));max-height:min(70vh, 540px);overflow:auto;border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 26px 64px rgba(0,0,0,0.55);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform var(--t2), opacity var(--t2)}
     .notifPanel.open{transform:translateY(0);opacity:1;pointer-events:auto}
-    .notifHead{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:10px 10px 8px 10px;
-      border-bottom:1px solid var(--border);
-      position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)
-    }
+    .notifHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)}
     .notifHead .t{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
     .notifHead .actions{display:flex;gap:8px}
-    .nBtn{
-      padding:7px 10px;border-radius:12px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,0.02);
-      color:rgba(226,232,240,0.92);
-      font-size:12px;font-weight:800;
-      transition:transform var(--t1), background var(--t1), border-color var(--t1);
-      white-space:nowrap;
-    }
+    .nBtn{padding:7px 10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.92);font-size:12px;font-weight:800;transition:transform var(--t1), background var(--t1), border-color var(--t1);white-space:nowrap}
     .nBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.03);border-color:var(--border2)}
     .nBtn.primary{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.12)}
     .notifBody{padding:10px;display:flex;flex-direction:column;gap:8px}
-    .nItem{
-      border:1px solid var(--border);
-      background:rgba(255,255,255,0.02);
-      border-radius:14px;
-      padding:10px;
-      display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
-    }
+    .nItem{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
     .nItem .meta{color:var(--tm);font-size:12px;margin-top:4px}
     .nItem .msg{color:rgba(226,232,240,0.92);font-size:12px}
     .nItem .left{min-width:0}
     .nItem .right{display:flex;gap:8px;flex:0 0 auto;align-items:center}
     .nTag{font-weight:900;color:var(--tw)}
     .nEmpty{border:1px dashed var(--border);border-radius:14px;padding:14px;color:var(--tm);text-align:center}
-    @media (max-width: 980px){
-      .bento{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .section{grid-template-columns:1fr}
+    .bottomTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(15,17,23,0.86);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
+    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
+      border-color:rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.10);
+      color:var(--tw);
     }
     @media (max-width: 768px){
       :root{--sw:56px}
@@ -313,13 +224,11 @@ Top 5 research findings applied (2024–2025):
       .toastWrap{bottom:92px}
     }
     @media (prefers-reduced-motion: reduce){
-      .card,.nav a,.cta,.toast,.bar>div{transition:none}
-      .skel::after{animation:none}
-      .flame{animation:none}
+      .wBtn,.lessonChip,.toast,.bar>div{transition:none}
     }
   </style>
 </head>
-<body data-page="dashboard">
+<body data-page="lessons">
   <div id="app">
     <aside id="sidebar" aria-label="Sidebar navigation">
       <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
@@ -366,11 +275,11 @@ Top 5 research findings applied (2024–2025):
     <div id="main-wrapper">
       <header id="top-bar">
         <div class="tbLeft">
-          <div class="tbTitle" id="pageTitle">Dashboard</div>
-          <div class="tbSub" id="pageSub">Your Koine Greek command center</div>
+          <div class="tbTitle" id="pageTitle">Lessons</div>
+          <div class="tbSub" id="pageSub">Pick a world, then follow the path</div>
         </div>
         <div class="tbRight">
-          <div class="pill" title="Daily streak"><span class="flame">🔥</span><b id="streakVal">—</b></div>
+          <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
           <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
           <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
           <div style="display:flex;align-items:center;gap:10px">
@@ -383,67 +292,12 @@ Top 5 research findings applied (2024–2025):
         </div>
       </header>
       <main id="content">
-        <section class="banner" id="banner">
-          <div class="bannerTop">
-            <div>
-              <h1 id="welcomeTitle" class="skel" style="width:260px;height:26px;border-radius:10px"></h1>
-              <p id="welcomeSub" class="skel" style="width:320px;height:16px;border-radius:10px;margin-top:10px"></p>
-              <div class="meta">
-                <span class="chip skel" style="width:220px;height:30px"></span>
-                <span class="chip skel" style="width:210px;height:30px"></span>
-              </div>
-            </div>
-            <a class="cta" id="continueBtn" href="lessons.html" aria-label="Continue lesson">Continue →</a>
-          </div>
-        </section>
+        <section class="path" id="worldPath" aria-label="World path"></section>
 
-        <section class="bento" aria-label="Today overview">
-          <div class="card" style="grid-column:span 2">
-            <div class="k">📅 Today’s Goal</div>
-            <div class="v">One lesson a day builds mastery.</div>
-            <div class="bar" aria-label="Goal progress"><div id="goalBar"></div></div>
-          </div>
-          <div class="card" style="grid-column:span 2">
-            <div class="k">🔥 Streak</div>
-            <div class="v"><span id="streakText" class="skel" style="display:inline-block;width:160px;height:14px;border-radius:10px"></span></div>
-          </div>
-          <div class="card" style="grid-column:span 2">
-            <div class="k">⭐ XP & Level</div>
-            <div class="v"><span id="xpText" class="skel" style="display:inline-block;width:170px;height:14px;border-radius:10px"></span></div>
-            <div class="bar" aria-label="Level progress"><div id="xpBar"></div></div>
-          </div>
-          <div class="card" style="grid-column:span 2">
-            <div class="k">❤️ Hearts</div>
-            <div class="v">Lose one per wrong answer in lessons.</div>
-            <div class="hearts" id="heartsRow" aria-label="Hearts"></div>
-          </div>
-          <div class="card" style="grid-column:span 2">
-            <div class="k">🏆 Your Rank</div>
-            <div class="v" id="rankText" class="skel" style="width:160px;height:14px;border-radius:10px"></div>
-          </div>
-          <div class="card" style="grid-column:span 2">
-            <div class="k">👥 Friends Online</div>
-            <div class="v" id="friendsOnlineText" class="skel" style="width:180px;height:14px;border-radius:10px"></div>
-          </div>
-        </section>
-
-        <section class="section" aria-label="Details">
-          <div class="panel">
-            <h2>Recent Activity</h2>
-            <div class="feed" id="activityFeed">
-              <div class="rowItem skel" style="height:54px"></div>
-              <div class="rowItem skel" style="height:54px"></div>
-              <div class="rowItem skel" style="height:54px"></div>
-            </div>
-          </div>
-          <div class="panel">
-            <h2>World Map Preview</h2>
-            <div class="feed" id="worldPreview">
-              <div class="rowItem skel" style="height:54px"></div>
-              <div class="rowItem skel" style="height:54px"></div>
-              <div class="rowItem skel" style="height:54px"></div>
-            </div>
-          </div>
+        <section class="lessonStrip" aria-label="All lessons">
+          <div class="stripTitle">All Lessons</div>
+          <div class="stripSub">Locked lessons unlock sequentially.</div>
+          <div class="hScroll" id="lessonScroll"></div>
         </section>
       </main>
     </div>
@@ -527,64 +381,21 @@ Top 5 research findings applied (2024–2025):
       };
     }
 
-    function updateStreak(userData) {
-      const today = new Date().toISOString().split('T')[0];
-      const last = userData.lastActiveDate || '';
-      const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
-      if (last === today) return userData.streak;
-      if (last === yesterday) return userData.streak + 1;
-      return 0;
-    }
-
-    function leagueFromXp(xp) {
-      if (xp >= 2000) return "Diamond";
-      if (xp >= 1000) return "Sapphire";
-      if (xp >= 500) return "Gold";
-      if (xp >= 100) return "Silver";
-      return "Bronze";
-    }
-
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-
-    function renderHearts(count) {
-      const row = document.getElementById('heartsRow');
-      row.innerHTML = '';
-      for (let i = 0; i < 5; i++) {
-        const h = document.createElement('div');
-        h.className = 'heart ' + (i < count ? 'on' : 'off');
-        h.textContent = '❤';
-        row.appendChild(h);
-      }
-      document.getElementById('heartsVal').textContent = String(count);
-    }
-
-    function setBanner(name, streak, lessonNum, worldNum, lessonTitle) {
-      const wl = document.getElementById('welcomeTitle');
-      const ws = document.getElementById('welcomeSub');
-      wl.classList.remove('skel');
-      ws.classList.remove('skel');
-      wl.style.width = '';
-      wl.style.height = '';
-      ws.style.width = '';
-      ws.style.height = '';
-      wl.textContent = `Welcome back, ${name}! 🔥 ${streak} day streak`;
-      ws.textContent = "Keep going — one lesson a day builds mastery.";
-      const continueBtn = document.getElementById('continueBtn');
-      continueBtn.href = `lesson-player.html?lesson=${encodeURIComponent(lessonNum)}`;
-      continueBtn.textContent = `Continue → ${lessonTitle || ('Lesson ' + lessonNum)}`;
-      const chips = document.querySelectorAll('.meta .chip');
-      if (chips[0]) chips[0].innerHTML = `<b>Lesson ${lessonNum}</b> of 24 — World <b>${worldNum}</b>`;
-      if (chips[1]) chips[1].innerHTML = `<b>Next</b>: ${lessonTitle || 'Continue your path'}`;
-      chips.forEach(c => c.classList.remove('skel'));
-    }
+    function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
     const WORLDS = [
-      { n:1, name:"🏛️ The Alphabet Temple", range:"Lessons 1–5" },
-      { n:2, name:"📖 First Words & Sentences", range:"Lessons 6–10" },
-      { n:3, name:"🏗️ Grammar Foundations", range:"Lessons 11–15" },
-      { n:4, name:"📜 Expanding Grammar", range:"Lessons 16–20" },
-      { n:5, name:"🌟 Advanced Structures", range:"Lessons 21–24" }
+      { n:1, icon:"🏛️", title:"The Alphabet Temple", range:[1,5], color:"var(--purple)" },
+      { n:2, icon:"📖", title:"First Words & Sentences", range:[6,10], color:"var(--blue)" },
+      { n:3, icon:"🏗️", title:"Grammar Foundations", range:[11,15], color:"var(--green)" },
+      { n:4, icon:"📜", title:"Expanding Grammar", range:[16,20], color:"var(--orange)" },
+      { n:5, icon:"🌟", title:"Advanced Structures", range:[21,24], color:"var(--gold)" }
     ];
+
+    // Lesson metadata to render map quickly (lesson-player holds full content).
+    const LESSON_META = Array.from({length:24}, (_,i) => {
+      const id = i+1;
+      return { id, world: id<=5?1:id<=10?2:id<=15?3:id<=20?4:5, title: `Lesson ${id}` };
+    });
 
     const firebaseConfig = {
       apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
@@ -609,9 +420,7 @@ Top 5 research findings applied (2024–2025):
       return true;
     }
 
-    function isGuest() {
-      return localStorage.getItem('gk_guest') === '1';
-    }
+    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
 
     function wireSignOut(user){
       const link = document.getElementById('signOutLink');
@@ -719,7 +528,6 @@ Top 5 research findings applied (2024–2025):
           body.appendChild(empty);
         }
 
-        // Wire actions (delegated)
         body.querySelectorAll('button[data-dismiss]').forEach(btn => btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-dismiss');
           try{ await db.collection('users').doc(user.uid).collection('notifications').doc(id).set({ read:true }, { merge:true }); }catch(_){}
@@ -769,8 +577,6 @@ Top 5 research findings applied (2024–2025):
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); }, true);
 
       if (!user || !db) return;
-
-      // Friend requests live on user doc
       db.collection('users').doc(user.uid).onSnapshot((snap) => {
         const data = snap.exists ? (snap.data() || {}) : {};
         state.friendReqs = Array.isArray(data.friendRequests) ? data.friendRequests : [];
@@ -798,139 +604,106 @@ Top 5 research findings applied (2024–2025):
       });
     }
 
-    async function regenHeartsIfNeeded(userRef, userData) {
-      const now = Date.now();
-      const current = typeof userData.hearts === 'number' ? userData.hearts : 5;
-      const updatedAt = typeof userData.heartsUpdatedAt === 'number' ? userData.heartsUpdatedAt : now;
-      const regenEveryMs = 4 * 60 * 60 * 1000;
-      if (current >= 5) return current;
-      const gained = Math.floor((now - updatedAt) / regenEveryMs);
-      if (gained <= 0) return current;
-      const next = clamp(current + gained, 0, 5);
-      const nextUpdatedAt = updatedAt + gained * regenEveryMs;
-      await userRef.set({ hearts: next, heartsUpdatedAt: nextUpdatedAt }, { merge:true }).catch(()=>{});
-      return next;
+    function setTopUser(user, data) {
+      const xp = Number.isFinite(data?.xp) ? data.xp : 0;
+      const lvl = calcLevel(xp);
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
+      document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
+      const av = document.getElementById('avatar');
+      const url = data?.photoURL || user?.photoURL;
+      if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
     }
 
-    async function loadUserDashboard(user) {
+    function renderLessons(state) {
+      const worldPath = document.getElementById('worldPath');
+      const lessonScroll = document.getElementById('lessonScroll');
+      worldPath.innerHTML = '';
+      lessonScroll.innerHTML = '';
+
+      const completed = state.completedLessons;
+      const currentLesson = state.currentLesson;
+
+      // World cards
+      WORLDS.forEach(w => {
+        const [start,end] = w.range;
+        const total = end - start + 1;
+        const done = completed.filter(x => x>=start && x<=end).length;
+        const prevWorldDone = w.n === 1 ? true : WORLDS.find(x => x.n === w.n - 1).range.every ? true : true;
+        const prevRange = w.n === 1 ? null : WORLDS.find(x => x.n === w.n - 1).range;
+        const prevTotal = prevRange ? (prevRange[1] - prevRange[0] + 1) : 0;
+        const prevDone = prevRange ? completed.filter(x => x>=prevRange[0] && x<=prevRange[1]).length : prevTotal;
+        const unlocked = (w.n === 1) || (prevDone >= prevTotal);
+        const status = done >= total ? "COMPLETED" : (unlocked ? ((currentLesson>=start && currentLesson<=end) ? "ACTIVE" : "UNLOCKED") : "LOCKED");
+
+        const nextLessonInWorld = clamp(Math.max(start, Math.min(end, currentLesson)), start, end);
+        const btnLabel = status === "LOCKED" ? "Locked" : (status === "COMPLETED" ? "Review World" : (status === "ACTIVE" ? "Continue" : "Start World"));
+        const btnHref = status === "LOCKED" ? "#" : `lesson-player.html?lesson=${encodeURIComponent(nextLessonInWorld)}`;
+
+        const card = document.createElement('div');
+        card.className = 'worldCard' + (unlocked ? '' : ' locked');
+        card.innerHTML = `
+          <div class="wTop">
+            <div>
+              <div class="wTitle">${w.icon} World ${w.n}: ${w.title}</div>
+              <div class="wMeta">Lessons ${start}–${end} • ${done}/${total} completed</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+              <span class="wBadge" style="border-color:${unlocked ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'}">${status}</span>
+              <a class="wBtn" ${status === "LOCKED" ? 'aria-disabled="true"' : ''} href="${btnHref}" style="border-color:${unlocked ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'};background:linear-gradient(180deg, ${w.color.replace('var','rgba').includes('rgba')? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.02)'} , rgba(255,255,255,0.02))">${btnLabel} →</a>
+            </div>
+          </div>
+          <div class="bar" aria-label="World progress"><div style="background:linear-gradient(90deg, ${w.color}, rgba(255,255,255,0.15));width:${Math.round((done/total)*100)}%"></div></div>
+        `;
+        if (!unlocked) {
+          card.querySelector('.wBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showToast("Finish the previous world to unlock this one.", "bad", "Locked");
+          });
+        }
+        worldPath.appendChild(card);
+      });
+
+      // Lesson chips
+      for (let i = 1; i <= 24; i++) {
+        const done = completed.includes(i);
+        const locked = i > currentLesson && !done;
+        const isNext = i === currentLesson && !done;
+        const chip = document.createElement('a');
+        chip.className = 'lessonChip' + (locked ? ' locked' : '') + (done ? ' done' : '') + (isNext ? ' next' : '');
+        chip.href = locked ? '#' : `lesson-player.html?lesson=${encodeURIComponent(i)}`;
+        chip.innerHTML = `
+          <div class="lcTop">
+            <div class="lcNum">Lesson ${i}</div>
+            <div class="lcStat">${done ? '✅' : locked ? '🔒' : '➡️'}</div>
+          </div>
+          <div class="lcTitle">${LESSON_META[i-1].title}</div>
+        `;
+        if (locked) chip.addEventListener('click', (e) => { e.preventDefault(); showToast("Complete earlier lessons to unlock.", "bad", "Locked"); });
+        lessonScroll.appendChild(chip);
+      }
+    }
+
+    async function initPage(user) {
       wireSignOut(user);
       if (user && db) setupNotificationCenter(user);
-      const goalBar = document.getElementById('goalBar');
-      const xpBar = document.getElementById('xpBar');
-      const activityFeed = document.getElementById('activityFeed');
-      const worldPreview = document.getElementById('worldPreview');
 
       if (!user) {
-        document.getElementById('userName').textContent = "Guest";
-        document.getElementById('userLevel').textContent = "Level —";
-        document.getElementById('streakVal').textContent = "0";
-        renderHearts(5);
-        setBanner("Guest", 0, 1, 1, "Start Lesson 1");
-        goalBar.style.width = "0%";
-        xpBar.style.width = "0%";
-        document.getElementById('streakText').classList.remove('skel');
-        document.getElementById('streakText').textContent = "Complete a lesson to start a streak.";
-        document.getElementById('xpText').classList.remove('skel');
-        document.getElementById('xpText').textContent = "Sign in to track XP and levels.";
-        const rank = document.getElementById('rankText');
-        rank.classList.remove('skel');
-        rank.textContent = "Guest (no league)";
-        const fr = document.getElementById('friendsOnlineText');
-        fr.classList.remove('skel');
-        fr.textContent = "0 online (sign in to add friends)";
-        activityFeed.innerHTML = `<div class="rowItem"><div><div class="t">Guest mode</div><div class="d">Progress won’t save. Sign in any time.</div></div><div class="d">—</div></div>`;
-        worldPreview.innerHTML = WORLDS.map(w => `<div class="rowItem"><div><div class="t">${w.name}</div><div class="d">${w.range}</div></div><div class="d">Unlocked</div></div>`).join('');
+        setTopUser(null, { hearts:5, streak:0 });
+        renderLessons({ completedLessons: [], currentLesson: 1 });
         return;
       }
 
-      const userRef = db.collection('users').doc(user.uid);
-      const snap = await userRef.get();
-      const userData = snap.exists ? (snap.data() || {}) : {};
+      const ref = db.collection('users').doc(user.uid);
+      const snap = await ref.get();
+      const data = snap.exists ? (snap.data() || {}) : {};
+      setTopUser(user, data);
 
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
-      if (userData.lastActiveDate && userData.lastActiveDate !== today && userData.lastActiveDate !== yesterday && (userData.streak || 0) !== 0) {
-        await userRef.set({ streak: 0 }, { merge:true }).catch(()=>{});
-        userData.streak = 0;
-      }
-
-      const hearts = await regenHeartsIfNeeded(userRef, userData);
-      const xp = Number.isFinite(userData.xp) ? userData.xp : 0;
-      const lvl = calcLevel(xp);
-      const streak = Number.isFinite(userData.streak) ? userData.streak : 0;
-      const name = (userData.displayName || user.displayName || user.email || "Scholar").trim();
-      const currentLesson = Number.isFinite(userData.currentLesson) ? userData.currentLesson : 1;
-      const currentWorld = Number.isFinite(userData.currentWorld) ? userData.currentWorld : Math.max(1, Math.min(5, Math.ceil(currentLesson/5)));
-
-      document.getElementById('streakVal').textContent = String(streak);
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userLevel').textContent = `Level ${lvl.level} • ${lvl.title}`;
-      const av = document.getElementById('avatar');
-      if (userData.photoURL || user.photoURL) {
-        av.innerHTML = '';
-        const img = document.createElement('img');
-        img.alt = 'Avatar';
-        img.src = userData.photoURL || user.photoURL;
-        av.appendChild(img);
-      }
-      renderHearts(hearts);
-
-      setBanner(name, streak, currentLesson, currentWorld, `Lesson ${currentLesson}`);
-      document.getElementById('streakText').classList.remove('skel');
-      document.getElementById('streakText').textContent = streak ? `You’re on a ${streak}-day streak. Keep it alive today.` : "Start your streak: complete 1 lesson today.";
-      const xpText = document.getElementById('xpText');
-      xpText.classList.remove('skel');
-      xpText.textContent = `${xp} XP • ${lvl.title} • ${lvl.progress}% to next level`;
-      xpBar.style.width = lvl.progress + '%';
-
-      const doneToday = (userData.lastActiveDate || "") === today;
-      goalBar.style.width = doneToday ? "100%" : "0%";
-
-      const league = leagueFromXp(xp);
-      const rankEl = document.getElementById('rankText');
-      rankEl.classList.remove('skel');
-      rankEl.textContent = `${league} League • Rank: ${userData.rank || lvl.title}`;
-
-      const friendsEl = document.getElementById('friendsOnlineText');
-      friendsEl.classList.remove('skel');
-      const friends = Array.isArray(userData.friends) ? userData.friends : [];
-      if (!friends.length) friendsEl.textContent = "0 online • Add friends to study together";
-      else friendsEl.textContent = `${friends.length} friends • Tap Friends to see status`;
-
-      activityFeed.innerHTML = '';
-      db.collection('users').doc(user.uid).collection('activity')
-        .orderBy('timestamp','desc').limit(5).get()
-        .then(qs => {
-          if (qs.empty) {
-            activityFeed.innerHTML = `<div class="rowItem"><div><div class="t">No activity yet</div><div class="d">Complete a lesson or practice to start your feed.</div></div><div class="d">—</div></div>`;
-            return;
-          }
-          activityFeed.innerHTML = '';
-          qs.forEach(doc => {
-            const a = doc.data() || {};
-            const when = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : null;
-            const label = when ? when.toLocaleString() : '';
-            activityFeed.insertAdjacentHTML('beforeend',
-              `<div class="rowItem"><div><div class="t">${(a.description || a.type || 'Activity')}</div><div class="d">${a.xpEarned ? ('+'+a.xpEarned+' XP') : ''}</div></div><div class="d">${label}</div></div>`
-            );
-          });
-        })
-        .catch(() => {
-          activityFeed.innerHTML = `<div class="rowItem"><div><div class="t">Could not load activity</div><div class="d">Check your connection.</div></div><div class="d">—</div></div>`;
-        });
-
-      worldPreview.innerHTML = '';
-      const completed = Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0;
-      WORLDS.forEach(w => {
-        const start = (w.n-1)*5+1;
-        const end = w.n === 5 ? 24 : w.n*5;
-        const total = end - start + 1;
-        const done = clamp(Math.max(0, completed - (start-1)), 0, total);
-        const status = done >= total ? "Completed" : (currentWorld === w.n ? "Active" : (completed >= (start-1) ? "Unlocked" : "Locked"));
-        worldPreview.insertAdjacentHTML('beforeend',
-          `<div class="rowItem"><div><div class="t">${w.name}</div><div class="d">${done}/${total} lessons • ${w.range}</div></div><div class="d">${status}</div></div>`
-        );
-      });
+      const completedCount = Number.isFinite(data.lessonsCompleted) ? data.lessonsCompleted : 0;
+      const completedLessons = Array.from({length:completedCount}, (_,i)=>i+1);
+      const currentLesson = Number.isFinite(data.currentLesson) ? data.currentLesson : Math.min(24, completedCount + 1);
+      renderLessons({ completedLessons, currentLesson });
     }
 
     const isGuestAllowed = true;
@@ -939,17 +712,16 @@ Top 5 research findings applied (2024–2025):
       const ok = initFirebase();
       if (!ok) {
         showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase");
-        loadUserDashboard(null);
+        initPage(null);
         return;
       }
-
       firebase.auth().onAuthStateChanged(function(user) {
         if (!user && !isGuestAllowed && !isGuest()) {
           window.location.href = 'index.html';
           return;
         }
-        if (!user && isGuest()) loadUserDashboard(null);
-        else loadUserDashboard(user);
+        if (!user && isGuest()) initPage(null);
+        else initPage(user);
       });
     })();
   </script>

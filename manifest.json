@@ -1,32 +1,21 @@
 {
-  "id": "/Learn-koine-Greek/",
   "name": "Learn Koine Greek",
-  "short_name": "Koine Greek",
-  "description": "Learn Koine Greek through lessons, vocabulary review, and guided practice.",
-  "lang": "en",
-  "dir": "ltr",
-  "start_url": "/Learn-koine-Greek/dashboard.html",
-  "scope": "/Learn-koine-Greek/",
+  "short_name": "KoineGreek",
+  "description": "Master the language of the New Testament",
+  "start_url": "/Learn-koine-Greek/index.html",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0f1117",
-  "theme_color": "#0b0f1a",
-  "categories": [
-    "education",
-    "productivity"
-  ],
+  "theme_color": "#7c5cfc",
   "icons": [
     {
       "src": "assets/images/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "assets/images/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }

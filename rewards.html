@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
+  <title>Rewards • Learn Koine Greek</title>
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--green2:#16a34a;--orange:#f97316;--gold:#eab308;--gold2:#ca8a04;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;
+      --sw:220px;
+      --t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    #app{min-height:100%;display:flex}
+    #sidebar{width:var(--sw);flex:0 0 var(--sw);background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));border-right:1px solid var(--border);padding:14px;position:sticky;top:0;height:100vh;overflow:auto}
+    .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
+    .sbLogo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg, var(--purple), var(--blue));border:1px solid rgba(255,255,255,0.12)}
+    .sbLogo span{font-family:'Times New Roman',Georgia,serif;font-weight:900;color:white;font-size:20px}
+    .sbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;line-height:1.1}
+    .sbSub{font-size:12px;color:var(--tm);margin-top:2px}
+    .sbGroup{margin-top:14px}
+    .sbGroup h3{margin:12px 8px 8px 8px;color:rgba(226,232,240,0.72);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
+    .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
+    .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
+    body[data-page="dashboard"] .nav a[href="dashboard.html"],
+    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="profile"] .nav a[href="profile.html"]{
+      background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
+      border-color:rgba(124,92,252,0.3);
+      color:var(--tw);
+    }
+    .nav .ic{width:26px;display:flex;justify-content:center}
+    #main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+    #top-bar{position:sticky;top:0;z-index:50;background:rgba(15,17,23,0.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .tbLeft{min-width:0}
+    .tbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .tbSub{color:var(--tm);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tbRight{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .pill b{color:var(--tw)}
+    .avatar{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));display:grid;place-items:center;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .miniName{display:flex;flex-direction:column;line-height:1.1}
+    .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
+    .miniName .l{color:var(--tm);font-size:11px}
+    #content{padding:14px;max-width:960px;width:100%;margin:0 auto}
+
+    .panel{border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));border-radius:22px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,0.25);overflow:hidden}
+    .h1{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:16px}
+    .sub{margin-top:6px;color:var(--tm);font-size:12px;line-height:1.45}
+    .grid{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .card{border:1px solid var(--border);background:rgba(0,0,0,0.18);border-radius:18px;padding:12px}
+    .k{color:var(--tm);font-size:11px}
+    .v{margin-top:6px;font-weight:900;color:var(--tw)}
+    .chestWrap{margin-top:12px;display:grid;place-items:center}
+    .chest{
+      width:220px;height:160px;border-radius:26px;border:1px solid rgba(234,179,8,0.35);
+      background:radial-gradient(500px 260px at 30% 20%, rgba(234,179,8,0.22), transparent 60%),
+        linear-gradient(180deg, rgba(24,28,39,0.88), rgba(0,0,0,0.25));
+      box-shadow:0 30px 90px rgba(0,0,0,0.55);
+      position:relative;
+      overflow:hidden;
+      display:grid;place-items:center;
+      transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1);
+    }
+    .chest:hover{transform:translateY(-4px);box-shadow:0 34px 110px rgba(0,0,0,0.62);border-color:rgba(234,179,8,0.55)}
+    .chest .lid{position:absolute;left:0;right:0;top:0;height:58px;border-bottom:1px solid rgba(234,179,8,0.22);background:linear-gradient(180deg, rgba(234,179,8,0.20), rgba(234,179,8,0.06))}
+    .chest .lock{width:58px;height:58px;border-radius:22px;border:1px solid rgba(234,179,8,0.28);background:rgba(0,0,0,0.18);display:grid;place-items:center;font-size:26px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);font-weight:900;color:var(--tw)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .btnPrimary{border-color:rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.20), rgba(34,197,94,0.08))}
+    .btnPrimary:hover{border-color:rgba(34,197,94,0.75);box-shadow:0 18px 35px rgba(34,197,94,0.15)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;justify-content:center}
+
+    .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
+    .toast{pointer-events:auto;max-width:min(560px,100%);border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:16px;padding:10px 12px;box-shadow:0 22px 40px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;transform:translateY(20px);opacity:0;transition:transform var(--t2), opacity var(--t2)}
+    .toast.show{transform:translateY(0);opacity:1}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.info{background:var(--cyan)}
+    .dot.good{background:var(--green)}
+    .dot.bad{background:var(--red)}
+    .bell{position:relative}
+    .bellI{display:inline-block;line-height:1}
+    .bellBadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:900;color:white;background:var(--red);border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 24px rgba(0,0,0,0.45)}
+    .notifBackdrop{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0.25);display:none}
+    .notifPanel{position:fixed;z-index:130;top:64px;right:14px;width:min(420px, calc(100% - 28px));max-height:min(70vh, 540px);overflow:auto;border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 26px 64px rgba(0,0,0,0.55);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform var(--t2), opacity var(--t2)}
+    .notifPanel.open{transform:translateY(0);opacity:1;pointer-events:auto}
+    .notifHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)}
+    .notifHead .t{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
+    .notifHead .actions{display:flex;gap:8px}
+    .nBtn{padding:7px 10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.92);font-size:12px;font-weight:800;transition:transform var(--t1), background var(--t1), border-color var(--t1);white-space:nowrap}
+    .nBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.03);border-color:var(--border2)}
+    .nBtn.primary{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.12)}
+    .notifBody{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .nItem{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .nItem .meta{color:var(--tm);font-size:12px;margin-top:4px}
+    .nItem .msg{color:rgba(226,232,240,0.92);font-size:12px}
+    .nItem .left{min-width:0}
+    .nItem .right{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+    .nTag{font-weight:900;color:var(--tw)}
+    .nEmpty{border:1px dashed var(--border);border-radius:14px;padding:14px;color:var(--tm);text-align:center}
+    .bottomTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(15,17,23,0.86);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
+    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
+      border-color:rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.10);
+      color:var(--tw);
+    }
+    @media (max-width: 980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width: 640px){.grid{grid-template-columns:1fr}}
+    @media (max-width: 768px){
+      :root{--sw:56px}
+      #sidebar{padding:12px 8px}
+      .sbTitle,.sbSub,.sbGroup h3,.nav .tx{display:none}
+      .sbBrand{justify-content:center}
+      .nav a{justify-content:center}
+      .nav .ic{width:auto}
+      .tbSub{display:none}
+      #content{padding-bottom:90px}
+      .bottomTabs{display:block}
+      .toastWrap{bottom:92px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .btn,.toast,.chest{transition:none}
+    }
+  </style>
+</head>
+<body data-page="rewards">
+  <div id="app">
+    <aside id="sidebar" aria-label="Sidebar navigation">
+      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
+        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+        <div>
+          <div class="sbTitle">Koine Greek</div>
+          <div class="sbSub">Duolingo-style</div>
+        </div>
+      </a>
+      <div class="sbGroup">
+        <h3>Main</h3>
+        <nav class="nav">
+          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Learn</h3>
+        <nav class="nav">
+          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Social</h3>
+        <nav class="nav">
+          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Account</h3>
+        <nav class="nav">
+          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
+          <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
+        </nav>
+      </div>
+    </aside>
+
+    <div id="main-wrapper">
+      <header id="top-bar">
+        <div class="tbLeft">
+          <div class="tbTitle">Rewards</div>
+          <div class="tbSub">Daily chest • Gems • Crowns</div>
+        </div>
+        <div class="tbRight">
+          <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
+          <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
+          <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar" id="avatar"><span>👤</span></div>
+            <div class="miniName">
+              <div class="n" id="userName">Guest</div>
+              <div class="l" id="userLevel">Level —</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="content">
+        <section class="panel">
+          <h1 class="h1">Your Wallet</h1>
+          <div class="sub">Rewards are saved when signed in.</div>
+          <div class="grid" aria-label="Wallet">
+            <div class="card"><div class="k">💎 Gems</div><div class="v" id="gems">—</div></div>
+            <div class="card"><div class="k">👑 Crowns</div><div class="v" id="crowns">—</div></div>
+            <div class="card"><div class="k">⭐ XP</div><div class="v" id="xp">—</div></div>
+          </div>
+
+          <div class="chestWrap" aria-label="Daily chest">
+            <div class="sub" style="margin-top:12px">Daily Chest</div>
+            <button class="chest" id="chestBtn" type="button" aria-label="Open daily chest">
+              <div class="lid"></div>
+              <div class="lock" id="lockIc">🎁</div>
+            </button>
+            <div class="row">
+              <button class="btn btnPrimary" id="openBtn" type="button">Open</button>
+              <a class="btn" href="practice.html">Earn more →</a>
+            </div>
+            <div class="sub" id="chestNote">Loading…</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
+    <div class="tabs">
+      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+    </div>
+  </div>
+
+  <div class="notifBackdrop" id="notifBackdrop" aria-hidden="true"></div>
+  <section class="notifPanel" id="notifPanel" aria-label="Notifications" aria-hidden="true">
+    <div class="notifHead">
+      <div class="t">Notifications</div>
+      <div class="actions">
+        <button class="nBtn" id="notifMarkAll" type="button">Mark all read</button>
+        <button class="nBtn primary" id="notifClose" type="button">Close</button>
+      </div>
+    </div>
+    <div class="notifBody" id="notifBody"></div>
+  </section>
+
+  <div class="toastWrap" aria-live="polite" aria-atomic="true">
+    <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    document.addEventListener('click', function(e) {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const bad = ['lesson.html','home.html'];
+      if (bad.some(b => a.getAttribute('href') === b)) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    function showToast(msg, type='info', title='Notice') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      const t = document.getElementById('toastTitle');
+      const m = document.getElementById('toastMsg');
+      dot.className = 'dot ' + (type === 'good' ? 'good' : type === 'bad' ? 'bad' : 'info');
+      t.textContent = title;
+      m.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function calcLevel(xp) {
+      const thresholds = [0,100,250,500,900,1400,2000,2800,3800,5000];
+      const titles = ["Newcomer","Letter Keeper","Word Seeker","Novice Scribe","Scribe","Scholar","Grammarian","Interpreter","Theologian","Master"];
+      let level = 1;
+      for (let i = 0; i < thresholds.length; i++) if (xp >= thresholds[i]) level = i + 1;
+      return { level, title: titles[level-1] };
+    }
+
+    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
+
+    function wireSignOut(user){
+      const link = document.getElementById('signOutLink');
+      if (!link) return;
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        localStorage.removeItem('gk_guest');
+        try{ if (user && auth) await auth.signOut(); }catch(_){}
+        location.href = 'index.html';
+      });
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+      authDomain: "learn-basic-greek.firebaseapp.com",
+      projectId: "learn-basic-greek",
+      storageBucket: "learn-basic-greek.firebasestorage.app",
+      messagingSenderId: "628557836662",
+      appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+      measurementId: "G-6BYGXRJFT",
+      databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
+    };
+    let auth=null, db=null;
+    function initFirebase(){
+      if (!window.firebase) return false;
+      if (firebase.apps && firebase.apps.length===0) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps) firebase.initializeApp(firebaseConfig);
+      auth=firebase.auth(); db=firebase.firestore(); return true;
+    }
+
+    function setTopUser(user, data) {
+      const xp = Number.isFinite(data?.xp) ? data.xp : 0;
+      const lvl = calcLevel(xp);
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
+      document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
+      const av = document.getElementById('avatar');
+      const url = data?.photoURL || user?.photoURL;
+      if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
+    }
+
+    function randInt(min,max){ return Math.floor(min + Math.random()*(max-min+1)); }
+
+    async function initPage(user){
+      wireSignOut(user);
+      const openBtn = document.getElementById('openBtn');
+      const chestBtn = document.getElementById('chestBtn');
+      const note = document.getElementById('chestNote');
+      const lockIc = document.getElementById('lockIc');
+      const today = new Date().toISOString().split('T')[0];
+
+      if (!user) {
+        setTopUser(null, { hearts:5, streak:0 });
+        document.getElementById('gems').textContent = '—';
+        document.getElementById('crowns').textContent = '—';
+        document.getElementById('xp').textContent = '—';
+        note.textContent = "Sign in to open chests and save rewards.";
+        openBtn.disabled = true;
+        chestBtn.disabled = true;
+        lockIc.textContent = '🔒';
+        openBtn.onclick = () => location.href = 'index.html';
+        return;
+      }
+
+      const ref = db.collection('users').doc(user.uid);
+      const snap = await ref.get();
+      const data = snap.exists ? (snap.data() || {}) : {};
+      setTopUser(user, data);
+      document.getElementById('gems').textContent = String(Number.isFinite(data.gems) ? data.gems : 0);
+      document.getElementById('crowns').textContent = String(Number.isFinite(data.crowns) ? data.crowns : 0);
+      document.getElementById('xp').textContent = String(Number.isFinite(data.xp) ? data.xp : 0);
+
+      const last = data.lastChestDate || '';
+      const canOpen = last !== today;
+      note.textContent = canOpen ? "Open your daily chest for gems and crowns." : "Chest already opened today. Come back tomorrow.";
+      lockIc.textContent = canOpen ? '🎁' : '✅';
+      openBtn.disabled = !canOpen;
+      chestBtn.disabled = !canOpen;
+
+      async function openChest(){
+        const gems = randInt(10, 30);
+        const crowns = randInt(0, 2);
+        try{
+          await ref.set({
+            gems: firebase.firestore.FieldValue.increment(gems),
+            crowns: firebase.firestore.FieldValue.increment(crowns),
+            lastChestDate: today
+          }, { merge:true });
+          showToast(`You got +${gems} gems${crowns ? ` and +${crowns} crowns` : ''}!`, "good", "Chest opened");
+          lockIc.textContent = '✅';
+          openBtn.disabled = true;
+          chestBtn.disabled = true;
+          note.textContent = "Chest already opened today. Come back tomorrow.";
+          // update wallet UI
+          const s2 = await ref.get();
+          const d2 = s2.exists ? (s2.data() || {}) : {};
+          document.getElementById('gems').textContent = String(Number.isFinite(d2.gems) ? d2.gems : 0);
+          document.getElementById('crowns').textContent = String(Number.isFinite(d2.crowns) ? d2.crowns : 0);
+        }catch(e){
+          console.error(e);
+          showToast("Could not open chest.", "bad", "Rewards");
+        }
+      }
+
+      openBtn.onclick = openChest;
+      chestBtn.onclick = openChest;
+    }
+
+    const isGuestAllowed = true;
+    (function boot(){
+      const ok = initFirebase();
+      if (!ok) { showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase"); initPage(null); return; }
+      firebase.auth().onAuthStateChanged(function(user){
+        if (!user && !isGuestAllowed && !isGuest()) { window.location.href='index.html'; return; }
+        if (!user && isGuest()) initPage(null);
+        else initPage(user);
+      });
+    })();
+  </script>
+</body>
+</html>

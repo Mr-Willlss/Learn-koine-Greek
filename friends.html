@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
+  <title>Friends • Learn Koine Greek</title>
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--green2:#16a34a;--orange:#f97316;--gold:#eab308;--gold2:#ca8a04;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;
+      --sw:220px;
+      --t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    button{appearance:none;border:0;background:none;color:inherit;cursor:pointer}
+    #app{min-height:100%;display:flex}
+    #sidebar{width:var(--sw);flex:0 0 var(--sw);background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));border-right:1px solid var(--border);padding:14px;position:sticky;top:0;height:100vh;overflow:auto}
+    .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
+    .sbLogo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg, var(--purple), var(--blue));border:1px solid rgba(255,255,255,0.12)}
+    .sbLogo span{font-family:'Times New Roman',Georgia,serif;font-weight:900;color:white;font-size:20px}
+    .sbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;line-height:1.1}
+    .sbSub{font-size:12px;color:var(--tm);margin-top:2px}
+    .sbGroup{margin-top:14px}
+    .sbGroup h3{margin:12px 8px 8px 8px;color:rgba(226,232,240,0.72);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
+    .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
+    .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
+    body[data-page="dashboard"] .nav a[href="dashboard.html"],
+    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="profile"] .nav a[href="profile.html"]{
+      background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
+      border-color:rgba(124,92,252,0.3);
+      color:var(--tw);
+    }
+    .nav .ic{width:26px;display:flex;justify-content:center}
+    #main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+    #top-bar{position:sticky;top:0;z-index:50;background:rgba(15,17,23,0.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .tbLeft{min-width:0}
+    .tbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .tbSub{color:var(--tm);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tbRight{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .pill b{color:var(--tw)}
+    .avatar{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));display:grid;place-items:center;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .miniName{display:flex;flex-direction:column;line-height:1.1}
+    .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
+    .miniName .l{color:var(--tm);font-size:11px}
+    #content{padding:14px;max-width:1100px;width:100%;margin:0 auto}
+
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+    .panel{border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));border-radius:22px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,0.25);overflow:hidden}
+    .h1{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:16px}
+    .sub{margin-top:6px;color:var(--tm);font-size:12px;line-height:1.45}
+    .toolbar{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .input{flex:1 1 240px;min-width:220px;padding:12px 12px;border-radius:16px;border:1px solid var(--border);background:var(--bg-input);color:var(--ts);outline:none}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);font-weight:900;color:var(--tw)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .btnPrimary{border-color:rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.20), rgba(34,197,94,0.08))}
+    .btnPrimary:hover{border-color:rgba(34,197,94,0.75);box-shadow:0 18px 35px rgba(34,197,94,0.15)}
+    .btnDanger{border-color:rgba(239,68,68,0.45);background:rgba(239,68,68,0.10)}
+    .btnDanger:hover{border-color:rgba(239,68,68,0.75);box-shadow:0 18px 35px rgba(239,68,68,0.12)}
+    .list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:rgba(0,0,0,0.18);border-radius:16px;padding:10px}
+    .left{display:flex;align-items:center;gap:10px;min-width:0}
+    .pAv{width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);display:grid;place-items:center;overflow:hidden;flex:0 0 auto}
+    .pAv img{width:100%;height:100%;object-fit:cover}
+    .nm{font-weight:900;color:var(--tw);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{color:var(--tm);font-size:11px}
+    .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .badge{padding:7px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .muted{color:var(--tm);font-size:12px}
+
+    .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
+    .toast{pointer-events:auto;max-width:min(560px,100%);border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:16px;padding:10px 12px;box-shadow:0 22px 40px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;transform:translateY(20px);opacity:0;transition:transform var(--t2), opacity var(--t2)}
+    .toast.show{transform:translateY(0);opacity:1}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.info{background:var(--cyan)}
+    .dot.good{background:var(--green)}
+    .dot.bad{background:var(--red)}
+    .bell{position:relative}
+    .bellI{display:inline-block;line-height:1}
+    .bellBadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:900;color:white;background:var(--red);border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 24px rgba(0,0,0,0.45)}
+    .notifBackdrop{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0.25);display:none}
+    .notifPanel{position:fixed;z-index:130;top:64px;right:14px;width:min(420px, calc(100% - 28px));max-height:min(70vh, 540px);overflow:auto;border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 26px 64px rgba(0,0,0,0.55);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform var(--t2), opacity var(--t2)}
+    .notifPanel.open{transform:translateY(0);opacity:1;pointer-events:auto}
+    .notifHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)}
+    .notifHead .t{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
+    .notifHead .actions{display:flex;gap:8px}
+    .nBtn{padding:7px 10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.92);font-size:12px;font-weight:800;transition:transform var(--t1), background var(--t1), border-color var(--t1);white-space:nowrap}
+    .nBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.03);border-color:var(--border2)}
+    .nBtn.primary{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.12)}
+    .notifBody{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .nItem{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .nItem .meta{color:var(--tm);font-size:12px;margin-top:4px}
+    .nItem .msg{color:rgba(226,232,240,0.92);font-size:12px}
+    .nItem .left{min-width:0}
+    .nItem .right{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+    .nTag{font-weight:900;color:var(--tw)}
+    .nEmpty{border:1px dashed var(--border);border-radius:14px;padding:14px;color:var(--tm);text-align:center}
+    .bottomTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(15,17,23,0.86);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
+    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
+      border-color:rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.10);
+      color:var(--tw);
+    }
+    @media (max-width: 980px){.cols{grid-template-columns:1fr}}
+    @media (max-width: 768px){
+      :root{--sw:56px}
+      #sidebar{padding:12px 8px}
+      .sbTitle,.sbSub,.sbGroup h3,.nav .tx{display:none}
+      .sbBrand{justify-content:center}
+      .nav a{justify-content:center}
+      .nav .ic{width:auto}
+      .tbSub{display:none}
+      #content{padding-bottom:90px}
+      .bottomTabs{display:block}
+      .toastWrap{bottom:92px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .btn,.toast{transition:none}
+    }
+  </style>
+</head>
+<body data-page="friends">
+  <div id="app">
+    <aside id="sidebar" aria-label="Sidebar navigation">
+      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
+        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+        <div>
+          <div class="sbTitle">Koine Greek</div>
+          <div class="sbSub">Duolingo-style</div>
+        </div>
+      </a>
+      <div class="sbGroup">
+        <h3>Main</h3>
+        <nav class="nav">
+          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Learn</h3>
+        <nav class="nav">
+          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Social</h3>
+        <nav class="nav">
+          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Account</h3>
+        <nav class="nav">
+          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
+          <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
+        </nav>
+      </div>
+    </aside>
+
+    <div id="main-wrapper">
+      <header id="top-bar">
+        <div class="tbLeft">
+          <div class="tbTitle">Friends</div>
+          <div class="tbSub">Study together • Requests • Challenges</div>
+        </div>
+        <div class="tbRight">
+          <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
+          <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
+          <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar" id="avatar"><span>👤</span></div>
+            <div class="miniName">
+              <div class="n" id="userName">Guest</div>
+              <div class="l" id="userLevel">Level —</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="content">
+        <div class="cols">
+          <section class="panel">
+            <h1 class="h1">Find Friends</h1>
+            <div class="sub">Search by <b>@username</b> (exact) or display name (prefix).</div>
+            <div class="toolbar">
+              <input class="input" id="search" placeholder="Search @handle or name…" autocomplete="off" />
+              <button class="btn btnPrimary" id="searchBtn" type="button">Search</button>
+            </div>
+            <div class="list" id="searchResults"></div>
+          </section>
+
+          <section class="panel">
+            <h1 class="h1">Requests & Friends</h1>
+            <div class="sub">Incoming friend requests and your current friends.</div>
+            <div class="list" id="requests"></div>
+            <div class="list" id="friends"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
+    <div class="tabs">
+      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+    </div>
+  </div>
+
+  <div class="notifBackdrop" id="notifBackdrop" aria-hidden="true"></div>
+  <section class="notifPanel" id="notifPanel" aria-label="Notifications" aria-hidden="true">
+    <div class="notifHead">
+      <div class="t">Notifications</div>
+      <div class="actions">
+        <button class="nBtn" id="notifMarkAll" type="button">Mark all read</button>
+        <button class="nBtn primary" id="notifClose" type="button">Close</button>
+      </div>
+    </div>
+    <div class="notifBody" id="notifBody"></div>
+  </section>
+
+  <div class="toastWrap" aria-live="polite" aria-atomic="true">
+    <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    document.addEventListener('click', function(e) {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const bad = ['lesson.html','home.html'];
+      if (bad.some(b => a.getAttribute('href') === b)) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    function showToast(msg, type='info', title='Notice') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      const t = document.getElementById('toastTitle');
+      const m = document.getElementById('toastMsg');
+      dot.className = 'dot ' + (type === 'good' ? 'good' : type === 'bad' ? 'bad' : 'info');
+      t.textContent = title;
+      m.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function calcLevel(xp) {
+      const thresholds = [0,100,250,500,900,1400,2000,2800,3800,5000];
+      const titles = ["Newcomer","Letter Keeper","Word Seeker","Novice Scribe","Scribe","Scholar","Grammarian","Interpreter","Theologian","Master"];
+      let level = 1;
+      for (let i = 0; i < thresholds.length; i++) if (xp >= thresholds[i]) level = i + 1;
+      return { level, title: titles[level-1] };
+    }
+
+    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
+
+    function wireSignOut(user){
+      const link = document.getElementById('signOutLink');
+      if (!link) return;
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        localStorage.removeItem('gk_guest');
+        try{ if (user && auth) await auth.signOut(); }catch(_){}
+        location.href = 'index.html';
+      });
+    }
+
+    function timeAgo(ts){
+      const ms = ts && typeof ts.toMillis === 'function' ? ts.toMillis() : (typeof ts === 'number' ? ts : Date.now());
+      const s = Math.max(0, Math.floor((Date.now() - ms) / 1000));
+      if (s < 10) return 'just now';
+      if (s < 60) return `${s}s ago`;
+      const m = Math.floor(s/60);
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m/60);
+      if (h < 48) return `${h}h ago`;
+      const d = Math.floor(h/24);
+      return `${d}d ago`;
+    }
+
+    function setupNotificationCenter(user){
+      const bell = document.getElementById('bellBtn');
+      const badge = document.getElementById('bellBadge');
+      const panel = document.getElementById('notifPanel');
+      const backdrop = document.getElementById('notifBackdrop');
+      const body = document.getElementById('notifBody');
+      const markAllBtn = document.getElementById('notifMarkAll');
+      const closeBtn = document.getElementById('notifClose');
+      if (!bell || !badge || !panel || !backdrop || !body || !markAllBtn || !closeBtn) return;
+
+      const state = { open:false, notifs:[], friendReqs:[] };
+      function open(){ state.open=true; panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); backdrop.style.display='block'; render(); }
+      function close(){ state.open=false; panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); backdrop.style.display='none'; }
+      function toggle(){ state.open ? close() : open(); }
+
+      function render(){
+        if (!state.open) return;
+        body.innerHTML = '';
+
+        if (state.friendReqs.length) {
+          const wrap = document.createElement('div');
+          wrap.className = 'nItem';
+          wrap.innerHTML = `<div class="left"><div class="nTag">👥 Friend requests</div><div class="msg">You have ${state.friendReqs.length} pending request(s).</div><div class="meta">Accept or decline below.</div></div>`;
+          body.appendChild(wrap);
+          state.friendReqs.forEach(uid => {
+            const row = document.createElement('div');
+            row.className = 'nItem';
+            row.innerHTML = `
+              <div class="left">
+                <div class="nTag">Friend request</div>
+                <div class="msg">From <span style="font-family:ui-monospace, SFMono-Regular, Menlo, monospace">${uid}</span></div>
+                <div class="meta">${timeAgo(Date.now())}</div>
+              </div>
+              <div class="right">
+                <button class="nBtn primary" data-acc="${uid}" type="button">Accept</button>
+                <button class="nBtn" data-dec="${uid}" type="button">Decline</button>
+              </div>
+            `;
+            body.appendChild(row);
+          });
+        }
+
+        if (state.notifs.length) {
+          state.notifs.forEach(n => {
+            const icon = n.type === 'challenge' ? '🏆' : (n.type === 'system' ? '✨' : '🔔');
+            const row = document.createElement('div');
+            row.className = 'nItem';
+            row.innerHTML = `
+              <div class="left">
+                <div class="nTag">${icon} ${n.type || 'notification'}</div>
+                <div class="msg">${(n.message || '').replace(/</g,'&lt;')}</div>
+                <div class="meta">${timeAgo(n.timestamp)}</div>
+              </div>
+              <div class="right">
+                ${n.type === 'challenge' ? `<button class="nBtn primary" data-accept="${n.id}" type="button">Accept</button>` : ''}
+                <button class="nBtn" data-dismiss="${n.id}" type="button">Dismiss</button>
+              </div>
+            `;
+            body.appendChild(row);
+          });
+        }
+
+        if (!state.friendReqs.length && !state.notifs.length) {
+          const empty = document.createElement('div');
+          empty.className = 'nEmpty';
+          empty.textContent = 'No notifications yet.';
+          body.appendChild(empty);
+        }
+
+        body.querySelectorAll('button[data-dismiss]').forEach(btn => btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-dismiss');
+          try{ await db.collection('users').doc(user.uid).collection('notifications').doc(id).set({ read:true }, { merge:true }); }catch(_){}
+        }));
+        body.querySelectorAll('button[data-accept]').forEach(btn => btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-accept');
+          const notif = state.notifs.find(x => x.id === id);
+          try{ await db.collection('users').doc(user.uid).collection('notifications').doc(id).set({ read:true }, { merge:true }); }catch(_){}
+          if (notif && notif.questId) {
+            sessionStorage.setItem('gk_open_quest', notif.questId);
+            sessionStorage.setItem('gk_open_quest_from', notif.fromName || '');
+            location.href = 'quests.html';
+          }
+        }));
+        body.querySelectorAll('button[data-acc]').forEach(btn => btn.addEventListener('click', async () => {
+          const otherUid = btn.getAttribute('data-acc');
+          try{
+            const batch = db.batch();
+            const meRef = db.collection('users').doc(user.uid);
+            const otherRef = db.collection('users').doc(otherUid);
+            batch.set(meRef, { friendRequests: firebase.firestore.FieldValue.arrayRemove(otherUid), friends: firebase.firestore.FieldValue.arrayUnion(otherUid) }, { merge:true });
+            batch.set(otherRef, { friends: firebase.firestore.FieldValue.arrayUnion(user.uid) }, { merge:true });
+            await batch.commit();
+            showToast("Friend added!", "good", "Friends");
+          }catch(e){
+            console.error(e);
+            showToast("Could not accept request.", "bad", "Friends");
+          }
+        }));
+        body.querySelectorAll('button[data-dec]').forEach(btn => btn.addEventListener('click', async () => {
+          const otherUid = btn.getAttribute('data-dec');
+          try{
+            await db.collection('users').doc(user.uid).set({ friendRequests: firebase.firestore.FieldValue.arrayRemove(otherUid) }, { merge:true });
+            showToast("Request declined.", "info", "Friends");
+          }catch(_){}
+        }));
+      }
+
+      bell.addEventListener('click', toggle);
+      closeBtn.addEventListener('click', close);
+      backdrop.addEventListener('click', close);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); }, true);
+
+      if (!user || !db) return;
+      db.collection('users').doc(user.uid).onSnapshot((snap) => {
+        const data = snap.exists ? (snap.data() || {}) : {};
+        state.friendReqs = Array.isArray(data.friendRequests) ? data.friendRequests : [];
+        render();
+      }, ()=>{});
+
+      const col = db.collection('users').doc(user.uid).collection('notifications');
+      col.where('read','==',false).onSnapshot((snap) => {
+        const c = snap.size || 0;
+        badge.textContent = String(c);
+        badge.style.display = c ? '' : 'none';
+      }, ()=>{});
+      col.orderBy('timestamp','desc').limit(30).onSnapshot((snap) => {
+        state.notifs = snap.docs.map(d => ({ id:d.id, ...(d.data()||{}) }));
+        render();
+      }, ()=>{});
+
+      markAllBtn.addEventListener('click', async () => {
+        try{
+          const unread = await col.where('read','==',false).get();
+          const batch = db.batch();
+          unread.forEach(doc => batch.set(doc.ref, { read:true }, { merge:true }));
+          await batch.commit();
+        }catch(_){}
+      });
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+      authDomain: "learn-basic-greek.firebaseapp.com",
+      projectId: "learn-basic-greek",
+      storageBucket: "learn-basic-greek.firebasestorage.app",
+      messagingSenderId: "628557836662",
+      appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+      measurementId: "G-6BYGXRJFT",
+      databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
+    };
+    let auth=null, db=null;
+    function initFirebase(){
+      if (!window.firebase) return false;
+      if (firebase.apps && firebase.apps.length===0) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps) firebase.initializeApp(firebaseConfig);
+      auth=firebase.auth(); db=firebase.firestore(); return true;
+    }
+
+    function setTopUser(user, data) {
+      const xp = Number.isFinite(data?.xp) ? data.xp : 0;
+      const lvl = calcLevel(xp);
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
+      document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
+      const av = document.getElementById('avatar');
+      const url = data?.photoURL || user?.photoURL;
+      if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
+    }
+
+    function renderPersonRow(d, actionsHtml) {
+      const av = d.photoURL ? `<img alt="avatar" src="${d.photoURL}">` : '👤';
+      const lvl = d.level || 1;
+      const rank = d.rank || '';
+      const last = d.lastActiveDate || '';
+      return `
+        <div class="row">
+          <div class="left">
+            <div class="pAv">${av}</div>
+            <div style="min-width:0">
+              <div class="nm">${d.displayName || 'Scholar'} <span style="color:rgba(226,232,240,0.75);font-weight:700">${d.username || ''}</span></div>
+              <div class="meta">${rank ? (rank + ' • ') : ''}Level ${lvl} • 🔥 ${d.streak || 0} • Last: ${last || '—'}</div>
+            </div>
+          </div>
+          <div class="right">${actionsHtml || ''}</div>
+        </div>
+      `;
+    }
+
+    async function initPage(user) {
+      wireSignOut(user);
+      if (user && db) setupNotificationCenter(user);
+      const results = document.getElementById('searchResults');
+      const reqHost = document.getElementById('requests');
+      const frHost = document.getElementById('friends');
+
+      results.innerHTML = '';
+      reqHost.innerHTML = '';
+      frHost.innerHTML = '';
+
+      if (!user) {
+        setTopUser(null, { hearts:5, streak:0 });
+        results.innerHTML = `<div class="row"><div class="left"><div><div class="nm">Sign in to use friends</div><div class="meta">Friend requests require authenticated reads/writes.</div></div></div><div class="right"><a class="btn btnPrimary" href="index.html">Sign in</a></div></div>`;
+        reqHost.innerHTML = `<div class="muted">—</div>`;
+        frHost.innerHTML = `<div class="muted">—</div>`;
+        document.getElementById('searchBtn').disabled = true;
+        document.getElementById('search').disabled = true;
+        return;
+      }
+
+      const meRef = db.collection('users').doc(user.uid);
+      const meSnap = await meRef.get();
+      const me = meSnap.exists ? (meSnap.data() || {}) : {};
+      setTopUser(user, me);
+
+      async function refreshLists() {
+        const s = await meRef.get();
+        const data = s.exists ? (s.data() || {}) : {};
+        const incoming = Array.isArray(data.friendRequests) ? data.friendRequests : [];
+        const friends = Array.isArray(data.friends) ? data.friends : [];
+
+        // Requests
+        reqHost.innerHTML = '';
+        if (!incoming.length) reqHost.innerHTML = `<div class="muted">No incoming requests.</div>`;
+        else {
+          const snaps = await Promise.all(incoming.slice(0, 20).map(uid => db.collection('users').doc(uid).get().catch(()=>null)));
+          snaps.filter(Boolean).forEach(snap => {
+            if (!snap || !snap.exists) return;
+            const d = snap.data() || {};
+            const uid = snap.id;
+            reqHost.insertAdjacentHTML('beforeend', renderPersonRow(d,
+              `<button class="btn btnPrimary" data-accept="${uid}" type="button">Accept</button>
+               <button class="btn btnDanger" data-reject="${uid}" type="button">Reject</button>`
+            ));
+          });
+        }
+
+        // Friends
+        frHost.innerHTML = '<div class="h1" style="margin-top:8px">Friends</div>';
+        if (!friends.length) frHost.insertAdjacentHTML('beforeend', `<div class="muted">No friends yet. Search and send requests.</div>`);
+        else {
+          const snaps = await Promise.all(friends.slice(0, 50).map(uid => db.collection('users').doc(uid).get().catch(()=>null)));
+          snaps.filter(Boolean).forEach(snap => {
+            if (!snap || !snap.exists) return;
+            const d = snap.data() || {};
+            const uid = snap.id;
+            frHost.insertAdjacentHTML('beforeend', renderPersonRow(d,
+              `<button class="btn" data-challenge="${uid}" data-name="${String(d.displayName || 'Friend').replace(/\"/g,'&quot;')}" type="button">Challenge</button>
+               <button class="btn btnDanger" data-remove="${uid}" type="button">Remove</button>`
+            ));
+          });
+        }
+
+        // Actions
+        reqHost.querySelectorAll('button[data-accept]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const otherUid = btn.getAttribute('data-accept');
+            try{
+              const batch = db.batch();
+              const otherRef = db.collection('users').doc(otherUid);
+              batch.set(meRef, {
+                friendRequests: firebase.firestore.FieldValue.arrayRemove(otherUid),
+                friends: firebase.firestore.FieldValue.arrayUnion(otherUid)
+              }, { merge:true });
+              batch.set(otherRef, { friends: firebase.firestore.FieldValue.arrayUnion(user.uid) }, { merge:true });
+              await batch.commit();
+              showToast("Friend added!", "good", "Friends");
+              refreshLists();
+            }catch(e){ console.error(e); showToast("Could not accept request.", "bad", "Error"); }
+          });
+        });
+        reqHost.querySelectorAll('button[data-reject]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const otherUid = btn.getAttribute('data-reject');
+            try{
+              await meRef.set({ friendRequests: firebase.firestore.FieldValue.arrayRemove(otherUid) }, { merge:true });
+              showToast("Request rejected.", "info", "Friends");
+              refreshLists();
+            }catch(e){ console.error(e); showToast("Could not reject request.", "bad", "Error"); }
+          });
+        });
+        frHost.querySelectorAll('button[data-remove]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const otherUid = btn.getAttribute('data-remove');
+            try{
+              const batch = db.batch();
+              const otherRef = db.collection('users').doc(otherUid);
+              batch.set(meRef, { friends: firebase.firestore.FieldValue.arrayRemove(otherUid) }, { merge:true });
+              batch.set(otherRef, { friends: firebase.firestore.FieldValue.arrayRemove(user.uid) }, { merge:true });
+              await batch.commit();
+              showToast("Friend removed.", "info", "Friends");
+              refreshLists();
+            }catch(e){ console.error(e); showToast("Could not remove friend.", "bad", "Error"); }
+          });
+        });
+        frHost.querySelectorAll('button[data-challenge]').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const friendUid = btn.getAttribute('data-challenge');
+            const friendName = btn.getAttribute('data-name') || 'Friend';
+            if (!user || !db) { showToast("Sign in to send challenges.", "bad", "Guest"); return; }
+            try{
+              const fromName = (meData && meData.displayName) || user.displayName || 'A friend';
+              await db.collection('users').doc(friendUid).collection('notifications').add({
+                type: 'challenge',
+                fromUid: user.uid,
+                fromName,
+                questId: 'vocab_hunter',
+                message: `${fromName} challenged you to a quest!`,
+                read: false,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              showToast(`Challenge sent to ${friendName}! 🏆`, "good", "Challenge");
+            }catch(e){
+              console.error(e);
+              showToast("Could not send challenge.", "bad", "Challenge");
+            }
+          });
+        });
+      }
+
+      await refreshLists();
+
+      async function doSearch() {
+        const q = (document.getElementById('search').value || '').trim();
+        results.innerHTML = '';
+        if (!q) { results.innerHTML = `<div class="muted">Type a name or @username to search.</div>`; return; }
+        try{
+          let qs = null;
+          if (q.startsWith('@')) qs = await db.collection('users').where('username','==',q).limit(10).get();
+          else qs = await db.collection('users').orderBy('displayName').startAt(q).endAt(q + '\\uf8ff').limit(10).get();
+
+          if (qs.empty) { results.innerHTML = `<div class="muted">No users found.</div>`; return; }
+          const current = await meRef.get();
+          const meData = current.exists ? (current.data() || {}) : {};
+          const friends = Array.isArray(meData.friends) ? meData.friends : [];
+          const incoming = Array.isArray(meData.friendRequests) ? meData.friendRequests : [];
+
+          qs.forEach(doc => {
+            if (doc.id === user.uid) return;
+            const d = doc.data() || {};
+            const uid = doc.id;
+            const isFriend = friends.includes(uid);
+            const requestedYou = incoming.includes(uid);
+            const actions = isFriend
+              ? `<span class="badge">Friends</span>`
+              : requestedYou
+                ? `<span class="badge">Requested you</span>`
+                : `<button class="btn btnPrimary" data-add="${uid}" type="button">Add</button>`;
+            results.insertAdjacentHTML('beforeend', renderPersonRow(d, actions));
+          });
+
+          results.querySelectorAll('button[data-add]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const otherUid = btn.getAttribute('data-add');
+              try{
+                await db.collection('users').doc(otherUid).set({
+                  friendRequests: firebase.firestore.FieldValue.arrayUnion(user.uid)
+                }, { merge:true });
+                showToast("Friend request sent.", "good", "Friends");
+                btn.disabled = true;
+                btn.textContent = "Sent";
+              }catch(e){ console.error(e); showToast("Could not send request.", "bad", "Error"); }
+            });
+          });
+        }catch(e){
+          console.error(e);
+          results.innerHTML = `<div class="muted">Search failed. Try again.</div>`;
+        }
+      }
+
+      document.getElementById('searchBtn').addEventListener('click', doSearch);
+      document.getElementById('search').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') doSearch(); });
+    }
+
+    const isGuestAllowed = true;
+    (function boot(){
+      const ok = initFirebase();
+      if (!ok) { showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase"); initPage(null); return; }
+      firebase.auth().onAuthStateChanged(function(user){
+        if (!user && !isGuestAllowed && !isGuest()) { window.location.href='index.html'; return; }
+        if (!user && isGuest()) initPage(null);
+        else initPage(user);
+      });
+    })();
+  </script>
+</body>
+</html>

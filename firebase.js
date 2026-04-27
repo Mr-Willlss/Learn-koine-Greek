@@ -38,7 +38,13 @@ function initFirebase() {
   }
 
   try {
-    app = firebase.initializeApp(firebaseConfig);
+    if (firebase.apps && firebase.apps.length === 0) {
+      app = firebase.initializeApp(firebaseConfig);
+    } else if (firebase.apps && firebase.apps.length > 0) {
+      app = firebase.app();
+    } else {
+      app = firebase.initializeApp(firebaseConfig);
+    }
     auth = firebase.auth();
     db = firebase.firestore();
     functions = firebase.functions ? firebase.functions() : null;

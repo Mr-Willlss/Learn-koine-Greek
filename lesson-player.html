@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
+  <title>Lesson • Learn Koine Greek</title>
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--green2:#16a34a;--orange:#f97316;--gold:#eab308;--gold2:#ca8a04;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;
+      --sw:220px;
+      --t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    #app{min-height:100%;display:flex}
+    #sidebar{
+      width:var(--sw);flex:0 0 var(--sw);
+      background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));
+      border-right:1px solid var(--border);
+      padding:14px;
+      position:sticky;top:0;height:100vh;overflow:auto
+    }
+    .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
+    .sbLogo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg, var(--purple), var(--blue));border:1px solid rgba(255,255,255,0.12)}
+    .sbLogo span{font-family:'Times New Roman',Georgia,serif;font-weight:900;color:white;font-size:20px}
+    .sbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;line-height:1.1}
+    .sbSub{font-size:12px;color:var(--tm);margin-top:2px}
+    .sbGroup{margin-top:14px}
+    .sbGroup h3{margin:12px 8px 8px 8px;color:rgba(226,232,240,0.72);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 10px;border-radius:14px;
+      border:1px solid transparent;
+      transition:transform var(--t1), background var(--t1), border-color var(--t1);
+      color:rgba(226,232,240,0.9)
+    }
+    .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
+    .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
+    body[data-page="dashboard"] .nav a[href="dashboard.html"],
+    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="profile"] .nav a[href="profile.html"]{
+      background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
+      border-color:rgba(124,92,252,0.3);
+      color:var(--tw);
+    }
+    .nav .ic{width:26px;display:flex;justify-content:center}
+    #main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+    #top-bar{
+      position:sticky;top:0;z-index:50;
+      background:rgba(15,17,23,0.78);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);
+      padding:12px 14px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px
+    }
+    .tbLeft{min-width:0}
+    .tbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .tbSub{color:var(--tm);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tbRight{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
+      font-size:12px;color:rgba(226,232,240,0.9)
+    }
+    .pill b{color:var(--tw)}
+    .avatar{
+      width:34px;height:34px;border-radius:12px;border:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      display:grid;place-items:center;overflow:hidden
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .miniName{display:flex;flex-direction:column;line-height:1.1}
+    .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
+    .miniName .l{color:var(--tm);font-size:11px}
+    #content{padding:14px;max-width:860px;width:100%;margin:0 auto}
+    .hud{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .progressOuter{flex:1 1 260px;min-width:220px;border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:999px;overflow:hidden;height:14px}
+    .progressOuter>div{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg, var(--purple), var(--blue));transition:width 0.8s ease}
+    .hudRight{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .heartsRow{display:flex;gap:6px;align-items:center}
+    .heart{
+      width:18px;height:18px;border-radius:6px;border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
+      display:grid;place-items:center;
+      transition:transform var(--t1), filter var(--t1), opacity var(--t1)
+    }
+    .heart.on{border-color:rgba(239,68,68,0.35);background:rgba(239,68,68,0.12)}
+    .heart.off{opacity:0.45;filter:grayscale(1)}
+    .heart.loss{animation:heartLoss 0.5s ease}
+    @keyframes heartLoss{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+    .card{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 18px 50px rgba(0,0,0,0.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .card.correct{border-color:rgba(34,197,94,0.45);box-shadow:0 0 0 2px rgba(34,197,94,0.10), 0 20px 55px rgba(0,0,0,0.32);animation:goodPulse 0.45s ease}
+    @keyframes goodPulse{0%{transform:scale(1)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
+    .card.wrong{border-color:rgba(239,68,68,0.55);animation:shake 0.35s ease}
+    @keyframes shake{0%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}100%{transform:translateX(0)}}
+    .h1{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:18px}
+    .sub{margin-top:6px;color:var(--tm);font-size:13px;line-height:1.5}
+    .theory{
+      margin-top:10px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,0.18);
+      border-radius:18px;
+      padding:12px;
+      max-height:48vh;
+      overflow:auto;
+      line-height:1.55;
+      color:rgba(226,232,240,0.9);
+      white-space:pre-wrap;
+    }
+    .theory .gr{font-family:'Times New Roman',Georgia,serif;font-size:18px;color:rgba(255,255,255,0.92)}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:11px 12px;border-radius:16px;border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
+      transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);
+      font-weight:900;color:var(--tw)
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .btnPrimary{border-color:rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.20), rgba(34,197,94,0.08))}
+    .btnPrimary:hover{border-color:rgba(34,197,94,0.75);box-shadow:0 18px 35px rgba(34,197,94,0.15)}
+    .q{margin-top:10px;font-weight:900;color:var(--tw);letter-spacing:-0.01em}
+    .q .gr{font-family:'Times New Roman',Georgia,serif;font-size:22px}
+    .opts{margin-top:10px;display:grid;grid-template-columns:1fr;gap:8px}
+    .opt{
+      text-align:left;
+      padding:12px 12px;border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
+      transition:transform var(--t1), border-color var(--t1), background var(--t1), box-shadow var(--t1);
+      color:rgba(226,232,240,0.92)
+    }
+    .opt:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04);box-shadow:0 14px 26px rgba(0,0,0,0.34)}
+    .opt.good{border-color:rgba(34,197,94,0.55);background:rgba(34,197,94,0.10)}
+    .opt.bad{border-color:rgba(239,68,68,0.65);background:rgba(239,68,68,0.10)}
+    .explain{margin-top:10px;color:var(--tm);font-size:12px;line-height:1.5}
+    .builderArea{
+      margin-top:10px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,0.18);
+      border-radius:18px;
+      padding:10px;
+      min-height:52px;
+      display:flex;flex-wrap:wrap;gap:8px;
+      align-items:center;
+    }
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
+      font-weight:800;color:rgba(226,232,240,0.95)
+    }
+    .chip.gr{font-family:'Times New Roman',Georgia,serif;font-size:17px;font-weight:700}
+    .pool{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+    .pool .chip{cursor:pointer;transition:transform var(--t1), background var(--t1), border-color var(--t1)}
+    .pool .chip:hover{transform:translateY(-2px);background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.14)}
+    .floatXP{
+      position:absolute;right:16px;top:12px;
+      color:rgba(34,197,94,0.95);
+      font-weight:900;
+      opacity:0;
+      transform:translateY(12px);
+      pointer-events:none;
+    }
+    .floatXP.show{animation:xpFloat 0.9s ease forwards}
+    @keyframes xpFloat{0%{opacity:0;transform:translateY(12px)}15%{opacity:1}100%{opacity:0;transform:translateY(-18px)}}
+    .overlay{
+      position:fixed;inset:0;z-index:200;
+      background:rgba(0,0,0,0.65);
+      backdrop-filter:blur(10px);
+      display:none;align-items:center;justify-content:center;padding:16px
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(620px,100%);
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(24,28,39,0.98), rgba(15,17,23,0.98));
+      border-radius:24px;
+      padding:16px;
+      box-shadow:0 30px 90px rgba(0,0,0,0.55);
+      position:relative;
+      overflow:hidden;
+    }
+    .modal h2{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:18px}
+    .modal p{margin:8px 0 0 0;color:var(--tm);font-size:13px;line-height:1.55}
+    .confetti{position:absolute;inset:0;pointer-events:none;opacity:0.9}
+    .confetti i{
+      position:absolute;width:8px;height:12px;border-radius:3px;
+      background:var(--purple);
+      top:-14px;
+      animation:fall 1.6s linear infinite;
+      opacity:0.9;
+    }
+    @keyframes fall{0%{transform:translateY(0) rotate(0deg)}100%{transform:translateY(110vh) rotate(280deg)}}
+    .badgePop{
+      position:fixed;left:16px;right:16px;bottom:90px;z-index:300;
+      display:flex;justify-content:center;pointer-events:none;
+    }
+    .badgeCard{
+      pointer-events:auto;
+      width:min(540px,100%);
+      border:1px solid rgba(234,179,8,0.35);
+      background:linear-gradient(180deg, rgba(234,179,8,0.18), rgba(24,28,39,0.92));
+      border-radius:18px;
+      padding:12px;
+      box-shadow:0 22px 45px rgba(0,0,0,0.55);
+      transform:translateY(18px);
+      opacity:0;
+      transition:transform var(--t2), opacity var(--t2);
+      display:flex;gap:10px;align-items:center
+    }
+    .badgeCard.show{transform:translateY(0);opacity:1}
+    .badgeIc{width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.18);display:grid;place-items:center;font-size:18px}
+    .badgeTxt b{color:var(--tw)}
+    .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
+    .toast{
+      pointer-events:auto;max-width:min(560px,100%);
+      border:1px solid var(--border);
+      background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);
+      border-radius:16px;padding:10px 12px;
+      box-shadow:0 22px 40px rgba(0,0,0,0.5);
+      display:flex;align-items:center;gap:10px;
+      transform:translateY(20px);opacity:0;
+      transition:transform var(--t2), opacity var(--t2);
+    }
+    .toast.show{transform:translateY(0);opacity:1}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.info{background:var(--cyan)}
+    .dot.good{background:var(--green)}
+    .dot.bad{background:var(--red)}
+    .bell{position:relative}
+    .bellI{display:inline-block;line-height:1}
+    .bellBadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:900;color:white;background:var(--red);border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 24px rgba(0,0,0,0.45)}
+    .notifBackdrop{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0.25);display:none}
+    .notifPanel{position:fixed;z-index:130;top:64px;right:14px;width:min(420px, calc(100% - 28px));max-height:min(70vh, 540px);overflow:auto;border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 26px 64px rgba(0,0,0,0.55);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform var(--t2), opacity var(--t2)}
+    .notifPanel.open{transform:translateY(0);opacity:1;pointer-events:auto}
+    .notifHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)}
+    .notifHead .t{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
+    .notifHead .actions{display:flex;gap:8px}
+    .nBtn{padding:7px 10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.92);font-size:12px;font-weight:800;transition:transform var(--t1), background var(--t1), border-color var(--t1);white-space:nowrap}
+    .nBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.03);border-color:var(--border2)}
+    .nBtn.primary{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.12)}
+    .notifBody{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .nItem{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .nItem .meta{color:var(--tm);font-size:12px;margin-top:4px}
+    .nItem .msg{color:rgba(226,232,240,0.92);font-size:12px}
+    .nItem .left{min-width:0}
+    .nItem .right{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+    .nTag{font-weight:900;color:var(--tw)}
+    .nEmpty{border:1px dashed var(--border);border-radius:14px;padding:14px;color:var(--tm);text-align:center}
+    .bottomTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(15,17,23,0.86);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
+    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
+      border-color:rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.10);
+      color:var(--tw);
+    }
+    @media (max-width: 768px){
+      :root{--sw:56px}
+      #sidebar{padding:12px 8px}
+      .sbTitle,.sbSub,.sbGroup h3,.nav .tx{display:none}
+      .sbBrand{justify-content:center}
+      .nav a{justify-content:center}
+      .nav .ic{width:auto}
+      .tbSub{display:none}
+      #content{padding-bottom:90px}
+      .bottomTabs{display:block}
+      .toastWrap{bottom:92px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .opt,.btn,.toast,.progressOuter>div,.badgeCard{transition:none}
+      .card.wrong,.card.correct{animation:none}
+      .floatXP.show{animation:none;opacity:1;transform:none}
+      .confetti i{animation:none}
+    }
+  </style>
+</head>
+<body data-page="lesson">
+  <div id="app">
+    <aside id="sidebar" aria-label="Sidebar navigation">
+      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
+        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+        <div>
+          <div class="sbTitle">Koine Greek</div>
+          <div class="sbSub">Duolingo-style</div>
+        </div>
+      </a>
+      <div class="sbGroup">
+        <h3>Main</h3>
+        <nav class="nav">
+          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Learn</h3>
+        <nav class="nav">
+          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Social</h3>
+        <nav class="nav">
+          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Account</h3>
+        <nav class="nav">
+          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
+          <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
+        </nav>
+      </div>
+    </aside>
+
+    <div id="main-wrapper">
+      <header id="top-bar">
+        <div class="tbLeft">
+          <div class="tbTitle" id="pageTitle">Lesson</div>
+          <div class="tbSub" id="pageSub">Theory → Exercises → Complete</div>
+        </div>
+        <div class="tbRight">
+          <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
+          <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
+          <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar" id="avatar"><span>👤</span></div>
+            <div class="miniName">
+              <div class="n" id="userName">Guest</div>
+              <div class="l" id="userLevel">Level —</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="content">
+        <div class="hud" aria-label="Lesson HUD">
+          <div class="progressOuter" aria-label="Progress"><div id="progressBar"></div></div>
+          <div class="hudRight">
+            <div class="pill"><span>⭐</span><b id="xpEarned">0</b><span style="color:var(--tm)">XP</span></div>
+            <div class="heartsRow" id="heartsRow" aria-label="Hearts"></div>
+          </div>
+        </div>
+        <section class="card" id="card" aria-live="polite">
+          <div class="floatXP" id="floatXP">+5 XP</div>
+          <div class="h1" id="cardTitle">Loading…</div>
+          <div class="sub" id="cardSub">Please wait.</div>
+          <div id="cardBody"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
+    <div class="tabs">
+      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal">
+      <div class="confetti" id="confetti" aria-hidden="true"></div>
+      <h2 id="modalTitle">Notice</h2>
+      <p id="modalText"></p>
+      <div class="btnRow" id="modalBtns"></div>
+    </div>
+  </div>
+
+  <div class="badgePop" aria-live="polite" aria-atomic="true">
+    <div class="badgeCard" id="badgeCard">
+      <div class="badgeIc" id="badgeIc">🏆</div>
+      <div class="badgeTxt"><b id="badgeName">Achievement</b><div style="color:rgba(226,232,240,0.82);font-size:12px" id="badgeDesc"></div></div>
+    </div>
+  </div>
+
+  <div class="notifBackdrop" id="notifBackdrop" aria-hidden="true"></div>
+  <section class="notifPanel" id="notifPanel" aria-label="Notifications" aria-hidden="true">
+    <div class="notifHead">
+      <div class="t">Notifications</div>
+      <div class="actions">
+        <button class="nBtn" id="notifMarkAll" type="button">Mark all read</button>
+        <button class="nBtn primary" id="notifClose" type="button">Close</button>
+      </div>
+    </div>
+    <div class="notifBody" id="notifBody"></div>
+  </section>
+
+  <div class="toastWrap" aria-live="polite" aria-atomic="true">
+    <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    document.addEventListener('click', function(e) {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const bad = ['lesson.html','home.html'];
+      if (bad.some(b => a.getAttribute('href') === b)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
+    function showToast(msg, type='info', title='Notice') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      const t = document.getElementById('toastTitle');
+      const m = document.getElementById('toastMsg');
+      dot.className = 'dot ' + (type === 'good' ? 'good' : type === 'bad' ? 'bad' : 'info');
+      t.textContent = title;
+      m.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function showModal(title, text, buttons) {
+      const ov = document.getElementById('overlay');
+      const mt = document.getElementById('modalTitle');
+      const ms = document.getElementById('modalText');
+      const mb = document.getElementById('modalBtns');
+      mt.textContent = title;
+      ms.textContent = text;
+      mb.innerHTML = '';
+      (buttons || []).forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = 'btn ' + (b.primary ? 'btnPrimary' : '');
+        btn.textContent = b.label;
+        btn.addEventListener('click', () => { ov.classList.remove('show'); b.onClick && b.onClick(); });
+        mb.appendChild(btn);
+      });
+      ov.classList.add('show');
+    }
+
+    function showAchievementPop(a) {
+      const card = document.getElementById('badgeCard');
+      document.getElementById('badgeIc').textContent = a.icon;
+      document.getElementById('badgeName').textContent = a.name;
+      document.getElementById('badgeDesc').textContent = a.desc + (a.xp ? ` (+${a.xp} XP)` : '');
+      card.classList.add('show');
+      clearTimeout(showAchievementPop._t);
+      showAchievementPop._t = setTimeout(() => card.classList.remove('show'), 3200);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function calcLevel(xp) {
+      const thresholds = [0,100,250,500,900,1400,2000,2800,3800,5000];
+      const titles = ["Newcomer","Letter Keeper","Word Seeker","Novice Scribe","Scribe","Scholar","Grammarian","Interpreter","Theologian","Master"];
+      let level = 1;
+      for (let i = 0; i < thresholds.length; i++) if (xp >= thresholds[i]) level = i + 1;
+      return {
+        level, title: titles[level-1],
+        currentThreshold: thresholds[level-1],
+        nextThreshold: thresholds[level] || 99999,
+        progress: level >= thresholds.length ? 100 :
+          Math.round((xp - thresholds[level-1]) / (thresholds[level] - thresholds[level-1]) * 100)
+      };
+    }
+
+    // Streak updater (prompt-required signature). We use it only on lesson completion.
+    function updateStreak(userData) {
+      const today = new Date().toISOString().split('T')[0];
+      const last = userData.lastActiveDate || '';
+      const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
+      if (last === today) return userData.streak;
+      if (last === yesterday) return userData.streak + 1;
+      return 0;
+    }
+
+    const ACHIEVEMENTS = [
+      { id:'firstSteps', icon:'🦶', name:'First Steps', desc:'Complete your first lesson', xp:10 },
+      { id:'streak3', icon:'🔥', name:'On Fire', desc:'3-day streak', xp:15 },
+      { id:'streak7', icon:'🌟', name:'Consistent', desc:'7-day streak', xp:30 },
+      { id:'streak30', icon:'💎', name:'Dedicated', desc:'30-day streak', xp:100 },
+      { id:'lessons5', icon:'📚', name:'Word Collector', desc:'Complete 5 lessons', xp:25 },
+      { id:'lessons10', icon:'⚡', name:'Quick Learner', desc:'Complete 10 lessons', xp:50 },
+      { id:'lessons24', icon:'🏆', name:'Master Scholar', desc:'Complete all 24 lessons', xp:200 },
+      { id:'accuracy90', icon:'🎯', name:'Accuracy Master', desc:'Finish a lesson with 90%+', xp:40 },
+      { id:'accuracy100', icon:'💯', name:'Perfect', desc:'Finish a lesson with 100%', xp:60 },
+      { id:'quest1', icon:'⚔️', name:'Quest Taker', desc:'Complete your first quest', xp:20 },
+      { id:'allQuests', icon:'🌟', name:'Quest Master', desc:'Complete all quests', xp:150 },
+      { id:'friends1', icon:'👥', name:'Social Learner', desc:'Add your first friend', xp:15 },
+      { id:'studyRoom', icon:'🏛️', name:'Study Together', desc:'Complete a lesson in study room', xp:25 },
+      { id:'vocab50', icon:'🔤', name:'Vocabulary Half', desc:'Unlock 50 vocabulary words', xp:35 },
+      { id:'vocab100', icon:'📖', name:'Word Master', desc:'Unlock all vocabulary', xp:100 },
+    ];
+
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+    function qs(key) {
+      const u = new URL(location.href);
+      return u.searchParams.get(key);
+    }
+
+    function setTopUser(user, data) {
+      const xp = Number.isFinite(data?.xp) ? data.xp : 0;
+      const lvl = calcLevel(xp);
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
+      document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
+      const av = document.getElementById('avatar');
+      const url = data?.photoURL || user?.photoURL;
+      if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
+    }
+
+    function renderHearts(count, animateLoss=false) {
+      const row = document.getElementById('heartsRow');
+      row.innerHTML = '';
+      for (let i=0;i<5;i++){
+        const h = document.createElement('div');
+        h.className = 'heart ' + (i < count ? 'on' : 'off') + (animateLoss && i===count ? ' loss' : '');
+        h.textContent = '❤';
+        row.appendChild(h);
+      }
+      document.getElementById('heartsVal').textContent = String(count);
+    }
+
+    function setProgress(done, total) {
+      const pct = total ? Math.round((done/total)*100) : 0;
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function flashXp(amount) {
+      const fx = document.getElementById('floatXP');
+      fx.textContent = `+${amount} XP`;
+      fx.classList.remove('show');
+      void fx.offsetWidth;
+      fx.classList.add('show');
+    }
+
+    function spawnConfetti() {
+      const host = document.getElementById('confetti');
+      host.innerHTML = '';
+      const colors = ['var(--purple)','var(--blue)','var(--green)','var(--gold)','var(--pink)','var(--cyan)'];
+      for (let i=0;i<20;i++){
+        const p = document.createElement('i');
+        p.style.left = Math.floor(Math.random()*100) + '%';
+        p.style.animationDelay = (-Math.random()*1.6).toFixed(2) + 's';
+        p.style.background = colors[Math.floor(Math.random()*colors.length)];
+        p.style.opacity = (0.6 + Math.random()*0.4).toFixed(2);
+        p.style.transform = `translateY(${(-20 - Math.random()*120).toFixed(0)}px) rotate(${Math.floor(Math.random()*360)}deg)`;
+        host.appendChild(p);
+      }
+    }
+
+    // ===== LESSON CONTENT (from prompt) =====
+    const LESSON_DATA = {
+      1:{id:1,world:1,title:"The Greek Alphabet — Part 1 (α to μ)",objective:"Learn the first 12 letters of the Greek alphabet",theory:`The Greek alphabet has 24 letters. Each has an uppercase form, a lowercase form, a name, and a transliteration sound.\nLetters 1–12: Α α (Alpha/a), Β β (Beta/b), Γ γ (Gamma/g),\nΔ δ (Delta/d), Ε ε (Epsilon/e short), Ζ ζ (Zeta/z),\nΗ η (Eta/ē long), Θ θ (Theta/th), Ι ι (Iota/i),\nΚ κ (Kappa/k), Λ λ (Lambda/l), Μ μ (Mu/m)`,vocabulary:[{greek:"ἀδελφός",english:"brother",example:"ὁ ἀδελφός μου — my brother"},{greek:"ἄνθρωπος",english:"man / human being",example:"ὁ ἄνθρωπος βλέπει — the man sees"},{greek:"βλέπω",english:"I see / I look",example:"βλέπω τὸν ἄνθρωπον — I see the man"}],exercises:[{type:"multiple_choice",question:"What is the name of the Greek letter: Γ",options:["Alpha","Gamma","Delta","Beta"],answer:"Gamma",explanation:"Γ γ is called Gamma and is transliterated as 'g'"},{type:"multiple_choice",question:"Which letter is transliterated as 'th'?",options:["Τ τ (Tau)","Θ θ (Theta)","Φ φ (Phi)","Χ χ (Chi)"],answer:"Θ θ (Theta)",explanation:"Theta (Θ θ) makes the 'th' sound as in 'think'"},{type:"translate_to_english",question:"What does ἀδελφός mean?",options:["Father","Brother","Son","Friend"],answer:"Brother",explanation:"ἀδελφός means 'brother' — you see it in 'Philadelphia' (city of brotherly love)"},{type:"sentence_builder",question:"Arrange these words to say 'I see the man'",words:["βλέπω","τὸν","ἄνθρωπον"],answer:["βλέπω","τὸν","ἄνθρωπον"],explanation:"Greek verb-object-complement word order"}],xpReward:15},
+      2:{id:2,world:1,title:"The Greek Alphabet — Part 2 (ν to ω)",objective:"Learn the remaining 12 letters of the Greek alphabet",theory:`Letters 13–24: Ν ν (Nu/n), Ξ ξ (Xi/x), Ο ο (Omicron/o short),\nΠ π (Pi/p), Ρ ρ (Rho/r), Σ σ/ς (Sigma/s),\nΤ τ (Tau/t), Υ υ (Upsilon/u-y), Φ φ (Phi/ph),\nΧ χ (Chi/ch), Ψ ψ (Psi/ps), Ω ω (Omega/ō long).\nNote: Sigma has two lowercase forms — σ (mid-word) and ς (end of word).`,vocabulary:[{greek:"ἔχω",english:"I have",example:"ἔχω ἄρτον — I have bread"},{greek:"καί",english:"and / also / even",example:"ἄνθρωπος καί ἀδελφός — man and brother"},{greek:"λέγω",english:"I say / I speak",example:"λέγω τὴν ἀλήθειαν — I speak the truth"},{greek:"χαῖρε",english:"rejoice / greetings",example:"χαῖρε! — Hello! / Greetings!"}],exercises:[{type:"multiple_choice",question:"Which letter makes the 'ps' sound?",options:["Ξ ξ","Φ φ","Ψ ψ","Χ χ"],answer:"Ψ ψ",explanation:"Ψ ψ (Psi) makes the 'ps' sound as in 'psychology'"},{type:"multiple_choice",question:"Sigma has two lowercase forms. Which is used at the END of a word?",options:["σ","ς","Σ","ς or σ — both work"],answer:"ς",explanation:"ς (final sigma) is only used when sigma ends a word. σ is used everywhere else."},{type:"translate_to_english",question:"What does καί mean?",options:["But","From","And / also","In"],answer:"And / also",explanation:"καί is one of the most common Greek words meaning 'and', 'also', or 'even'"},{type:"multiple_choice",question:"What is the transliteration of Ω ω?",options:["o (short)","u","ō (long)","w"],answer:"ō (long)",explanation:"Omega (Ω ω) is always a LONG 'o' sound, unlike Omicron which is short"}],xpReward:15},
+      3:{id:3,world:1,title:"Vowels, Diphthongs & Accents",objective:"Master Greek vowels, diphthong combinations, and accent marks",theory:`VOWELS (7): α, ε, η, ι, ο, υ, ω\nShort vowels: ε, ο (always short); α, ι, υ (can be short or long)\nLong vowels: η, ω (always long); α, ι, υ (can be long)\n\nDIPHTHONGS — two vowels pronounced as one sound:\nαι (like 'aisle') | ει (like 'eight') | οι (like 'oil')\nαυ (like 'now') | ευ (like 'feud') | ου (like 'food')\nυι (like 'we') | ηυ (rare, long eu)\n\nACCENTS (3):\nAcute ( ΄ ) — ὀξεῖα — any of last 3 syllables: ἄνθρωπος\nGrave ( ` ) — βαρεῖα — replaces acute on final syllable before another word\nCircumflex ( ͂ ) — περισπωμένη — only on long syllables, last 2 syllables: δοῦλος`,vocabulary:[{greek:"ἄρτος",english:"bread",example:"ἐσθίω ἄρτον — I eat bread"},{greek:"ἐσθίω",english:"I eat",example:"ἐσθίω καρπόν — I eat fruit"},{greek:"καρπός",english:"fruit",example:"ὁ καρπός — the fruit"},{greek:"πιστεύω",english:"I believe",example:"πιστεύω εἰς θεόν — I believe in God"}],exercises:[{type:"multiple_choice",question:"How many vowels does Greek have?",options:["5","6","7","8"],answer:"7",explanation:"Greek has 7 vowels: α, ε, η, ι, ο, υ, ω"},{type:"multiple_choice",question:"The diphthong 'ου' sounds like:",options:["oil","aisle","food","feud"],answer:"food",explanation:"ου makes the 'oo' sound as in 'food' — it is very common in Greek"},{type:"multiple_choice",question:"Which accent appears ONLY on long syllables?",options:["Acute","Grave","Circumflex","All three"],answer:"Circumflex",explanation:"The Circumflex ( ͂ ) can only appear on long syllables (η, ω, or long α, ι, υ)"},{type:"multiple_choice",question:"Which vowels are ALWAYS short?",options:["α and ι","ε and ο","η and ω","υ and ω"],answer:"ε and ο",explanation:"Epsilon (ε) and Omicron (ο) are ALWAYS short vowels in Greek"}],xpReward:20},
+      4:{id:4,world:1,title:"First Greek Words — Nouns & Basic Vocabulary",objective:"Learn 20 essential Koine Greek nouns and their meanings",theory:`Greek nouns have GENDER (masculine, feminine, neuter), NUMBER (singular, plural), and CASE (how the word functions in a sentence).\nIn a dictionary, nouns appear in the NOMINATIVE SINGULAR form.\n\nToday's words are all from the New Testament — some of the most frequent words you will encounter when reading Greek Scripture.`,vocabulary:[{greek:"δοῦλος",english:"slave / servant",example:"ὁ δοῦλος τοῦ κυρίου — the servant of the Lord"},{greek:"κόσμος",english:"world",example:"ὁ θεὸς ἠγάπα τὸν κόσμον — God loved the world"},{greek:"θεός",english:"God",example:"θεός ἐστιν ἀγάπη — God is love"},{greek:"υἱός",english:"son",example:"ὁ υἱὸς τοῦ θεοῦ — the Son of God"},{greek:"καρδία",english:"heart",example:"ἐκ τῆς καρδίας — from the heart"},{greek:"ἀλήθεια",english:"truth",example:"ἡ ἀλήθεια ἐλευθερώσει ὑμᾶς — the truth will free you"},{greek:"ἄγγελος",english:"angel / messenger",example:"ὁ ἄγγελος τοῦ θεοῦ — the angel of God"},{greek:"ἐπιθυμία",english:"desire / lust",example:""},{greek:"παρρησία",english:"boldness / confidence",example:""},{greek:"δωρεά",english:"gift",example:""}],exercises:[{type:"translate_to_english",question:"What does θεός mean?",options:["Angel","Lord","God","Son"],answer:"God",explanation:"θεός means 'God' — it is the root of words like 'theology' and 'theist'"},{type:"translate_to_english",question:"What does ἀλήθεια mean?",options:["Love","Truth","World","Heart"],answer:"Truth",explanation:"ἀλήθεια means 'truth' — Jesus said 'I am the way, the truth (ἀλήθεια), and the life'"},{type:"translate_to_english",question:"ἄγγελος means:",options:["King","Prophet","Angel / Messenger","Servant"],answer:"Angel / Messenger",explanation:"ἄγγελος means 'messenger' — it is transliterated into English as 'angel'"},{type:"multiple_choice",question:"Which is the Greek word for 'world'?",options:["κόσμος","καρδία","δοῦλος","υἱός"],answer:"κόσμος",explanation:"κόσμος means 'world' — John 3:16 says God loved the κόσμος (world)"}],xpReward:20},
+      5:{id:5,world:1,title:"Cases in Greek — The 5 Cases",objective:"Understand the five Greek noun cases and their functions",theory:`Greek has FIVE CASES. The case of a noun tells you its FUNCTION in the sentence — not word order.\n\n1. NOMINATIVE — the SUBJECT\n2. GENITIVE — POSSESSION ('of')\n3. DATIVE — INDIRECT OBJECT ('to/for')\n4. ACCUSATIVE — DIRECT OBJECT\n5. VOCATIVE — DIRECT ADDRESS`,vocabulary:[{greek:"ἐλεύθερος",english:"free",example:"ἐλεύθερός ἐστιν — he is free"},{greek:"καλός",english:"good / beautiful",example:"καλὸς ἄνθρωπος — a good man"},{greek:"δίκαιος",english:"righteous / just",example:"δίκαιος κριτής — a righteous judge"},{greek:"μακάριος",english:"blessed / happy",example:"μακάριοι οἱ πτωχοί — blessed are the poor"},{greek:"κακός",english:"bad / evil",example:"κακὸν ἔργον — an evil work"}],exercises:[{type:"multiple_choice",question:"How many cases does Greek have?",options:["3","4","5","6"],answer:"5",explanation:"Greek has 5 cases: Nominative, Genitive, Dative, Accusative, Vocative"},{type:"multiple_choice",question:"Which case shows POSSESSION ('of')?",options:["Nominative","Genitive","Dative","Accusative"],answer:"Genitive",explanation:"The Genitive case shows possession or 'of'. E.g., τοῦ θεοῦ = 'of God'"},{type:"multiple_choice",question:"Which case is the DIRECT OBJECT (receives the action)?",options:["Vocative","Nominative","Dative","Accusative"],answer:"Accusative",explanation:"The Accusative is the direct object. 'I see THE MAN' — 'the man' is Accusative"},{type:"multiple_choice",question:"What does μακάριος mean?",options:["Holy","Righteous","Blessed / Happy","Free"],answer:"Blessed / Happy",explanation:"μακάριος means 'blessed' or 'happy' — the Beatitudes begin 'μακάριοι...'"}],xpReward:25},
+      6:{id:6,world:2,title:"Verbs — Present Active Indicative",objective:"Learn to conjugate Greek verbs in the present tense",theory:`Greek verbs change their ENDINGS to show person and number.\n\nPresent Active Indicative of πιστεύω (I believe):\n1st Sg: πιστεύω\n2nd Sg: πιστεύεις\n3rd Sg: πιστεύει\n1st Pl: πιστεύομεν\n2nd Pl: πιστεύετε\n3rd Pl: πιστεύουσι\n\nKEY PERSONAL ENDINGS: -ω, -εις, -ει, -ομεν, -ετε, -ουσι`,vocabulary:[{greek:"φόβος",english:"fear",example:"οὐκ ἔχω φόβον — I do not have fear"},{greek:"εἰμί",english:"I am",example:"ἐγώ εἰμί — I am"},{greek:"ἐλπίζω",english:"I hope",example:"ἐλπίζω εἰς θεόν — I hope in God"},{greek:"θέλω",english:"I wish / I want",example:"θέλω μαθεῖν — I want to learn"},{greek:"ἀκούω",english:"I hear",example:"ἀκούω τὸν λόγον — I hear the word"}],exercises:[{type:"multiple_choice",question:"What is the 3rd person PLURAL of πιστεύω?",options:["πιστεύει","πιστεύομεν","πιστεύουσι","πιστεύετε"],answer:"πιστεύουσι",explanation:"3rd plural = πιστεύουσι(ν) = 'They believe'"},{type:"multiple_choice",question:"The ending -εις means:",options:["I (1st sg)","You (2nd sg)","He/She (3rd sg)","We (1st pl)"],answer:"You (2nd sg)",explanation:"-εις is the 2nd person singular active ending: 'you (one person) believe'"},{type:"multiple_choice",question:"What does εἰμί mean?",options:["I see","I am","I have","I believe"],answer:"I am",explanation:"εἰμί = 'I am' — one of the most important Greek verbs"},{type:"translate_to_english",question:"Translate: πιστεύομεν",options:["I believe","You believe","We believe","They believe"],answer:"We believe",explanation:"-ομεν is the 1st person plural ending: 'We believe'"}],xpReward:25},
+      7:{id:7,world:2,title:"Genders & Articles",objective:"Master the three Greek genders and the definite article",theory:`Greek has THREE GENDERS: Masculine, Feminine, Neuter.\n\nTHE DEFINITE ARTICLE (“the”) changes with gender, number, and case:\nMasculine: ὁ (nom sg) | οἱ (nom pl)\nFeminine: ἡ (nom sg) | αἱ (nom pl)\nNeuter: τό (nom sg) | τά (nom pl)\n\nThe article is your BEST CLUE to a noun's gender and case!`,vocabulary:[{greek:"τέκνον",english:"child",example:"τὸ τέκνον — the child (neuter)"},{greek:"οἶκος",english:"house",example:"ὁ οἶκος — the house (masculine)"},{greek:"γλῶσσα",english:"tongue / language",example:"ἡ γλῶσσα — the tongue (feminine)"},{greek:"κώμη",english:"village",example:"ἡ κώμη — the village (feminine)"},{greek:"σκοτία",english:"darkness",example:"ἡ σκοτία — the darkness (feminine)"}],exercises:[{type:"multiple_choice",question:"How many genders does Greek have?",options:["2","3","4","1"],answer:"3",explanation:"Greek has 3 genders: Masculine, Feminine, and Neuter"},{type:"multiple_choice",question:"The article ἡ indicates which gender?",options:["Masculine","Feminine","Neuter","All genders"],answer:"Feminine",explanation:"ἡ is the feminine nominative singular definite article meaning 'the'"},{type:"multiple_choice",question:"What does τέκνον mean?",options:["Father","Mother","Child","Brother"],answer:"Child",explanation:"τέκνον means 'child' — it is neuter gender, so its article is τό"},{type:"sentence_builder",question:"Build the phrase: 'the house'",words:["ὁ","οἶκος","ἡ","τό"],answer:["ὁ","οἶκος"],explanation:"οἶκος (house) is masculine, so it takes ὁ (the)"}],xpReward:25},
+      8:{id:8,world:2,title:"Prepositions & Basic Sentences",objective:"Use Greek prepositions to build simple sentences",theory:`Greek prepositions govern specific CASES:\n\nἐν (in/among) → DATIVE\nεἰς (into/to) → ACCUSATIVE\nἐκ (out of/from) → GENITIVE\nἀπό (from) → GENITIVE\nσύν (with) → DATIVE\nμετά (with/after) → GENITIVE/ACCUSATIVE\nπερί (about) → GEN/ACC\nδιά (through/because) → GEN/ACC`,vocabulary:[{greek:"ἀπό",english:"from / away from",example:"ἀπὸ τοῦ οἴκου — from the house"},{greek:"εἰς",english:"into / to",example:"εἰς τὸν κόσμον — into the world"},{greek:"ἐκ",english:"out of / from",example:"ἐκ τῆς καρδίας — out of the heart"},{greek:"ἐν",english:"in / among",example:"ἐν τῷ κόσμῳ — in the world"},{greek:"σύν",english:"with",example:"σὺν αὐτῷ — with him"},{greek:"διά",english:"through / because of",example:"διὰ πίστεως — through faith"},{greek:"μετά",english:"with / after",example:"μετὰ τοῦ κυρίου — with the Lord"},{greek:"περί",english:"about / concerning",example:"περὶ τοῦ υἱοῦ — concerning the Son"}],exercises:[{type:"multiple_choice",question:"The preposition εἰς takes which case?",options:["Genitive","Dative","Accusative","Nominative"],answer:"Accusative",explanation:"εἰς (into/to) always governs the ACCUSATIVE case"},{type:"multiple_choice",question:"What does ἐν mean?",options:["Out of","Into","From","In / among"],answer:"In / among",explanation:"ἐν means 'in' or 'among' and governs the Dative case"},{type:"multiple_choice",question:"Which preposition means 'out of' or 'from'?",options:["εἰς","ἐν","ἐκ","σύν"],answer:"ἐκ",explanation:"ἐκ (or ἐξ before vowels) means 'out of' and governs the Genitive"},{type:"translate_to_english",question:"ἐν τῷ κόσμῳ means:",options:["Into the world","From the world","In the world","About the world"],answer:"In the world",explanation:"ἐν = in, τῷ κόσμῳ = the world (dative). So: 'in the world'"}],xpReward:30},
+      9:{id:9,world:2,title:"Future & Aorist Tenses",objective:"Learn how to form and recognize the Future and First Aorist tenses",theory:`FUTURE TENSE: Formed by inserting σ before the personal endings.\nπιστεύω → πιστεύσω (I will believe)\n\nFIRST AORIST: A past tense. Formed by:\n1) Adding augment ε- to the beginning\n2) Inserting σα before the endings\nπιστεύω → ἐπίστευσα (I believed)\n\nLIQUID VERBS (stems ending in λ/μ/ν/ρ) form the FUTURE differently: μένω → μενῶ (I will remain)`,vocabulary:[{greek:"μένω",english:"I remain / I stay",example:"μένω ἐν τῷ οἴκῳ — I remain in the house"},{greek:"κρίνω",english:"I judge",example:"κρίνω τοὺς ἁμαρτωλούς — I judge the sinners"},{greek:"αἴρω",english:"I take up / I raise",example:"αἴρω τὸν σταυρόν — I take up the cross"},{greek:"πέμπω",english:"I send",example:"πέμπω τὸν ἄγγελον — I send the angel"},{greek:"ἄγω",english:"I lead / I bring",example:"ἄγω τοὺς μαθητάς — I lead the disciples"}],exercises:[{type:"multiple_choice",question:"The First Aorist of πιστεύω (I believe) is:",options:["πιστεύσω","ἐπίστευσα","πεπίστευκα","πιστεύσεις"],answer:"ἐπίστευσα",explanation:"ἐπίστευσα = 'I believed'. Augment (ἐ) + stem + σα"},{type:"multiple_choice",question:"Liquid verbs form their future WITHOUT:",options:["Any suffix","The σ (sigma) suffix","Personal endings","The augment"],answer:"The σ (sigma) suffix",explanation:"Liquid verbs (stems ending λ/μ/ν/ρ) drop σ in the future and contract instead"},{type:"multiple_choice",question:"What does μένω mean?",options:["I send","I judge","I remain / I stay","I raise"],answer:"I remain / I stay",explanation:"μένω means 'I remain'. John 15:4 — 'remain (μείνατε) in me'"},{type:"multiple_choice",question:"ἐπέμψα is the Aorist of which verb?",options:["μένω","κρίνω","πέμπω","αἴρω"],answer:"πέμπω",explanation:"πέμπω (I send) → ἔπεμψα (I sent)"}],xpReward:30},
+      10:{id:10,world:2,title:"Verb Analysis — The 5 Things to Know",objective:"Analyze any Greek verb by identifying its 5 key properties",theory:`When you see a Greek verb, identify FIVE things:\n1. PERSON\n2. NUMBER\n3. TENSE\n4. VOICE\n5. MOOD\n\nEXAMPLE: ἠσθίετε → Lexical form: ἐσθίω | Imperfect | Active | Indicative | 2nd Plural`,vocabulary:[{greek:"διδάσκω",english:"I teach",example:"διδάσκω τοὺς μαθητάς — I teach the disciples"},{greek:"μανθάνω",english:"I learn",example:"μανθάνω τὴν ἀλήθειαν — I learn the truth"},{greek:"λαμβάνω",english:"I take / I receive",example:"λαμβάνω δῶρον — I receive a gift"},{greek:"ἀποθνήσκω",english:"I die",example:"ἀποθνήσκω ὑπὲρ ὑμῶν — I die for you"},{greek:"συνάγω",english:"I gather together",example:"συνάγω τοὺς λαούς — I gather the peoples"}],exercises:[{type:"multiple_choice",question:"How many properties must you identify when analyzing a Greek verb?",options:["3","4","5","6"],answer:"5",explanation:"Person, Number, Tense, Voice, Mood — all five are needed for full analysis"},{type:"multiple_choice",question:"ἠσθίετε: What is the PERSON and NUMBER?",options:["1st Singular","3rd Plural","2nd Plural","1st Plural"],answer:"2nd Plural",explanation:"ἠσθίετε = 2nd person plural imperfect active indicative of ἐσθίω"},{type:"multiple_choice",question:"A verb in the PASSIVE VOICE means:",options:["The subject is doing the action","The subject is receiving the action","The subject acts on itself","It is a command"],answer:"The subject is receiving the action",explanation:"Passive voice = subject receives the action. 'The man was seen' (ὁ ἄνθρωπος ἑωράθη)"},{type:"multiple_choice",question:"What does the INDICATIVE mood express?",options:["A wish","A command","A statement of fact","A possibility"],answer:"A statement of fact",explanation:"The Indicative mood states facts — 'The man sees' (ὁ ἄνθρωπος βλέπει)"}],xpReward:35},
+      11:{id:11,world:3,title:"Adjectives & Agreement",objective:"Understand how Greek adjectives must agree with their nouns",theory:`Greek ADJECTIVES must AGREE with their noun in GENDER, NUMBER, and CASE (CONCORD).\n\nATTRIBUTIVE: ὁ δίκαιος ἄνθρωπος\nPREDICATE: ὁ ἄνθρωπος δίκαιος`,vocabulary:[{greek:"μικρός",english:"small / little",example:"μικρὸν τέκνον — a little child"},{greek:"ἴδιος",english:"one's own",example:"ἴδιον δῶρον — one's own gift"},{greek:"νεώτερος",english:"younger",example:"ὁ νεώτερος ἀδελφός — the younger brother"},{greek:"πλοῦτος",english:"wealth / riches",example:"ὁ πλοῦτος τοῦ θεοῦ — the riches of God"},{greek:"χρεία",english:"need / necessity",example:"χρείαν ἔχω — I have need"}],exercises:[{type:"multiple_choice",question:"Greek adjectives must agree with their noun in:",options:["Only gender","Gender and number only","Gender, number, and case","Case only"],answer:"Gender, number, and case",explanation:"Adjectives must match the noun in all three: gender, number, and case"},{type:"multiple_choice",question:"ὁ δίκαιος ἄνθρωπος — the adjective is:",options:["Predicate position","Attributive position","No position — wrong Greek","Vocative use"],answer:"Attributive position",explanation:"Attributive: article + adjective + noun (or article + noun + article + adjective)"},{type:"translate_to_english",question:"What does μικρός mean?",options:["Great","Holy","Small / Little","Old"],answer:"Small / Little",explanation:"μικρός means 'small' — you see it in English words like 'microscope'"},{type:"multiple_choice",question:"The FEMININE nominative singular of δίκαιος is:",options:["δίκαιοι","δικαία","δίκαιον","δικαίου"],answer:"δικαία",explanation:"Feminine nominative sg of δίκαιος = δικαία"}],xpReward:35},
+      12:{id:12,world:3,title:"Demonstrative Pronouns — This & That",objective:"Learn and decline οὗτος (this) and ἐκεῖνος (that)",theory:`οὗτος — THIS (near): οὗτος/αὕτη/τοῦτο\nἐκεῖνος — THAT (far): ἐκεῖνος/ἐκείνη/ἐκεῖνο\n\nDemonstratives often appear OUTSIDE the article-noun group: οὗτος ὁ ἄνθρωπος`,vocabulary:[{greek:"νῦν",english:"now",example:"νῦν λέγω — I speak now"},{greek:"πάντοτε",english:"always",example:"πάντοτε πιστεύω — I always believe"},{greek:"οὐκέτι",english:"no longer",example:"οὐκέτι δοῦλος — no longer a slave"},{greek:"πάλιν",english:"again",example:"πάλιν ἔρχομαι — I come again"},{greek:"τότε",english:"then",example:"τότε εἶπεν — then he said"}],exercises:[{type:"multiple_choice",question:"The neuter nominative singular of οὗτος is:",options:["οὗτος","αὕτη","τοῦτο","ταῦτα"],answer:"τοῦτο",explanation:"τοῦτο = 'this' (neuter singular) — e.g., τοῦτό ἐστιν τὸ σῶμά μου"},{type:"multiple_choice",question:"ἐκεῖνος means:",options:["This","That","Which","Who"],answer:"That",explanation:"ἐκεῖνος means 'that' (pointing to something far away)"},{type:"multiple_choice",question:"How do you say 'this man' in Greek?",options:["ὁ ἄνθρωπος οὗτος","οὗτος ὁ ἄνθρωπος","Either of the above","Neither — οὗτος can't modify nouns"],answer:"Either of the above",explanation:"Both word orders are correct for the attributive demonstrative in Greek"},{type:"translate_to_english",question:"οὐκέτι means:",options:["Not yet","No longer","Never","Not here"],answer:"No longer",explanation:"οὐκέτι = 'no longer'. John 15:15 — 'No longer do I call you servants'"}],xpReward:35},
+      13:{id:13,world:3,title:"αὐτός — He / She / It / Same",objective:"Master the highly versatile pronoun αὐτός",theory:`αὐτός has THREE distinct uses:\n1) PERSONAL (him/her/it)\n2) INTENSIVE: αὐτὸς ὁ ἄνθρωπος = the man himself\n3) SAME: ὁ αὐτὸς ἄνθρωπος = the same man`,vocabulary:[{greek:"γεωργός",english:"farmer",example:"ὁ γεωργός — the farmer"},{greek:"σήμερον",english:"today",example:"σήμερον σωθήσῃ — today you will be saved"},{greek:"αὔριον",english:"tomorrow",example:"αὔριον ἐλεύσομαι — tomorrow I will come"},{greek:"ἐχθές",english:"yesterday",example:"ἐχθὲς ἦλθεν — he came yesterday"},{greek:"ὅτε",english:"when",example:"ὅτε ἦλθεν — when he came"}],exercises:[{type:"multiple_choice",question:"αὐτόν is which form of αὐτός?",options:["Nominative Masculine","Accusative Masculine","Dative Masculine","Genitive Masculine"],answer:"Accusative Masculine",explanation:"αὐτόν = him (accusative masculine singular)"},{type:"multiple_choice",question:"ὁ αὐτὸς ἄνθρωπος means:",options:["The man himself","The same man","That man","This man"],answer:"The same man",explanation:"In ATTRIBUTIVE position (ὁ αὐτός), αὐτός means 'same'"},{type:"multiple_choice",question:"αὐτὸς ὁ ἄνθρωπος means:",options:["The man himself","The same man","That man","This man"],answer:"The man himself",explanation:"In PREDICATE position (αὐτὸς ὁ), αὐτός means 'himself'"},{type:"translate_to_english",question:"σήμερον means:",options:["Yesterday","Tomorrow","Today","Always"],answer:"Today",explanation:"σήμερον = 'today' — Luke 23:43: 'today you will be with me in paradise'"}],xpReward:40},
+      14:{id:14,world:3,title:"Deponent Verbs",objective:"Recognize and use deponent verbs — passive form, active meaning",theory:`DEPONENT VERBS have MIDDLE/PASSIVE FORMS but ACTIVE MEANINGS.\nKey deponents: ἔρχομαι, γίνομαι, δύναμαι, ἀποκρίνομαι, πορεύομαι`,vocabulary:[{greek:"ἔρχομαι",english:"I come / I go",example:"ἔρχομαι πρὸς σέ — I come to you"},{greek:"γίνομαι",english:"I become / I am",example:"γίνομαι δοῦλος — I become a servant"},{greek:"δύναμαι",english:"I am able / I can",example:"δύναμαι πάντα — I can do all things"},{greek:"ἀποκρίνομαι",english:"I answer",example:"ἀποκρίνομαι τῷ δικαστῇ — I answer the judge"},{greek:"πορεύομαι",english:"I go / I travel",example:"πορεύομαι εἰς τὴν κώμην — I go to the village"}],exercises:[{type:"multiple_choice",question:"A deponent verb has ___ forms but ___ meaning:",options:["Active forms, passive meaning","Passive/Middle forms, active meaning","Active forms, middle meaning","No forms at all"],answer:"Passive/Middle forms, active meaning",explanation:"Deponents look passive but mean something active — we translate them in active voice"},{type:"multiple_choice",question:"The 3rd person singular of ἔρχομαι is:",options:["ἔρχομαι","ἔρχῃ","ἔρχεται","ἔρχονται"],answer:"ἔρχεται",explanation:"ἔρχεται = 'he/she/it comes' (3rd singular deponent)"},{type:"multiple_choice",question:"δύναμαι means:",options:["I go","I become","I answer","I am able / I can"],answer:"I am able / I can",explanation:"δύναμαι = 'I am able'. Philippians 4:13 — 'I can do all things through Christ'"},{type:"multiple_choice",question:"What is the infinitive of ἔρχομαι?",options:["ἔρχειν","ἔρχεσθαι","ἐλθεῖν","ἔρχεσθε"],answer:"ἔρχεσθαι",explanation:"Deponent infinitives use the middle/passive form: ἔρχεσθαι = 'to come'"}],xpReward:40},
+      15:{id:15,world:3,title:"Interrogative & Indefinite Pronouns",objective:"Master τίς/τί and τις/τι",theory:`τίς/τί (WITH accent) = WHO? / WHAT?\nτις/τι (NO accent on first syllable) = SOMEONE / SOMETHING`,vocabulary:[{greek:"τίς / τί",english:"who? / what?",example:"τίς εἶ σύ; — Who are you?"},{greek:"τις / τι",english:"someone / something",example:"εἶδόν τινα — I saw someone"},{greek:"ποῦ",english:"where?",example:"ποῦ μένεις; — Where are you staying?"},{greek:"ἐκεῖ",english:"there",example:"ἐκεῖ ἐστιν — he is there"},{greek:"ὧδε",english:"here",example:"ὧδε μένω — I remain here"}],exercises:[{type:"multiple_choice",question:"τίς (with accent) means:",options:["Someone (indefinite)","Who? / What? (interrogative)","That (demonstrative)","He/She"],answer:"Who? / What? (interrogative)",explanation:"τίς WITH accent = interrogative pronoun. τις WITHOUT accent = indefinite pronoun"},{type:"multiple_choice",question:"The accusative singular of τίς (masc/fem) is:",options:["τίνος","τίνι","τίνα","τίνες"],answer:"τίνα",explanation:"τίνα = 'whom' or 'what' (accusative of τίς)"},{type:"multiple_choice",question:"εἶδόν τινα means:",options:["I saw who?","I saw someone","I saw that","I saw him"],answer:"I saw someone",explanation:"τινα (indefinite, no accent on first syllable) = 'someone'"},{type:"multiple_choice",question:"ποῦ means:",options:["When?","How?","Where?","Why?"],answer:"Where?",explanation:"ποῦ = 'where?' — John 1:38: 'Rabbi, ποῦ μένεις; — where are you staying?'"}],xpReward:40},
+      16:{id:16,world:4,title:"Liquid Verbs — μένω, κρίνω, αἴρω",objective:"Master the special behavior of liquid verbs in future and aorist",theory:`LIQUID VERBS have stems ending in λ, μ, ν, or ρ.\nThey behave differently in FUTURE and AORIST:\n\nFUTURE: Use -εσ- which contracts to give -ῶ, -εῖς, -εῖ...\nμένω → μενῶ, μενεῖς, μενεῖ, μενοῦμεν, μενεῖτε, μενοῦσι\n\nAORIST: No σ suffix; instead LENGTHEN the stem vowel:\nκρίνω → ἔκρινα (short ι stays, stem changes)\nαἴρω → ἦρα (αι- lengthens to η-)\n\nIMPERATIVES of liquid verbs:\nμένω: μένε (sg), μένετε (pl)\nκρίνω: κρῖνε (sg), κρίνετε (pl)\nαἴρω: αἶρε (sg), αἴρετε (pl)`,vocabulary:[{greek:"μνημονεύω",english:"I remember",example:"μνημονεύω τοῦ κυρίου — I remember the Lord"},{greek:"ὁμοῦ",english:"together",example:"ὁμοῦ ἦσαν — they were together"},{greek:"λίαν",english:"very much / greatly",example:"λίαν χαίρω — I rejoice greatly"},{greek:"πως",english:"somehow",example:"πως σωθήσεται — somehow he will be saved"},{greek:"φέρω",english:"I carry / I bear",example:"φέρω τὸν σταυρόν — I carry the cross"}],exercises:[{type:"multiple_choice",question:"Liquid verbs form the future by:",options:["Adding -σ- before endings","Using -εσ- which contracts, dropping σ","Adding -κ- before endings","Doubling the first consonant"],answer:"Using -εσ- which contracts, dropping σ",explanation:"Liquid futures: μένω → μενῶ (via μενε-σ-ω contraction losing σ)"},{type:"multiple_choice",question:"The future of μένω is:",options:["μένσω","μενῶ","ἔμεινα","μείνω"],answer:"μενῶ",explanation:"μενῶ = 'I will remain' (liquid future — contracted)"},{type:"multiple_choice",question:"The Aorist of αἴρω is:",options:["ἤρσα","ἦρα","αἰρῶ","ᾖρα"],answer:"ἦρα",explanation:"ἦρα = 'I took up / I raised' — liquid aorist with lengthened stem"},{type:"translate_to_english",question:"What does μνημονεύω mean?",options:["I forget","I remember","I meditate","I know"],answer:"I remember",explanation:"μνημονεύω = 'I remember' — root of 'mnemonics'"}],xpReward:45},
+      17:{id:17,world:4,title:"Perfect Tense",objective:"Understand the Greek Perfect tense — completed action with present results",theory:`The PERFECT TENSE describes a COMPLETED action whose RESULTS still exist.\nEnglish: \"I have believed\" = I believed (past) and still believe (now).\n\nFORMATION:\n1. REDUPLICATION: Double the first consonant + ε\n   πιστεύω → πε-πίστευ-κα\n2. PERFECT STEM: usually ends in -κ-\n3. PERFECT ENDINGS: -κα, -κας, -κε, -καμεν, -κατε, -κασι\n\nEXAMPLES from the document:\nπέμπω → πέπομφα (I have sent)\nἀπολύω → ἀπολέλυκα (I have released)\nἀποστέλλω → ἀπέσταλκα (I have sent forth)\nἄγω → ἦχα (I have led)\nφέρω → ἐνήνοχα (I have carried)\nἀκούω → ἀκήκοα (I have heard)`,vocabulary:[{greek:"ἀπολύω",english:"I release / dismiss",example:"ἀπολύω τοὺς δούλους — I release the servants"},{greek:"δουλεύω",english:"I serve",example:"δουλεύω τῷ κυρίῳ — I serve the Lord"},{greek:"θεραπεύω",english:"I heal",example:"θεραπεύω τοὺς ἀσθενεῖς — I heal the sick"},{greek:"ἰσχύω",english:"I am strong / able",example:"ἰσχύω πάντα — I am able to do all"},{greek:"ἀποστέλλω",english:"I send forth",example:"ἀποστέλλω ἄγγελον — I send an angel"}],exercises:[{type:"multiple_choice",question:"The Greek Perfect tense expresses:",options:["A simple past action","A completed action with ongoing results","A future action","A repeated past action"],answer:"A completed action with ongoing results",explanation:"Perfect = completed action whose effect is still felt now"},{type:"multiple_choice",question:"The Perfect of πιστεύω is:",options:["ἐπίστευσα","πιστεύσω","πεπίστευκα","ἐπιστεύθην"],answer:"πεπίστευκα",explanation:"πεπίστευκα = 'I have believed' — reduplication πε- + perfect stem + -κα"},{type:"multiple_choice",question:"How is reduplication formed?",options:["Add ε- to the beginning","Double the first consonant + add ε","Add -κ- before endings","Lengthen the stem vowel"],answer:"Double the first consonant + add ε",explanation:"Reduplication: π- from πιστεύω becomes πε-. So: πε-πίστευ-κα"},{type:"multiple_choice",question:"θεραπεύω means:",options:["I teach","I heal","I serve","I send"],answer:"I heal",explanation:"θεραπεύω = 'I heal' — root of 'therapy' and 'therapeutic'"}],xpReward:45},
+      18:{id:18,world:4,title:"Verb Conjugation — Send, Lead, Hear",objective:"Master the principal parts of key verbs: send, lead/carry, hear",theory:`SEND group — Present | Future | Aorist | Perfect:\nπέμπω (send)       | πέμψω    | ἔπεμψα  | πέπομφα\nἀπολύω (send away) | ἀπολύσω  | ἀπέλυσα | ἀπολέλυκα\nἀποστέλλω (send forth)|ἀποστελῶ|ἀπέστειλα|ἀπέσταλκα\n\nLEAD/CARRY group:\nἄγω (lead)    | ἄξω  | ἤγαγον | ἦχα\nφέρω (carry)  | οἴσω | ἤνεγκα | ἐνήνοχα\n\nHEAR:\nἀκούω (hear) | ἀκούσω | ἤκουσα | ἀκήκοα\n\nNote: φέρω uses SUPPLETIVE forms (different stems for different tenses) —\nvery like English 'go/went/gone'.`,vocabulary:[{greek:"ὅτι",english:"that / because",example:"λέγω ὅτι ἀλήθεια — I say that it is truth"},{greek:"ἀλλά",english:"but",example:"οὐ δοῦλος, ἀλλά υἱός — not a slave, but a son"},{greek:"γάρ",english:"for / because",example:"ἀγαπῶμεν, γὰρ αὐτὸς ἠγάπησεν — we love because he loved"},{greek:"πυρετός",english:"fever",example:"ἔχει πυρετόν — he has a fever"},{greek:"ἑπτά",english:"seven",example:"ἑπτὰ ἡμέρας — seven days"}],exercises:[{type:"multiple_choice",question:"The Aorist of ἄγω (I lead) is:",options:["ἦξα","ἤγαγον","ἦγον","ἄξω"],answer:"ἤγαγον",explanation:"ἤγαγον is the 2nd Aorist of ἄγω — 'I led'. It uses a different stem (second aorist)"},{type:"multiple_choice",question:"φέρω uses _____ forms — different stems for different tenses:",options:["Regular","Suppletive","Deponent","Liquid"],answer:"Suppletive",explanation:"φέρω: Present φέρω, Future οἴσω, Aorist ἤνεγκα — all from different roots!"},{type:"multiple_choice",question:"The Perfect of ἀκούω is:",options:["ἤκουσα","ἀκούσω","ἀκήκοα","ἠκούθην"],answer:"ἀκήκοα",explanation:"ἀκήκοα = 'I have heard' — note the double reduplication: ἀκ-ήκ-"},{type:"translate_to_english",question:"ὅτι means:",options:["When","Where","That / Because","But"],answer:"That / Because",explanation:"ὅτι introduces content clauses ('that') or gives a reason ('because')"}],xpReward:45},
+      19:{id:19,world:4,title:"Reading Greek — The Joseph Story",objective:"Read and comprehend a connected Greek narrative",theory:`In this lesson we read a simplified version of the Joseph story\nusing vocabulary from the Greek document.\n\nKEY WORDS for this narrative:\nἸωσήφ = Joseph | Ἰακώβ = Jacob | Ἰούδας = Judah\nΒενιαμίν = Benjamin | Ῥαχήλ = Rachel\nσῖτος = grain / wheat | κῆπος = garden | οἶνος = wine\nὀψάριον = fish | ποτήριον = cup | δεῖπνον = supper\nνεώτερος = younger | πάλαι = long ago / formerly\nἔτη = years | ἑπτά = seven\n\nGRAMMAR FOCUS: Notice how verbs agree with their subjects,\nand how word order can vary while meaning stays clear\nthrough case endings.`,vocabulary:[{greek:"σῖτος",english:"grain / wheat",example:"ὁ σῖτος — the grain"},{greek:"κῆπος",english:"garden",example:"ὁ κῆπος — the garden"},{greek:"οἶνος",english:"wine",example:"ὁ οἶνος — the wine"},{greek:"ποτήριον",english:"cup",example:"τὸ ποτήριον — the cup"},{greek:"δεῖπνον",english:"supper / dinner",example:"τὸ δεῖπνον — the supper"},{greek:"ἀρνίον",english:"lamb",example:"τὸ ἀρνίον — the lamb"},{greek:"σπήλαιον",english:"cave / den",example:"τὸ σπήλαιον — the cave"}],exercises:[{type:"translate_to_english",question:"What does σῖτος mean?",options:["Salt","Oil","Grain / Wheat","Water"],answer:"Grain / Wheat",explanation:"σῖτος = grain. In the Joseph story, he oversees the grain supply of Egypt"},{type:"translate_to_english",question:"What is Βενιαμίν?",options:["The Greek word for 'son'","The name Benjamin","A type of food","A place name"],answer:"The name Benjamin",explanation:"Βενιαμίν is the Greek transliteration of the Hebrew name Benjamin"},{type:"multiple_choice",question:"ἔτη means:",options:["Days","Months","Years","Hours"],answer:"Years",explanation:"ἔτη = 'years' (plural neuter noun)"},{type:"multiple_choice",question:"ποτήριον means:",options:["Plate","Cup","Table","Bread"],answer:"Cup",explanation:"ποτήριον = cup. Jesus used this word at the Last Supper: 'this cup (ποτήριον)'" }],xpReward:45},
+      20:{id:20,world:4,title:"Verb Analysis Practice",objective:"Confidently parse and translate Greek verb forms",theory:`COMPLETE VERB ANALYSIS — Practice these five forms:\n\nἠσθίετε:\n  Lexical: ἐσθίω | Imperfect Active Indicative | 2nd Plural\n  = \"You (pl.) were eating\"\n\nἐδουλεύσαμεν:\n  Lexical: δουλεύω | 1st Aorist Active Indicative | 1st Plural\n  = \"We served\"\n\nἤγαγον:\n  Lexical: ἄγω | 2nd Aorist Active Indicative | 3rd Plural or 1st Sg\n  = \"They led\" or \"I led\"\n\nλαμβάνειν:\n  Lexical: λαμβάνω | Present Active Infinitive | —\n  = \"To take / to receive\"\n\nεἶπον:\n  Lexical: λέγω | 2nd Aorist Active Indicative | 3rd Plural or 1st Sg\n  = \"They said\" or \"I said\"`,vocabulary:[{greek:"διδάσκαλος",english:"teacher",example:"ὁ διδάσκαλος — the teacher / Rabbi"},{greek:"συναγωγή",english:"synagogue",example:"ἐν τῇ συναγωγῇ — in the synagogue"},{greek:"ἀπέρχομαι",english:"I go away / depart",example:"ἀπέρχομαι εἰς τὴν κώμην — I depart to the village"},{greek:"πάλαι",english:"long ago / formerly",example:"πάλαι εἶπεν — he said long ago"},{greek:"ὁράω",english:"I see",example:"ὁράω τὸν υἱόν — I see the Son"}],exercises:[{type:"multiple_choice",question:"Parse ἐδουλεύσαμεν: What is the TENSE?",options:["Present","Imperfect","1st Aorist","Perfect"],answer:"1st Aorist",explanation:"ἐδουλεύσαμεν: augment ε + stem + σα + 1st pl ending = 1st Aorist Active"},{type:"multiple_choice",question:"λαμβάνειν is in which MOOD?",options:["Indicative","Imperative","Subjunctive","Infinitive"],answer:"Infinitive",explanation:"-ειν is the Present Active Infinitive ending in Greek"},{type:"multiple_choice",question:"εἶπον is the 2nd Aorist of which verb?",options:["εἰμί","λέγω","ἄγω","ὁράω"],answer:"λέγω",explanation:"εἶπον = 'I/they said' — 2nd aorist of λέγω, using a different stem"},{type:"translate_to_english",question:"ὁράω means:",options:["I hear","I speak","I see","I know"],answer:"I see",explanation:"ὁράω = 'I see' — it has an irregular aorist: εἶδον (I saw)"}],xpReward:50},
+      21:{id:21,world:5,title:"Declension of Adjectives — Full Tables",objective:"Decline Greek adjectives across all cases, genders, and numbers",theory:`FULL DECLENSION OF δίκαιος (righteous/just):\n\nMASCULINE:\nNom: δίκαιος / δίκαιοι\nGen: δικαίου / δικαίων\nDat: δικαίῳ / δικαίοις\nAcc: δίκαιον / δικαίους\nVoc: δίκαιε / δίκαιοι\n\nFEMININE:\nNom: δικαία / δίκαιαι\nGen: δικαίας / δικαίων\nDat: δικαίᾳ / δικαίαις\nAcc: δικαίαν / δικαίας\nVoc: δικαία / δίκαιαι\n\nNEUTER:\nNom: δίκαιον / δίκαια\nGen: δικαίου / δικαίων\nDat: δικαίῳ / δικαίοις\nAcc: δίκαιον / δίκαια\nVoc: δίκαιον / δίκαια`,vocabulary:[{greek:"διά",english:"through / because of",example:"διὰ πίστεως — through faith"},{greek:"ἐπιθυμία",english:"desire / lust",example:"ἐπιθυμία κακή — evil desire"},{greek:"συναγωγή",english:"synagogue",example:"ἐν τῇ συναγωγῇ διδάσκει — he teaches in the synagogue"},{greek:"πέμπω",english:"I send",example:"πέμπω τὸν ἄγγελον — I send the angel"},{greek:"φέρω",english:"I carry / I bear",example:"φέρω καρπόν — I bear fruit"}],exercises:[{type:"multiple_choice",question:"The MASCULINE ACCUSATIVE PLURAL of δίκαιος is:",options:["δίκαιοι","δίκαιον","δικαίους","δικαίοις"],answer:"δικαίους",explanation:"Masculine accusative plural = δικαίους (like 2nd declension nouns in -ους)"},{type:"multiple_choice",question:"The FEMININE DATIVE SINGULAR of δίκαιος is:",options:["δικαίᾳ","δικαίας","δικαίαν","δίκαιαι"],answer:"δικαίᾳ",explanation:"Feminine dative singular = δικαίᾳ (with iota subscript)"},{type:"multiple_choice",question:"The NEUTER NOMINATIVE PLURAL of δίκαιος is:",options:["δίκαια","δίκαιον","δικαίων","δίκαιοι"],answer:"δίκαια",explanation:"Neuter plural nominative and accusative are always the same: δίκαια"},{type:"multiple_choice",question:"What case is δικαίοις?",options:["Accusative","Genitive","Nominative","Dative"],answer:"Dative",explanation:"δικαίοις = dative plural (masculine or neuter) of δίκαιος"}],xpReward:50},
+      22:{id:22,world:5,title:"Imperative Mood — Commands",objective:"Form and use the Greek imperative mood for commands",theory:`The IMPERATIVE MOOD gives COMMANDS.\n\nPRESENT ACTIVE IMPERATIVE of πιστεύω:\n2nd Sg: πίστευε\n3rd Sg: πιστευέτω\n2nd Pl: πιστεύετε\n3rd Pl: πιστευέτωσαν\n\nFIRST AORIST IMPERATIVE of πιστεύω:\n2nd Sg: πίστευσον\n3rd Sg: πιστευσάτω\n2nd Pl: πιστεύσατε\n3rd Pl: πιστευσάτωσαν\n\nKEY DISTINCTION:\nPresent Imperative = CONTINUOUS command (keep doing it)\nAorist Imperative = SIMPLE/URGENT command (do it now)`,vocabulary:[{greek:"πίνω",english:"I drink",example:"πίνω ὕδωρ — I drink water"},{greek:"πέμπω",english:"I send",example:"πέμψον αὐτόν — Send him! (aorist imperative)"},{greek:"ἄγε",english:"Come! / Lead! (imperative of ἄγω)",example:"ἄγε ἡμᾶς — Lead us!"},{greek:"μένε",english:"Stay! / Remain! (imperative of μένω)",example:"μένε ὧδε — Stay here!"},{greek:"χαῖρε",english:"Rejoice! / Greetings! (imperative)",example:"χαῖρε, κύριε — Greetings, Lord!"}],exercises:[{type:"multiple_choice",question:"The Present Imperative implies:",options:["A one-time urgent action","A continuous / ongoing command","A past action","A possibility"],answer:"A continuous / ongoing command",explanation:"Present imperative = keep doing it. Aorist imperative = do it (once, urgently)"},{type:"multiple_choice",question:"2nd Person Plural Present Imperative of πιστεύω:",options:["πίστευε","πιστευέτω","πιστεύετε","πίστευσον"],answer:"πιστεύετε",explanation:"πιστεύετε = 'You all, believe!' (2nd plural present imperative)"},{type:"multiple_choice",question:"πίστευσον is the ___ Aorist ___ Singular Imperative:",options:["2nd Aorist / 2nd Person","1st Aorist / 2nd Person","Present / 3rd Person","Perfect / 2nd Person"],answer:"1st Aorist / 2nd Person",explanation:"πίστευσον = 1st Aorist 2nd Singular Imperative: 'Believe! (right now)'"},{type:"translate_to_english",question:"χαῖρε means:",options:["Believe!","Remain!","Rejoice! / Greetings!","Go!"],answer:"Rejoice! / Greetings!",explanation:"χαῖρε is the imperative of χαίρω used as a greeting — like 'Hail!' or 'Hello!'"}],xpReward:50},
+      23:{id:23,world:5,title:"Vocabulary Mastery — 100 Essential Words",objective:"Consolidate knowledge of the most important Koine Greek vocabulary",theory:`This lesson consolidates the high-frequency vocabulary you've\nlearned throughout the course. These words appear THOUSANDS of times\nin the Greek New Testament.\n\nVERBS (most common):\nεἰμί (I am) | ἔχω (I have) | λέγω (I say) | βλέπω (I see)\nἔρχομαι (I come) | ποιέω (I do/make) | ἀκούω (I hear) | πιστεύω (I believe)\nἀγαπάω (I love) | γινώσκω (I know) | ὁράω (I see) | λαμβάνω (I take)\n\nNOUNS (most common):\nθεός | κύριος | Ἰησοῦς | Χριστός | ἄνθρωπος | υἱός | πνεῦμα\nπατήρ | λόγος | ἀδελφός | ὁδός | ζωή | κόσμος | καρδία | ἀλήθεια\n\nPARTICLES & CONJUNCTIONS:\nκαί | δέ | ἀλλά | γάρ | ὅτι | εἰ | ἐάν | ἵνα | ὅτε | οὖν`,vocabulary:[{greek:"ἀγαπάω",english:"I love",example:"ἀγαπῶ τὸν θεόν — I love God"},{greek:"γινώσκω",english:"I know",example:"γινώσκω τὴν ἀλήθειαν — I know the truth"},{greek:"ζωή",english:"life",example:"ἔχω ζωήν — I have life"},{greek:"λόγος",english:"word",example:"ὁ λόγος τοῦ θεοῦ — the word of God"},{greek:"ὁδός",english:"way / road",example:"ἐγώ εἰμι ἡ ὁδός — I am the way"}],exercises:[{type:"translate_to_english",question:"ζωή means:",options:["Death","Life","Light","World"],answer:"Life",explanation:"ζωή = 'life' — John 14:6: 'I am the way, the truth, and the ζωή (life)'"},{type:"translate_to_english",question:"λόγος means:",options:["Word","Work","Law","Love"],answer:"Word",explanation:"λόγος = 'word' — John 1:1: 'In the beginning was the Word (λόγος)'"},{type:"translate_to_english",question:"γινώσκω means:",options:["I believe","I hope","I know","I see"],answer:"I know",explanation:"γινώσκω = 'I know' — root of English 'gnosis' (knowledge)"},{type:"translate_to_english",question:"ὁδός means:",options:["Truth","Life","Light","Way / Road"],answer:"Way / Road",explanation:"ὁδός = 'way' — Jesus said ἐγώ εἰμι ἡ ὁδός — 'I am the way'"}],xpReward:55},
+      24:{id:24,world:5,title:"Bringing It All Together — Reading Greek Texts",objective:"Apply all learned grammar to read and analyze real Greek sentences",theory:`You have now learned:\n✓ The complete Greek alphabet (24 letters)\n✓ All 5 cases and their functions\n✓ All 3 genders and the definite article\n✓ 7 vowels, 8 diphthongs, 3 accent marks\n✓ Present, Future, Imperfect, Aorist, Perfect tenses\n✓ Active, Middle, and Passive voices\n✓ All 6 moods (Indicative, Imperative, Subjunctive, etc.)\n✓ Regular, Liquid, Deponent, and Suppletive verbs\n✓ Adjective declension and agreement rules\n✓ Pronouns: Personal, Demonstrative, Interrogative, Indefinite\n✓ Key prepositions and their cases\n✓ 100+ essential vocabulary words\n\nFINAL CHALLENGE: You will analyze complete sentences and\nidentify every grammatical feature — the capstone of your\nKoine Greek foundation!`,vocabulary:[{greek:"ἀγάπη",english:"love",example:"ὁ θεὸς ἀγάπη ἐστίν — God is love"},{greek:"πίστις",english:"faith / belief",example:"διὰ πίστεως — through faith"},{greek:"χάρις",english:"grace",example:"χάρις καὶ εἰρήνη — grace and peace"},{greek:"εἰρήνη",english:"peace",example:"εἰρήνη ὑμῖν — peace to you"},{greek:"δόξα",english:"glory",example:"δόξα τῷ θεῷ — glory to God"}],exercises:[{type:"multiple_choice",question:"ἀγάπη means:",options:["Faith","Hope","Love","Grace"],answer:"Love",explanation:"ἀγάπη = 'love' — 1 Corinthians 13 is the great ἀγάπη chapter"},{type:"multiple_choice",question:"χάρις means:",options:["Peace","Grace","Glory","Truth"],answer:"Grace",explanation:"χάρις = 'grace' — root of 'charisma', 'charity'"},{type:"multiple_choice",question:"How many tenses have you studied in this course?",options:["3","4","5","6"],answer:"6",explanation:"Present, Imperfect, Future, Aorist (1st & 2nd), Perfect, Pluperfect — 6 tenses"},{type:"multiple_choice",question:"The Accusative case is used for:",options:["The subject","Possession","Indirect object","Direct object"],answer:"Direct object",explanation:"The Accusative = the direct object — what receives the action of the verb"}],xpReward:60}
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+      authDomain: "learn-basic-greek.firebaseapp.com",
+      projectId: "learn-basic-greek",
+      storageBucket: "learn-basic-greek.firebasestorage.app",
+      messagingSenderId: "628557836662",
+      appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+      measurementId: "G-6BYGXRJFT",
+      databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
+    };
+
+    let auth = null;
+    let db = null;
+
+    function initFirebase() {
+      if (!window.firebase) return false;
+      if (firebase.apps && firebase.apps.length === 0) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps) firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      return true;
+    }
+
+    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
+
+    function wireSignOut(user){
+      const link = document.getElementById('signOutLink');
+      if (!link) return;
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        localStorage.removeItem('gk_guest');
+        try{ if (user && auth) await auth.signOut(); }catch(_){}
+        location.href = 'index.html';
+      });
+    }
+
+    async function regenHeartsIfNeeded(userRef, userData) {
+      const now = Date.now();
+      const current = typeof userData.hearts === 'number' ? userData.hearts : 5;
+      const updatedAt = typeof userData.heartsUpdatedAt === 'number' ? userData.heartsUpdatedAt : now;
+      const regenEveryMs = 4 * 60 * 60 * 1000;
+      if (current >= 5) return current;
+      const gained = Math.floor((now - updatedAt) / regenEveryMs);
+      if (gained <= 0) return current;
+      const next = clamp(current + gained, 0, 5);
+      const nextUpdatedAt = updatedAt + gained * regenEveryMs;
+      await userRef.set({ hearts: next, heartsUpdatedAt: nextUpdatedAt }, { merge:true }).catch(()=>{});
+      return next;
+    }
+
+    function worldFromLesson(n){ return n<=5?1:n<=10?2:n<=15?3:n<=20?4:5; }
+
+    function computeUnlockedVocabCount(lessonsCompleted){
+      let count = 0;
+      for (let i=1;i<=lessonsCompleted;i++){
+        const v = (LESSON_DATA[i] && LESSON_DATA[i].vocabulary) || [];
+        count += v.length;
+      }
+      return count;
+    }
+
+    function uniqueVocabTotal(){
+      const set = new Set();
+      for (let i=1;i<=24;i++){
+        (LESSON_DATA[i].vocabulary || []).forEach(v => set.add(v.greek+'|'+v.english));
+      }
+      return set.size;
+    }
+
+    async function awardAchievementsIfNeeded(userRef, userData, context) {
+      const achievements = userData.achievements && typeof userData.achievements === 'object' ? userData.achievements : {};
+      const unlocked = [];
+      const streak = Number.isFinite(context.streak) ? context.streak : (Number.isFinite(userData.streak) ? userData.streak : 0);
+      const lessonsCompleted = Number.isFinite(context.lessonsCompleted) ? context.lessonsCompleted : (Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0);
+      const accuracy = Number.isFinite(context.accuracy) ? context.accuracy : null;
+      const friends = Array.isArray(userData.friends) ? userData.friends : [];
+      const inStudyRoom = !!context.inStudyRoom;
+      const unlockedVocab = computeUnlockedVocabCount(lessonsCompleted);
+      const totalVocab = uniqueVocabTotal();
+
+      function unlock(id) {
+        if (achievements[id]) return;
+        const a = ACHIEVEMENTS.find(x => x.id === id);
+        if (!a) return;
+        achievements[id] = true;
+        unlocked.push(a);
+      }
+
+      if (lessonsCompleted >= 1) unlock('firstSteps');
+      if (lessonsCompleted >= 5) unlock('lessons5');
+      if (lessonsCompleted >= 10) unlock('lessons10');
+      if (lessonsCompleted >= 24) unlock('lessons24');
+      if (streak >= 3) unlock('streak3');
+      if (streak >= 7) unlock('streak7');
+      if (streak >= 30) unlock('streak30');
+      if (accuracy != null && accuracy >= 90) unlock('accuracy90');
+      if (accuracy != null && accuracy >= 100) unlock('accuracy100');
+      if (friends.length >= 1) unlock('friends1');
+      if (inStudyRoom) unlock('studyRoom');
+      if (unlockedVocab >= 50) unlock('vocab50');
+      if (unlockedVocab >= totalVocab) unlock('vocab100');
+
+      if (!unlocked.length) return { unlocked: [], bonusXp: 0 };
+      const bonusXp = unlocked.reduce((s,a)=>s+(a.xp||0),0);
+      await userRef.set({ achievements }, { merge:true }).catch(()=>{});
+      return { unlocked, bonusXp };
+    }
+
+    function setCard(title, subtitle, bodyHtml) {
+      document.getElementById('card').classList.remove('correct','wrong');
+      document.getElementById('cardTitle').textContent = title;
+      document.getElementById('cardSub').textContent = subtitle || '';
+      document.getElementById('cardBody').innerHTML = bodyHtml || '';
+    }
+
+    function disableOptions(){
+      document.querySelectorAll('.opt').forEach(b => b.disabled = true);
+    }
+
+    async function initLesson(user) {
+      wireSignOut(user);
+
+      const lessonId = parseInt(qs('lesson') || '0', 10);
+      if (!lessonId || !LESSON_DATA[lessonId]) {
+        setCard("Lesson not found", "Return to the lesson map.", `<div class="btnRow"><a class="btn btnPrimary" href="lessons.html">Back to Lessons</a></div>`);
+        return;
+      }
+
+      const inRoom = !!qs('room');
+      const lesson = LESSON_DATA[lessonId];
+      document.title = `${lesson.title} • Learn Koine Greek`;
+      document.getElementById('pageTitle').textContent = `Lesson ${lessonId}`;
+      document.getElementById('pageSub').textContent = lesson.title;
+
+      let userData = { hearts:5, heartsUpdatedAt:Date.now(), xp:0, streak:0, lessonsCompleted:0, currentLesson:1, achievements:{} };
+      let userRef = null;
+
+      if (user) {
+        userRef = db.collection('users').doc(user.uid);
+        const snap = await userRef.get();
+        userData = snap.exists ? (snap.data() || userData) : userData;
+        userData.hearts = await regenHeartsIfNeeded(userRef, userData);
+        setTopUser(user, userData);
+      } else {
+        setTopUser(null, userData);
+      }
+
+      const currentLesson = Number.isFinite(userData.currentLesson) ? userData.currentLesson : 1;
+      const lessonsCompleted = Number.isFinite(userData.lessonsCompleted) ? userData.lessonsCompleted : 0;
+      const alreadyCompleted = lessonId <= lessonsCompleted;
+      const locked = lessonId > currentLesson && !alreadyCompleted;
+      if (locked) {
+        setCard("Locked Lesson 🔒", "Complete earlier lessons to unlock this one.", `<div class="btnRow"><a class="btn btnPrimary" href="lessons.html">Back to Lessons</a><a class="btn" href="lesson-player.html?lesson=${encodeURIComponent(currentLesson)}">Go to Next Lesson</a></div>`);
+        return;
+      }
+
+      // Lesson state
+      let hearts = clamp(Number.isFinite(userData.hearts) ? userData.hearts : 5, 0, 5);
+      let xpEarned = 0;
+      let correct = 0;
+      let answered = 0;
+      let phase = 'theory';
+      const exercises = shuffle(lesson.exercises || []);
+      let idx = 0;
+      const totalSteps = 1 + exercises.length + 1;
+
+      function updateHud() {
+        document.getElementById('xpEarned').textContent = String(xpEarned);
+        renderHearts(hearts);
+        const done = (phase === 'theory' ? 0 : 1) + answered + (phase === 'complete' ? 1 : 0);
+        setProgress(done, totalSteps);
+      }
+
+      function loseHeart() {
+        const prev = hearts;
+        hearts = clamp(hearts - 1, 0, 5);
+        renderHearts(hearts, true);
+        if (prev > 0 && hearts === 0) {
+          showModal("You’ve run out of hearts 💔", "Come back later (1 heart regenerates every 4 hours) or return to lessons.", [
+            { label:"Back to Lessons", primary:true, onClick:()=>location.href='lessons.html' },
+            { label:"Try again later", onClick:()=>location.href='dashboard.html' }
+          ]);
+        }
+      }
+
+      function markCard(ok) {
+        const c = document.getElementById('card');
+        c.classList.remove('correct','wrong');
+        void c.offsetWidth;
+        c.classList.add(ok ? 'correct' : 'wrong');
+      }
+
+      function showTheory() {
+        phase = 'theory';
+        updateHud();
+        const theoryHtml = `<div class="q">Objective: <span style="color:rgba(226,232,240,0.9)">${lesson.objective}</span></div>
+          <div class="theory">${lesson.theory.replace(/([Α-Ωα-ωάέήίόύώἄἅἆἇἁἂἃἈἉἊἋἌἍἎἏὁἡτόῷῇῳἸἰῆῶἀἔὄὦ]+)/g,'<span class="gr">$1</span>')}</div>
+          <div class="btnRow">
+            <button class="btn btnPrimary" id="gotItBtn" type="button">Got it! →</button>
+            <a class="btn" href="lessons.html">Back</a>
+          </div>`;
+        setCard(lesson.title, "Phase 1/3 • Theory", theoryHtml);
+        document.getElementById('gotItBtn').addEventListener('click', () => showExercise());
+      }
+
+      function showExercise() {
+        if (hearts <= 0) return;
+        if (idx >= exercises.length) return showComplete();
+        phase = 'exercise';
+        updateHud();
+        const ex = exercises[idx];
+
+        if (ex.type === 'sentence_builder') {
+          const pool = shuffle(ex.words || []);
+          const chosen = [];
+          const body = `
+            <div class="q">${ex.question}</div>
+            <div class="builderArea" id="builderArea">${chosen.length ? '' : '<span style="color:var(--tm);font-size:12px">Tap words below to build your answer…</span>'}</div>
+            <div class="pool" id="pool"></div>
+            <div class="btnRow">
+              <button class="btn btnPrimary" id="submitBtn" type="button">Submit</button>
+              <button class="btn" id="resetBtn" type="button">Reset</button>
+            </div>
+            <div class="explain" id="explain"></div>
+          `;
+          setCard(`Exercise ${idx+1}/${exercises.length}`, "Phase 2/3 • Sentence Builder", body);
+          const poolEl = document.getElementById('pool');
+          const builderEl = document.getElementById('builderArea');
+          const explainEl = document.getElementById('explain');
+
+          function renderBuilder() {
+            builderEl.innerHTML = '';
+            if (!chosen.length) builderEl.innerHTML = '<span style="color:var(--tm);font-size:12px">Tap words below to build your answer…</span>';
+            chosen.forEach((w, i) => {
+              const c = document.createElement('button');
+              c.className = 'chip gr';
+              c.type = 'button';
+              c.textContent = w;
+              c.title = 'Tap to remove';
+              c.addEventListener('click', () => { chosen.splice(i,1); renderBuilder(); renderPool(); });
+              builderEl.appendChild(c);
+            });
+          }
+          function renderPool() {
+            poolEl.innerHTML = '';
+            pool.forEach((w, i) => {
+              const isUsed = chosen.includes(w) && chosen.filter(x=>x===w).length >= (pool.filter(x=>x===w).length ? 1 : 1);
+              const c = document.createElement('button');
+              c.className = 'chip gr';
+              c.type = 'button';
+              c.textContent = w;
+              c.disabled = chosen.length >= pool.length || (chosen.join(' ').split(' ').length >= pool.length);
+              c.addEventListener('click', () => { chosen.push(w); renderBuilder(); });
+              poolEl.appendChild(c);
+            });
+          }
+          renderBuilder(); renderPool();
+
+          document.getElementById('resetBtn').addEventListener('click', () => { chosen.length = 0; explainEl.textContent = ''; renderBuilder(); });
+          document.getElementById('submitBtn').addEventListener('click', () => {
+            if (hearts <= 0) return;
+            const ok = JSON.stringify(chosen) === JSON.stringify(ex.answer || []);
+            answered++;
+            if (ok) { correct++; xpEarned += 5; flashXp(5); markCard(true); }
+            else { loseHeart(); markCard(false); }
+            explainEl.textContent = ex.explanation || '';
+            updateHud();
+            setTimeout(() => { idx++; showExercise(); }, 900);
+          });
+          return;
+        }
+
+        const isTranslate = ex.type === 'translate_to_english';
+        const prompt = isTranslate ? `<span class="gr">${ex.question}</span>` : ex.question;
+        const body = `
+          <div class="q">${prompt}</div>
+          <div class="opts" id="opts"></div>
+          <div class="explain" id="explain"></div>
+        `;
+        setCard(`Exercise ${idx+1}/${exercises.length}`, `Phase 2/3 • ${isTranslate ? 'Translate' : 'Multiple Choice'}`, body);
+        const optsEl = document.getElementById('opts');
+        const explainEl = document.getElementById('explain');
+        (ex.options || []).forEach((opt) => {
+          const b = document.createElement('button');
+          b.className = 'opt';
+          b.type = 'button';
+          b.textContent = opt;
+          b.addEventListener('click', () => {
+            if (hearts <= 0) return;
+            disableOptions();
+            const ok = opt === ex.answer;
+            answered++;
+            if (ok) {
+              correct++;
+              xpEarned += 5;
+              b.classList.add('good');
+              flashXp(5);
+              markCard(true);
+            } else {
+              b.classList.add('bad');
+              loseHeart();
+              markCard(false);
+              [...optsEl.children].forEach(ch => { if (ch.textContent === ex.answer) ch.classList.add('good'); });
+            }
+            explainEl.textContent = ex.explanation || '';
+            updateHud();
+            setTimeout(() => { idx++; showExercise(); }, 900);
+          });
+          optsEl.appendChild(b);
+        });
+      }
+
+      async function showComplete() {
+        phase = 'complete';
+        const accuracy = exercises.length ? Math.round((correct/exercises.length)*100) : 0;
+        const baseReward = Number.isFinite(lesson.xpReward) ? lesson.xpReward : 0;
+        const lessonXp = baseReward + xpEarned;
+        const multiplier = inRoom ? 1.1 : 1.0;
+        const finalXp = Math.round(lessonXp * multiplier);
+        updateHud();
+        setProgress(totalSteps, totalSteps);
+
+        spawnConfetti();
+        const newWords = (lesson.vocabulary || []).length;
+        const body = `
+          <div style="margin-top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+            <div style="border:1px solid var(--border);border-radius:18px;padding:10px;background:rgba(255,255,255,0.02)">
+              <div style="color:var(--tm);font-size:12px">XP earned</div>
+              <div style="font-weight:900;color:var(--tw);font-size:18px;margin-top:4px">+${finalXp}</div>
+              ${inRoom ? `<div style="color:rgba(226,232,240,0.8);font-size:11px;margin-top:4px">Study room bonus: +10%</div>` : ``}
+            </div>
+            <div style="border:1px solid var(--border);border-radius:18px;padding:10px;background:rgba(255,255,255,0.02)">
+              <div style="color:var(--tm);font-size:12px">Accuracy</div>
+              <div style="font-weight:900;color:var(--tw);font-size:18px;margin-top:4px">${accuracy}%</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:18px;padding:10px;background:rgba(255,255,255,0.02)">
+              <div style="color:var(--tm);font-size:12px">New words</div>
+              <div style="font-weight:900;color:var(--tw);font-size:18px;margin-top:4px">${newWords}</div>
+            </div>
+          </div>
+          <div class="btnRow">
+            <a class="btn btnPrimary" id="nextBtn" href="lesson-player.html?lesson=${encodeURIComponent(Math.min(24, lessonId+1))}">Continue to next lesson →</a>
+            <button class="btn" id="reviewBtn" type="button">Review lesson</button>
+            <a class="btn" href="lessons.html">Back to map</a>
+          </div>
+        `;
+        setCard("Lesson Complete! 🎉", "Phase 3/3 • Summary", body);
+        document.getElementById('reviewBtn').addEventListener('click', () => { idx = 0; answered = 0; correct = 0; xpEarned = 0; showTheory(); });
+
+        if (!user) {
+          showModal("Save your progress?", "You finished a lesson as a guest. Sign in with Google to save XP, streaks, and friends.", [
+            { label:"Sign in", primary:true, onClick:()=>location.href='index.html' },
+            { label:"Not now", onClick:()=>{} }
+          ]);
+          return;
+        }
+
+        // Persist completion once.
+        const userRef = db.collection('users').doc(user.uid);
+        const progRef = userRef.collection('progress').doc(String(lessonId));
+
+        try {
+          await db.runTransaction(async (tx) => {
+            const [uSnap, pSnap] = await Promise.all([tx.get(userRef), tx.get(progRef)]);
+            const u = uSnap.exists ? (uSnap.data() || {}) : {};
+            const already = pSnap.exists && (pSnap.data() || {}).completed;
+            const nowTs = firebase.firestore.Timestamp.now();
+
+            // Update hearts state after lesson.
+            tx.set(userRef, { hearts: hearts, heartsUpdatedAt: Date.now() }, { merge:true });
+
+            if (!already) {
+              const prevXp = Number.isFinite(u.xp) ? u.xp : 0;
+              const prevLessons = Number.isFinite(u.lessonsCompleted) ? u.lessonsCompleted : 0;
+              const prevStreak = Number.isFinite(u.streak) ? u.streak : 0;
+              const prevLast = u.lastActiveDate || '';
+              const today = new Date().toISOString().split('T')[0];
+              const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
+
+              let nextStreak = prevStreak;
+              if (prevLast !== today) {
+                nextStreak = prevLast === yesterday ? (prevStreak + 1) : 1;
+              }
+
+              const nextLessons = Math.min(24, Math.max(prevLessons, lessonId));
+              const nextCurrentLesson = Math.min(24, Math.max(Number.isFinite(u.currentLesson) ? u.currentLesson : 1, lessonId + 1));
+              const nextWorld = worldFromLesson(nextCurrentLesson);
+
+              const newXp = prevXp + finalXp;
+              const lvl = calcLevel(newXp);
+
+              tx.set(progRef, {
+                lessonId,
+                completed:true,
+                score: accuracy,
+                completedAt: nowTs,
+                xpEarned: finalXp,
+                accuracy
+              }, { merge:true });
+
+              tx.set(userRef, {
+                xp: newXp,
+                level: lvl.level,
+                rank: lvl.title,
+                lessonsCompleted: nextLessons,
+                currentLesson: nextCurrentLesson,
+                currentWorld: nextWorld,
+                streak: nextStreak,
+                lastActiveDate: today
+              }, { merge:true });
+
+              // Activity record
+              const actRef = userRef.collection('activity').doc();
+              tx.set(actRef, {
+                type: "lesson",
+                description: `Completed Lesson ${lessonId}: ${lesson.title}`,
+                xpEarned: finalXp,
+                timestamp: nowTs
+              });
+
+              // Leaderboard row
+              const lbRef = db.collection('leaderboard').doc(user.uid);
+              tx.set(lbRef, {
+                displayName: u.displayName || user.displayName || user.email || "Scholar",
+                photoURL: u.photoURL || user.photoURL || "",
+                xp: newXp,
+                streak: nextStreak,
+                level: lvl.level,
+                rank: lvl.title
+              }, { merge:true });
+            }
+          });
+
+          // Award achievements (outside transaction for simplicity)
+          const uSnap2 = await userRef.get();
+          const u2 = uSnap2.exists ? (uSnap2.data() || {}) : {};
+          const computedLessons = Math.min(24, Math.max(Number.isFinite(u2.lessonsCompleted) ? u2.lessonsCompleted : 0, lessonId));
+          const computedStreak = Number.isFinite(u2.streak) ? u2.streak : 0;
+          const award = await awardAchievementsIfNeeded(userRef, u2, { lessonsCompleted: computedLessons, streak: computedStreak, accuracy, inStudyRoom: inRoom });
+          if (award.unlocked.length) {
+            for (const a of award.unlocked) showAchievementPop(a);
+            if (award.bonusXp) {
+              await userRef.set({ xp: firebase.firestore.FieldValue.increment(award.bonusXp) }, { merge:true }).catch(()=>{});
+              showToast(`Achievement bonus: +${award.bonusXp} XP`, "good", "Bonus XP");
+            }
+          }
+        } catch (e) {
+          console.error(e);
+          showToast("Could not save lesson completion. Try again later.", "bad", "Save failed");
+        }
+      }
+
+      // Initial render
+      updateHud();
+      showTheory();
+    }
+
+    const isGuestAllowed = true;
+
+    (function boot(){
+      const ok = initFirebase();
+      if (!ok) {
+        showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase");
+        initLesson(null);
+        return;
+      }
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user && !isGuestAllowed && !isGuest()) {
+          window.location.href = 'index.html';
+          return;
+        }
+        if (!user && isGuest()) initLesson(null);
+        else initLesson(user);
+      });
+    })();
+  </script>
+</body>
+</html>

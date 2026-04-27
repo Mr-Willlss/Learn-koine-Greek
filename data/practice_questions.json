@@ -1,0 +1,81 @@
+{
+  "source": "greek_practice_answers-1.docx",
+  "count": 15,
+  "questions": [
+    {
+      "id": 1,
+      "title": "Write all the Greek Alphabets",
+      "answerText": "#\nUppercase\nLowercase\nName\nTransliteration\n1\nΑ\nα\nAlpha\na\n2\nΒ\nβ\nBeta\nb\n3\nΓ\nγ\nGamma\ng\n4\nΔ\nδ\nDelta\nd\n5\nΕ\nε\nEpsilon\ne (short)\n6\nΖ\nζ\nZeta\nz\n7\nΗ\nη\nEta\nē (long)\n8\nΘ\nθ\nTheta\nth\n9\nΙ\nι\nIota\ni\n10\nΚ\nκ\nKappa\nk\n11\nΛ\nλ\nLambda\nl\n12\nΜ\nμ\nMu\nm\n13\nΝ\nν\nNu\nn\n14\nΞ\nξ\nXi\nx\n15\nΟ\nο\nOmicron\no (short)\n16\nΠ\nπ\nPi\np\n17\nΡ\nρ\nRho\nr\n18\nΣ\nσ/ς\nSigma\ns\n19\nΤ\nτ\nTau\nt\n20\nΥ\nυ\nUpsilon\nu/y\n21\nΦ\nφ\nPhi\nph\n22\nΧ\nχ\nChi\nch\n23\nΨ\nψ\nPsi\nps\n24\nΩ\nω\nOmega\nō (long)"
+    },
+    {
+      "id": 2,
+      "title": "Cases We Have in Greek",
+      "answerText": "There are five (5) cases in Greek:\nNominative — the subject of the sentence\nGenitive — shows possession ('of')\nDative — the indirect object ('to/for')\nAccusative — the direct object\nVocative — used for direct address"
+    },
+    {
+      "id": 3,
+      "title": "Genders in Greek",
+      "answerText": "There are three (3) genders in Greek:\nMasculine\nFeminine\nNeuter"
+    },
+    {
+      "id": 4,
+      "title": "Five Things to Look for When Analyzing a Greek Verb",
+      "answerText": "Person — 1st, 2nd, or 3rd\nNumber — Singular or Plural\nTense — Present, Imperfect, Future, Aorist, Perfect, Pluperfect\nVoice — Active, Middle, or Passive\nMood — Indicative, Subjunctive, Optative, Imperative, Infinitive, Participle"
+    },
+    {
+      "id": 5,
+      "title": "Greek Vowels",
+      "answerText": "There are seven (7) vowels in Greek:\nα, ε, η, ι, ο, υ, ω\nShort vowels: ε, ο (always short); α, ι, υ (can be short)\nLong vowels: η, ω (always long); α, ι, υ (can be long)"
+    },
+    {
+      "id": 6,
+      "title": "Diphthongs",
+      "answerText": "Definition: A diphthong is the combination of two vowels that are pronounced together as a single sound.\nGreek Diphthongs:\nDiphthong\nSound / Pronunciation\nαι\nlike 'aisle'\nει\nlike 'eight'\nοι\nlike 'oil'\nυι\nlike 'we'\nαυ\nlike 'now'\nευ\nlike 'feud'\nου\nlike 'food'\nηυ\nrare; long eu sound"
+    },
+    {
+      "id": 7,
+      "title": "Three Kinds of Accents in Greek",
+      "answerText": "Acute ( ΄ ) — ὀξεῖα — can appear on any of the last three syllables (e.g., ἄνθρωπος)\nGrave ( ` ) — βαρεῖα — replaces an acute on the final syllable when followed by another word (e.g., καλὸς ἄνθρωπος)\nCircumflex ( ͂ ) — περισπωμένη — appears only on long syllables; only on the last two syllables (e.g., δοῦλος)"
+    },
+    {
+      "id": 8,
+      "title": "English Meanings of Greek Words",
+      "answerText": "Greek Word\nEnglish Meaning\nἀδελφός\nbrother\nἄνθρωπος\nman / human being\nβλέπω\nI see / I look\nἔχω\nI have\nκαί\nand / also / even\nλέγω\nI say / I speak\nχαῖρε\nrejoice / greetings\nἄρτος\nbread\nἐσθίω\nI eat\nκαρπός\nfruit\nπιστεύω\nI believe\nφέρω\nI carry / I bear\nἀπό\nfrom / away from\nἀρνίον\nlamb\nγάρ\nfor / because\nδεῖπνον\nsupper / dinner\nδοῦλος\nslave / servant\nεἰς\ninto / to\nἐκ\nout of / from\nἐν\nin / among\nκαλός\ngood / beautiful\nἀλλά\nbut\nδίκαιος\nrighteous / just\nδωρεά\ngift\nἐλεύθερος\nfree\nἐπιθυμία\ndesire / lust\nκαρδία\nheart\nἴδιος\none's own\nπαρρησία\nboldness / confidence\nμακάριος\nblessed / happy\nοὐκέτι\nno longer\nχρεία\nneed / necessity\nκόσμος\nworld\nνῦν\nnow\nπάντοτε\nalways\nσύν\nwith\nκῆπος\ngarden\nοἶκος\nhouse\nοἶνος\nwine\nὀψάριον\nfish\nπέμπω\nI send\nπίνω\nI drink\nποτήριον\ncup\nτέκνον\nchild\nἀπολύω\nI release / dismiss\nδουλεύω\nI serve\nθεραπεύω\nI heal\nἰσχύω\nI am strong / able\nκακός\nbad / evil\nὅτι\nthat / because\nπυρετός\nfever\nἄγγελος\nangel / messenger\nεἰμί\nI am\nἐλπίζω\nI hope\nθέλω\nI wish / I want\nμικρός\nsmall / little\nμνημονεύω\nI remember\nὁμοῦ\ntogether\nὅτε\nwhen\nπάλιν\nagain\nτότε\nthen\nἀκούω\nI hear\nγεωργός\nfarmer\nμετά\nwith / after\nπερί\nabout / concerning\nσήμερον\ntoday\nσκοτία\ndarkness\nἀλήθεια\ntruth\nκώμη\nvillage\nπλοῦτος\nwealth / riches\nπως\nsomehow\nσπήλαιον\ncave / den\nἄγω\nI lead / I bring\nἀποθνήσκω\nI die\nλαμβάνω\nI take / I receive\nθεός\nGod\nυἱός\nson\nφόβος\nfear\nτίς/τί\nwho? / what? (interrogative)\nτις/τι\nsomeone / something (indefinite)\nἑπτά\nseven\nἔρχομαι\nI come / I go\nἔτη\nyears\nἸωσήφ\nJoseph\nὁράω\nI see\nσῖτος\ngrain / wheat\nσυνάγω\nI gather together\nαὔριον\ntomorrow\nγλῶσσα\ntongue / language\nἐχθές\nyesterday\nδιά\nthrough / because of\nδιδάσκαλος\nteacher\nδιδάσκω\nI teach\nδύναμαι\nI am able / I can\nλίαν\nvery much / greatly\nμανθάνω\nI learn\nποῦ\nwhere?\nἐκεῖ\nthere\nὧδε\nhere\nσυναγωγή\nsynagogue\nἀπέρχομαι\nI go away / depart\nΒενιαμίν\nBenjamin\nνεώτερος\nyounger\nἸακώβ\nJacob\nἸούδας\nJudas / Judah\nῬαχήλ\nRachel\nπάλαι\nlong ago / formerly"
+    },
+    {
+      "id": 9,
+      "title": "Conjugate πιστεύω (BELIEVE)",
+      "answerText": "A. Present Active Indicative\nPerson\nSingular\nEnglish\nPlural\nEnglish\n1st\nπιστεύω\nI believe\nπιστεύομεν\nWe believe\n2nd\nπιστεύεις\nYou believe\nπιστεύετε\nYou (pl.) believe\n3rd\nπιστεύει\nHe/She/It believes\nπιστεύουσι(ν)\nThey believe\nB. Present Active Imperative\nPerson\nSingular\nPlural\n2nd\nπίστευε (Believe!)\nπιστεύετε (Believe!)\n3rd\nπιστευέτω (Let him/her believe)\nπιστευέτωσαν (Let them believe)\nC. Future Active Indicative\nPerson\nSingular\nPlural\n1st\nπιστεύσω\nπιστεύσομεν\n2nd\nπιστεύσεις\nπιστεύσετε\n3rd\nπιστεύσει\nπιστεύσουσι(ν)\nD. First Aorist Active Indicative\nPerson\nSingular\nPlural\n1st\nἐπίστευσα\nἐπιστεύσαμεν\n2nd\nἐπίστευσας\nἐπιστεύσατε\n3rd\nἐπίστευσε(ν)\nἐπίστευσαν\nE. First Aorist Active Imperative\nPerson\nSingular\nPlural\n2nd\nπίστευσον\nπιστεύσατε\n3rd\nπιστευσάτω\nπιστευσάτωσαν"
+    },
+    {
+      "id": 10,
+      "title": "Declension of Greek Words",
+      "answerText": "A. δίκαιος — RIGHTEOUS / JUST\nCase\nMasc. Sg\nMasc. Pl\nFem. Sg\nFem. Pl\nNeut. Sg\nNeut. Pl\nNom.\nδίκαιος\nδίκαιοι\nδικαία\nδίκαιαι\nδίκαιον\nδίκαια\nGen.\nδικαίου\nδικαίων\nδικαίας\nδικαίων\nδικαίου\nδικαίων\nDat.\nδικαίῳ\nδικαίοις\nδικαίᾳ\nδικαίαις\nδικαίῳ\nδικαίοις\nAcc.\nδίκαιον\nδικαίους\nδικαίαν\nδικαίας\nδίκαιον\nδίκαια\nVoc.\nδίκαιε\nδίκαιοι\nδικαία\nδίκαιαι\nδίκαιον\nδίκαια\nB. οὗτος — THIS\nCase\nMasc. Sg\nMasc. Pl\nFem. Sg\nFem. Pl\nNeut. Sg\nNeut. Pl\nNom.\nοὗτος\nοὗτοι\nαὕτη\nαὗται\nτοῦτο\nταῦτα\nGen.\nτούτου\nτούτων\nταύτης\nτούτων\nτούτου\nτούτων\nDat.\nτούτῳ\nτούτοις\nταύτῃ\nταύταις\nτούτῳ\nτούτοις\nAcc.\nτοῦτον\nτούτους\nταύτην\nταύτας\nτοῦτο\nταῦτα\nC. ἐκεῖνος — THAT\nCase\nMasc. Sg\nMasc. Pl\nFem. Sg\nFem. Pl\nNeut. Sg\nNeut. Pl\nNom.\nἐκεῖνος\nἐκεῖνοι\nἐκείνη\nἐκεῖναι\nἐκεῖνο\nἐκεῖνα\nGen.\nἐκείνου\nἐκείνων\nἐκείνης\nἐκείνων\nἐκείνου\nἐκείνων\nDat.\nἐκείνῳ\nἐκείνοις\nἐκείνῃ\nἐκείναις\nἐκείνῳ\nἐκείνοις\nAcc.\nἐκεῖνον\nἐκείνους\nἐκείνην\nἐκείνας\nἐκεῖνο\nἐκεῖνα\nD. αὐτός — HE / SHE / IT / SAME\nCase\nMasc. Sg\nMasc. Pl\nFem. Sg\nFem. Pl\nNeut. Sg\nNeut. Pl\nNom.\nαὐτός\nαὐτοί\nαὐτή\nαὐταί\nαὐτό\nαὐτά\nGen.\nαὐτοῦ\nαὐτῶν\nαὐτῆς\nαὐτῶν\nαὐτοῦ\nαὐτῶν\nDat.\nαὐτῷ\nαὐτοῖς\nαὐτῇ\nαὐταῖς\nαὐτῷ\nαὐτοῖς\nAcc.\nαὐτόν\nαὐτούς\nαὐτήν\nαὐτάς\nαὐτό\nαὐτά"
+    },
+    {
+      "id": 11,
+      "title": "Liquid Verbs",
+      "answerText": "A. Definition\nLiquid verbs are verbs whose stem ends in a liquid consonant: λ, μ, ν, or ρ. They form their future tense by adding -εσ- (which then contracts), and their aorist without the typical σ suffix, instead lengthening the stem vowel.\nB. Three Examples: μένω, κρίνω, αἴρω\ni. μένω (I remain / I stay)\nPresent Active Indicative:\nPerson\nSingular\nPlural\n1st\nμένω\nμένομεν\n2nd\nμένεις\nμένετε\n3rd\nμένει\nμένουσι(ν)\nPresent Active Imperative:\nPerson\nSingular\nPlural\n2nd\nμένε\nμένετε\n3rd\nμενέτω\nμενέτωσαν\nPresent Active Infinitive: μένειν\nii. κρίνω (I judge)\nPresent Active Indicative:\nPerson\nSingular\nPlural\n1st\nκρίνω\nκρίνομεν\n2nd\nκρίνεις\nκρίνετε\n3rd\nκρίνει\nκρίνουσι(ν)\nPresent Active Imperative:\nPerson\nSingular\nPlural\n2nd\nκρῖνε\nκρίνετε\n3rd\nκρινέτω\nκρινέτωσαν\nPresent Active Infinitive: κρίνειν\niii. αἴρω (I take up / I raise)\nPresent Active Indicative:\nPerson\nSingular\nPlural\n1st\nαἴρω\nαἴρομεν\n2nd\nαἴρεις\nαἴρετε\n3rd\nαἴρει\nαἴρουσι(ν)\nPresent Active Imperative:\nPerson\nSingular\nPlural\n2nd\nαἶρε\nαἴρετε\n3rd\nαἰρέτω\nαἰρέτωσαν\nPresent Active Infinitive: αἴρειν"
+    },
+    {
+      "id": 12,
+      "title": "Decline Interrogative & Indefinite Pronouns",
+      "answerText": "A. τίς / τί — WHO? / WHICH? / WHAT? (Interrogative)\nCase\nMasc./Fem. Sg\nMasc./Fem. Pl\nNeut. Sg\nNeut. Pl\nNom.\nτίς\nτίνες\nτί\nτίνα\nGen.\nτίνος\nτίνων\nτίνος\nτίνων\nDat.\nτίνι\nτίσι(ν)\nτίνι\nτίσι(ν)\nAcc.\nτίνα\nτίνας\nτί\nτίνα\nB. τις / τι — SOMEONE / SOMETHING / ANYONE (Indefinite)\nCase\nMasc./Fem. Sg\nMasc./Fem. Pl\nNeut. Sg\nNeut. Pl\nNom.\nτις\nτινές\nτι\nτινά\nGen.\nτινός\nτινῶν\nτινός\nτινῶν\nDat.\nτινί\nτισί(ν)\nτινί\nτισί(ν)\nAcc.\nτινά\nτινάς\nτι\nτινά"
+    },
+    {
+      "id": 13,
+      "title": "Deponent Verbs",
+      "answerText": "Definition\nDeponent verbs are verbs that have Middle or Passive forms but carry Active meanings. They have no active voice forms, yet they are translated actively in English.\nFive Examples with Conjugations\n1. ἔρχομαι — I come / I go\nIndicative (Present Middle/Passive):\nPerson\nSingular\nPlural\n1st\nἔρχομαι\nἐρχόμεθα\n2nd\nἔρχῃ\nἔρχεσθε\n3rd\nἔρχεται\nἔρχονται\nImperative:\nPerson\nSingular\nPlural\n2nd\nἔρχου\nἔρχεσθε\n3rd\nἐρχέσθω\nἐρχέσθωσαν\nInfinitive: ἔρχεσθαι\n2. γίνομαι — I become / I am\nIndicative:\nPerson\nSingular\nPlural\n1st\nγίνομαι\nγινόμεθα\n2nd\nγίνῃ\nγίνεσθε\n3rd\nγίνεται\nγίνονται\nImperative:\nPerson\nSingular\nPlural\n2nd\nγίνου\nγίνεσθε\n3rd\nγινέσθω\nγινέσθωσαν\nInfinitive: γίνεσθαι\n3. δύναμαι — I am able / I can\nIndicative:\nPerson\nSingular\nPlural\n1st\nδύναμαι\nδυνάμεθα\n2nd\nδύνασαι\nδύνασθε\n3rd\nδύναται\nδύνανται\nImperative:\nPerson\nSingular\nPlural\n2nd\nδύνασο\nδύνασθε\n3rd\nδυνάσθω\nδυνάσθωσαν\nInfinitive: δύνασθαι\n4. ἀποκρίνομαι — I answer\nIndicative:\nPerson\nSingular\nPlural\n1st\nἀποκρίνομαι\nἀποκρινόμεθα\n2nd\nἀποκρίνῃ\nἀποκρίνεσθε\n3rd\nἀποκρίνεται\nἀποκρίνονται\nImperative:\nPerson\nSingular\nPlural\n2nd\nἀποκρίνου\nἀποκρίνεσθε\n3rd\nἀποκρινέσθω\nἀποκρινέσθωσαν\nInfinitive: ἀποκρίνεσθαι\n5. πορεύομαι — I go / I travel\nIndicative:\nPerson\nSingular\nPlural\n1st\nπορεύομαι\nπορευόμεθα\n2nd\nπορεύῃ\nπορεύεσθε\n3rd\nπορεύεται\nπορεύονται\nImperative:\nPerson\nSingular\nPlural\n2nd\nπορεύου\nπορεύεσθε\n3rd\nπορευέσθω\nπορευέσθωσαν\nInfinitive: πορεύεσθαι"
+    },
+    {
+      "id": 14,
+      "title": "Conjugate Greek Verbs in Present, Future, Aorist & Perfect",
+      "answerText": "i. SEND / SEND AWAY / SEND FORTH\nTense\nπέμπω (Send)\nἀπολύω (Send Away)\nἀποστέλλω (Send Forth)\nPresent\nπέμπω\nἀπολύω\nἀποστέλλω\nFuture\nπέμψω\nἀπολύσω\nἀποστελῶ\nAorist\nἔπεμψα\nἀπέλυσα\nἀπέστειλα\nPerfect\nπέπομφα\nἀπολέλυκα\nἀπέσταλκα\nii. LEAD / BRING\nTense\nἄγω (Lead)\nφέρω (Bring/Carry)\nPresent\nἄγω\nφέρω\nFuture\nἄξω\nοἴσω\nAorist\nἤγαγον\nἤνεγκα\nPerfect\nἦχα\nἐνήνοχα\niii. HEAR / LISTEN\nTense\nἀκούω (Hear / Listen)\nPresent\nἀκούω\nFuture\nἀκούσω\nAorist\nἤκουσα\nPerfect\nἀκήκοα"
+    },
+    {
+      "id": 15,
+      "title": "Analyze the Greek Words",
+      "answerText": "Word\nLexical Form\nTense\nVoice\nMood\nPerson\nNumber\nTranslation\nἠσθίετε\nἐσθίω\nImperfect\nActive\nIndicative\n2nd\nPlural\nYou (pl) were eating\nἐδουλεύσαμεν\nδουλεύω\n1st Aorist\nActive\nIndicative\n1st\nPlural\nWe served\nἤγαγον\nἄγω\n2nd Aorist\nActive\nIndicative\n3rd/1st\nPl. or Sg.\nThey led / I led\nλαμβάνειν\nλαμβάνω\nPresent\nActive\nInfinitive\n—\nTo take / to receive\nεἶπον\nλέγω\n2nd Aorist\nActive\nIndicative\n3rd/1st\nPl. or Sg.\nThey said / I said\n— END OF ANSWERS —"
+    }
+  ]
+}

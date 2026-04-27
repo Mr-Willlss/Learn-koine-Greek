@@ -2,40 +2,352 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0b0f1a" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Learn Koine Greek</title>
-  <link rel="manifest" href="manifest.json?v=202604222" />
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/icon-192.png?v=202604222" />
-  <link rel="apple-touch-icon" href="assets/images/icon-192.png?v=202604222" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
-  <script src="app-version.js?v=202604222"></script>
-  <link rel="stylesheet" href="start.css?v=202604222" />
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--green2:#16a34a;--orange:#f97316;--gold:#eab308;--gold2:#ca8a04;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;
+      --t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+      background:var(--bg-base);
+      color:var(--ts);
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+    button{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+
+    .wrap{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding:28px 16px;
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+    }
+    .bgGlow{
+      position:absolute;inset:-40%;
+      background:
+        radial-gradient(900px 520px at 20% 20%, rgba(124,92,252,0.22), transparent 60%),
+        radial-gradient(900px 520px at 80% 30%, rgba(59,130,246,0.18), transparent 60%),
+        radial-gradient(900px 520px at 40% 90%, rgba(34,197,94,0.12), transparent 60%);
+      filter:blur(10px);
+      z-index:-2;
+    }
+    .floatLayer{position:absolute;inset:0;z-index:-1;pointer-events:none}
+    .floatLetter{
+      position:absolute;
+      left:calc(var(--x) * 1%);
+      bottom:-12vh;
+      font-family:'Times New Roman',Georgia,serif;
+      font-weight:800;
+      font-size:clamp(22px, 5vw, 44px);
+      color:rgba(226,232,240,var(--o));
+      transform:translate3d(0,0,0);
+      animation:floatUp var(--d) linear infinite;
+      filter:blur(0.2px);
+      user-select:none;
+      text-shadow:0 18px 60px rgba(0,0,0,0.55);
+    }
+    @keyframes floatUp{
+      0%{transform:translate3d(0,0,0) rotate(calc(var(--r) * 1deg))}
+      100%{transform:translate3d(calc(var(--dx) * 1px), -140vh, 0) rotate(calc((var(--r) + 16) * 1deg))}
+    }
+
+    .card{
+      width:min(420px, 100%);
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(24,28,39,0.92), rgba(24,28,39,0.78));
+      backdrop-filter:blur(10px);
+      border-radius:24px;
+      padding:18px 16px 16px 16px;
+      box-shadow:0 28px 70px rgba(0,0,0,0.55);
+      position:relative;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute;inset:-1px;
+      background:radial-gradient(800px 280px at 20% 0%, rgba(124,92,252,0.26), transparent 55%);
+      pointer-events:none;
+      z-index:0;
+    }
+    .card > *{position:relative;z-index:1}
+    .hidden{display:none}
+
+    .logo{
+      display:grid;place-items:center;
+      width:64px;height:64px;
+      border-radius:22px;
+      border:1px solid rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.12);
+      margin:4px auto 10px auto;
+      box-shadow:0 14px 34px rgba(124,92,252,0.16);
+    }
+    .logo span{
+      font-family:'Times New Roman',Georgia,serif;
+      font-weight:900;
+      font-size:64px;
+      line-height:1;
+      color:var(--purple);
+      transform:translateY(-2px);
+    }
+    h1{
+      margin:0;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:-0.03em;
+      font-size:32px;
+      color:var(--tw);
+    }
+    .tag{
+      margin:8px 0 0 0;
+      text-align:center;
+      color:var(--tm);
+      font-size:13px;
+      line-height:1.4;
+      font-weight:500;
+    }
+    .divider{
+      height:1px;
+      background:rgba(255,255,255,0.08);
+      margin:14px 0;
+    }
+    .btn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(124,92,252,0.35);
+      background:linear-gradient(180deg, rgba(124,92,252,0.95), rgba(90,63,214,0.95));
+      color:var(--tw);
+      font-weight:800;
+      letter-spacing:-0.01em;
+      transition:transform var(--t1), filter var(--t1), box-shadow var(--t1);
+      box-shadow:0 18px 40px rgba(0,0,0,0.38);
+    }
+    .btn:hover{transform:translateY(-2px);filter:saturate(1.05)}
+    .btn:active{transform:translateY(0px)}
+    .btn:disabled{opacity:0.7;cursor:not-allowed;filter:saturate(0.9)}
+    .btn svg{width:18px;height:18px}
+    .guest{
+      display:block;
+      text-align:center;
+      margin-top:10px;
+      font-weight:700;
+      color:rgba(226,232,240,0.92);
+      opacity:0.9;
+      transition:opacity var(--t1);
+    }
+    .guest:hover{opacity:1}
+    .pills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-top:14px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.02);
+      color:rgba(226,232,240,0.9);
+      font-size:12px;
+      font-weight:700;
+    }
+    .err{
+      margin-top:10px;
+      color:rgba(239,68,68,0.95);
+      font-size:12px;
+      text-align:center;
+      min-height:16px;
+    }
+
+    .fine{
+      margin-top:14px;
+      text-align:center;
+      color:rgba(148,163,184,0.85);
+      font-size:12px;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .floatLetter,.btn{animation:none;transition:none}
+    }
+  </style>
 </head>
-<body class="start-page">
-  <main class="start-shell">
-    <section class="start-card" aria-label="Launch Learn Koine Greek">
-      <div class="start-card__media">
-        <video class="start-mascot" src="assets/media/mascot-coach.mp4?v=202604222" autoplay muted loop playsinline></video>
+<body>
+  <div class="wrap">
+    <div class="bgGlow" aria-hidden="true"></div>
+    <div class="floatLayer" aria-hidden="true">
+      <div class="floatLetter" style="--x:8;--d:14s;--o:0.08;--r:-8;--dx:14">Α</div>
+      <div class="floatLetter" style="--x:18;--d:9s;--o:0.06;--r:10;--dx:-10">Β</div>
+      <div class="floatLetter" style="--x:28;--d:18s;--o:0.10;--r:-12;--dx:18">Γ</div>
+      <div class="floatLetter" style="--x:38;--d:12s;--o:0.07;--r:7;--dx:-14">Δ</div>
+      <div class="floatLetter" style="--x:48;--d:20s;--o:0.12;--r:-5;--dx:10">Ε</div>
+      <div class="floatLetter" style="--x:58;--d:10s;--o:0.05;--r:12;--dx:-18">Ζ</div>
+      <div class="floatLetter" style="--x:66;--d:16s;--o:0.09;--r:-10;--dx:12">Η</div>
+      <div class="floatLetter" style="--x:74;--d:11s;--o:0.07;--r:8;--dx:-12">Θ</div>
+      <div class="floatLetter" style="--x:82;--d:19s;--o:0.11;--r:-6;--dx:16">Ι</div>
+      <div class="floatLetter" style="--x:90;--d:13s;--o:0.06;--r:10;--dx:-10">Κ</div>
+      <div class="floatLetter" style="--x:12;--d:17s;--o:0.09;--r:-9;--dx:20">Λ</div>
+      <div class="floatLetter" style="--x:92;--d:8s;--o:0.05;--r:14;--dx:-22">Μ</div>
+    </div>
+
+    <section class="card hidden" id="card" aria-label="Sign in">
+      <div class="logo" aria-hidden="true"><span>Ω</span></div>
+      <h1>Learn Koine Greek</h1>
+      <p class="tag">Master the language of the New Testament</p>
+      <div class="divider"></div>
+
+      <button class="btn" id="googleBtn" type="button">
+        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.654 32.654 29.303 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.963 3.037l5.657-5.657C34.047 6.053 29.273 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+          <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 16.108 18.961 13 24 13c3.059 0 5.842 1.154 7.963 3.037l5.657-5.657C34.047 6.053 29.273 4 24 4c-7.682 0-14.374 4.327-17.694 10.691z"/>
+          <path fill="#4CAF50" d="M24 44c5.17 0 9.86-1.977 13.409-5.197l-6.191-5.238C29.211 35.091 26.715 36 24 36c-5.282 0-9.626-3.337-11.288-7.946l-6.51 5.02C9.482 39.556 16.227 44 24 44z"/>
+          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.085 5.565l.003-.002 6.191 5.238C36.97 39.101 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="err" id="err"></div>
+      <a class="guest" href="#" id="guestBtn">Continue as Guest</a>
+
+      <div class="pills" aria-label="Features">
+        <div class="pill">24 Lessons</div>
+        <div class="pill">100+ Words</div>
+        <div class="pill">Study Together</div>
       </div>
-      <div class="start-card__copy">
-        <p class="start-eyebrow">Ready to learn</p>
-        <h1>Learn Koine Greek</h1>
-        <p class="start-note">Open the lesson dashboard instantly. Sign in later from inside the app if you want to sync progress across devices.</p>
-      </div>
-      <div class="start-card__actions">
-        <button id="startBtn" class="start-btn" type="button">Start learning</button>
-      </div>
+      <div class="fine">Trusted by theological students worldwide</div>
     </section>
-  </main>
-  <script src="start.js?v=202604222"></script>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+      authDomain: "learn-basic-greek.firebaseapp.com",
+      projectId: "learn-basic-greek",
+      storageBucket: "learn-basic-greek.firebasestorage.app",
+      messagingSenderId: "628557836662",
+      appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+      measurementId: "G-6BYGXRJFT",
+      databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
+    };
+
+    let auth = null;
+    let db = null;
+
+    function initFirebase() {
+      if (!window.firebase) return false;
+      if (firebase.apps && firebase.apps.length === 0) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps) firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      return true;
+    }
+
+    function show(el){ el.classList.remove('hidden'); }
+    function setErr(msg){ document.getElementById('err').textContent = msg || ''; }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      const card = document.getElementById('card');
+      const googleBtn = document.getElementById('googleBtn');
+      const guestBtn = document.getElementById('guestBtn');
+
+      if (!initFirebase()) {
+        show(card);
+        setErr("Firebase failed to load. You can still continue as guest.");
+      }
+
+      if (auth) {
+        auth.onAuthStateChanged(function(user){
+          if (user) {
+            localStorage.removeItem('gk_guest');
+            window.location.href = 'dashboard.html';
+          } else {
+            show(card);
+          }
+        });
+      } else {
+        show(card);
+      }
+
+      googleBtn.addEventListener('click', async function(){
+        if (!auth || !db) { setErr("Firebase isn't ready. Try again, or continue as guest."); return; }
+        setErr('');
+        googleBtn.disabled = true;
+        try{
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const res = await auth.signInWithPopup(provider);
+          const user = res && res.user;
+          if (!user) throw new Error("Sign-in failed. Please try again.");
+
+          localStorage.removeItem('gk_guest');
+
+          const ref = db.collection('users').doc(user.uid);
+          const snap = await ref.get();
+          if (!snap.exists) {
+            const display = user.displayName || 'Learner';
+            const username = '@' + String(display).toLowerCase().replace(/\\s/g,'').replace(/[^a-z0-9_]/g,'').slice(0, 18);
+            await ref.set({
+              displayName: display,
+              email: user.email || '',
+              photoURL: user.photoURL || '',
+              username,
+              bio: '',
+              joinedDate: firebase.firestore.FieldValue.serverTimestamp(),
+              xp: 0,
+              streak: 0,
+              lastActiveDate: '',
+              hearts: 5,
+              gems: 0,
+              crowns: 0,
+              rank: 'Newcomer',
+              level: 1,
+              lessonsCompleted: 0,
+              accuracy: 0,
+              currentLesson: 1,
+              currentWorld: 1,
+              friends: [],
+              friendRequests: [],
+              achievements: {},
+              settings: { notifications: true, dailyGoal: 1 }
+            }, { merge:true });
+          }
+          window.location.href = 'dashboard.html';
+        }catch(e){
+          console.error(e);
+          setErr(e && e.message ? e.message : "Could not sign in. Please try again.");
+        }finally{
+          googleBtn.disabled = false;
+        }
+      });
+
+      guestBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        localStorage.setItem('gk_guest', '1');
+        window.location.href = 'dashboard.html';
+      });
+    });
+  </script>
 </body>
 </html>

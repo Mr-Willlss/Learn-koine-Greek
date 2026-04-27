@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7c5cfc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
+  <title>Quests • Learn Koine Greek</title>
+  <style>
+    :root{
+      --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+      --purple:#7c5cfc;--purple2:#5a3fd6;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;--green2:#16a34a;--orange:#f97316;--gold:#eab308;--gold2:#ca8a04;--red:#ef4444;--pink:#ec4899;
+      --tw:#ffffff;--ts:#e2e8f0;--tm:#94a3b8;--td:#475569;
+      --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rp:999px;
+      --sw:220px;
+      --t1:0.15s ease;--t2:0.25s ease;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-base);color:var(--ts);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    button{appearance:none;border:0;background:none;color:inherit;cursor:pointer}
+    #app{min-height:100%;display:flex}
+    #sidebar{width:var(--sw);flex:0 0 var(--sw);background:linear-gradient(180deg, rgba(19,21,30,0.95), rgba(19,21,30,0.82));border-right:1px solid var(--border);padding:14px;position:sticky;top:0;height:100vh;overflow:auto}
+    .sbBrand{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,0.02)}
+    .sbLogo{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg, var(--purple), var(--blue));border:1px solid rgba(255,255,255,0.12)}
+    .sbLogo span{font-family:'Times New Roman',Georgia,serif;font-weight:900;color:white;font-size:20px}
+    .sbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;line-height:1.1}
+    .sbSub{font-size:12px;color:var(--tm);margin-top:2px}
+    .sbGroup{margin-top:14px}
+    .sbGroup h3{margin:12px 8px 8px 8px;color:rgba(226,232,240,0.72);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+    .nav{display:flex;flex-direction:column;gap:6px}
+    .nav a{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:14px;border:1px solid transparent;transition:transform var(--t1), background var(--t1), border-color var(--t1);color:rgba(226,232,240,0.9)}
+    .nav a:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px);border-color:var(--border)}
+    .nav a.active{background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));border-color:rgba(124,92,252,0.3);color:var(--tw)}
+    body[data-page="dashboard"] .nav a[href="dashboard.html"],
+    body[data-page="practice"] .nav a[href="practice.html"],
+    body[data-page="lessons"] .nav a[href="lessons.html"],
+    body[data-page="lesson"] .nav a[href="lessons.html"],
+    body[data-page="quests"] .nav a[href="quests.html"],
+    body[data-page="vocabulary"] .nav a[href="vocabulary.html"],
+    body[data-page="leaderboard"] .nav a[href="leaderboard.html"],
+    body[data-page="rewards"] .nav a[href="rewards.html"],
+    body[data-page="friends"] .nav a[href="friends.html"],
+    body[data-page="study-room"] .nav a[href="study-room.html"],
+    body[data-page="profile"] .nav a[href="profile.html"]{
+      background:linear-gradient(180deg, rgba(124,92,252,0.18), rgba(124,92,252,0.08));
+      border-color:rgba(124,92,252,0.3);
+      color:var(--tw);
+    }
+    .nav .ic{width:26px;display:flex;justify-content:center}
+    #main-wrapper{flex:1;display:flex;flex-direction:column;min-width:0}
+    #top-bar{position:sticky;top:0;z-index:50;background:rgba(15,17,23,0.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .tbLeft{min-width:0}
+    .tbTitle{font-weight:900;color:var(--tw);letter-spacing:-0.02em;font-size:16px}
+    .tbSub{color:var(--tm);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tbRight{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;color:rgba(226,232,240,0.9)}
+    .pill b{color:var(--tw)}
+    .avatar{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));display:grid;place-items:center;overflow:hidden}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .miniName{display:flex;flex-direction:column;line-height:1.1}
+    .miniName .n{font-weight:800;color:var(--tw);font-size:12px}
+    .miniName .l{color:var(--tm);font-size:11px}
+    #content{padding:14px;max-width:960px;width:100%;margin:0 auto}
+
+    .grid{margin-top:8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .quest{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
+      border-radius:22px;padding:14px;
+      box-shadow:0 18px 50px rgba(0,0,0,0.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .quest.locked{opacity:0.6;filter:saturate(0.9)}
+    .qt{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .qname{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
+    .qdesc{margin-top:6px;color:var(--tm);font-size:12px;line-height:1.45}
+    .stars{margin-top:10px;display:flex;gap:4px}
+    .star{width:22px;height:22px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.02);display:grid;place-items:center}
+    .star.on{border-color:rgba(234,179,8,0.45);background:rgba(234,179,8,0.12)}
+    .btnRow{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:11px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:transform var(--t1), box-shadow var(--t1), border-color var(--t1), background var(--t1);font-weight:900;color:var(--tw)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 16px 30px rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04)}
+    .btnPrimary{border-color:rgba(34,197,94,0.45);background:linear-gradient(180deg, rgba(34,197,94,0.20), rgba(34,197,94,0.08))}
+    .btnPrimary:hover{border-color:rgba(34,197,94,0.75);box-shadow:0 18px 35px rgba(34,197,94,0.15)}
+
+    .overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:16px}
+    .overlay.show{display:flex}
+    .modal{width:min(760px,100%);border:1px solid var(--border);background:linear-gradient(180deg, rgba(24,28,39,0.98), rgba(15,17,23,0.98));border-radius:24px;padding:16px;box-shadow:0 30px 90px rgba(0,0,0,0.55)}
+    .h1{margin:0;color:var(--tw);font-weight:900;letter-spacing:-0.02em;font-size:18px}
+    .sub{margin-top:6px;color:var(--tm);font-size:13px;line-height:1.5}
+    .q{margin-top:12px;font-weight:900;color:var(--tw);letter-spacing:-0.01em}
+    .opts{margin-top:10px;display:grid;grid-template-columns:1fr;gap:8px}
+    .opt{text-align:left;padding:12px 12px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,0.02);transition:transform var(--t1), border-color var(--t1), background var(--t1), box-shadow var(--t1);color:rgba(226,232,240,0.92)}
+    .opt:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.16);background:rgba(255,255,255,0.04);box-shadow:0 14px 26px rgba(0,0,0,0.34)}
+    .opt.good{border-color:rgba(34,197,94,0.55);background:rgba(34,197,94,0.10)}
+    .opt.bad{border-color:rgba(239,68,68,0.65);background:rgba(239,68,68,0.10)}
+    .hint{margin-top:8px;color:var(--tm);font-size:12px}
+    .bar{height:10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);overflow:hidden;margin-top:10px}
+    .bar>div{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg, var(--purple), var(--blue));transition:width 0.6s ease}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+    .pill2{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px}
+    .toastWrap{position:fixed;left:16px;right:16px;bottom:78px;z-index:9999;display:flex;justify-content:center;pointer-events:none}
+    .toast{pointer-events:auto;max-width:min(560px,100%);border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:16px;padding:10px 12px;box-shadow:0 22px 40px rgba(0,0,0,0.5);display:flex;align-items:center;gap:10px;transform:translateY(20px);opacity:0;transition:transform var(--t2), opacity var(--t2)}
+    .toast.show{transform:translateY(0);opacity:1}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.info{background:var(--cyan)}
+    .dot.good{background:var(--green)}
+    .dot.bad{background:var(--red)}
+    .bell{position:relative}
+    .bellI{display:inline-block;line-height:1}
+    .bellBadge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:999px;display:grid;place-items:center;font-size:11px;font-weight:900;color:white;background:var(--red);border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 24px rgba(0,0,0,0.45)}
+    .notifBackdrop{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,0.25);display:none}
+    .notifPanel{position:fixed;z-index:130;top:64px;right:14px;width:min(420px, calc(100% - 28px));max-height:min(70vh, 540px);overflow:auto;border:1px solid var(--border);background:rgba(15,17,23,0.92);backdrop-filter:blur(10px);border-radius:18px;box-shadow:0 26px 64px rgba(0,0,0,0.55);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform var(--t2), opacity var(--t2)}
+    .notifPanel.open{transform:translateY(0);opacity:1;pointer-events:auto}
+    .notifHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(15,17,23,0.92);backdrop-filter:blur(10px)}
+    .notifHead .t{font-weight:900;color:var(--tw);letter-spacing:-0.02em}
+    .notifHead .actions{display:flex;gap:8px}
+    .nBtn{padding:7px 10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:rgba(226,232,240,0.92);font-size:12px;font-weight:800;transition:transform var(--t1), background var(--t1), border-color var(--t1);white-space:nowrap}
+    .nBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,0.03);border-color:var(--border2)}
+    .nBtn.primary{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.12)}
+    .notifBody{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .nItem{border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+    .nItem .meta{color:var(--tm);font-size:12px;margin-top:4px}
+    .nItem .msg{color:rgba(226,232,240,0.92);font-size:12px}
+    .nItem .left{min-width:0}
+    .nItem .right{display:flex;gap:8px;flex:0 0 auto;align-items:center}
+    .nTag{font-weight:900;color:var(--tw)}
+    .nEmpty{border:1px dashed var(--border);border-radius:14px;padding:14px;color:var(--tm);text-align:center}
+    .bottomTabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(15,17,23,0.86);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 10px}
+    .tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px;border-radius:14px;border:1px solid transparent;color:rgba(226,232,240,0.82);font-size:11px}
+    .tab.active{border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.10);color:var(--tw)}
+    body[data-page="dashboard"] .bottomTabs a[href="dashboard.html"],
+    body[data-page="practice"] .bottomTabs a[href="practice.html"],
+    body[data-page="lessons"] .bottomTabs a[href="lessons.html"],
+    body[data-page="lesson"] .bottomTabs a[href="lessons.html"],
+    body[data-page="friends"] .bottomTabs a[href="friends.html"],
+    body[data-page="profile"] .bottomTabs a[href="profile.html"]{
+      border-color:rgba(124,92,252,0.35);
+      background:rgba(124,92,252,0.10);
+      color:var(--tw);
+    }
+    @media (max-width: 900px){.grid{grid-template-columns:1fr}}
+    @media (max-width: 768px){
+      :root{--sw:56px}
+      #sidebar{padding:12px 8px}
+      .sbTitle,.sbSub,.sbGroup h3,.nav .tx{display:none}
+      .sbBrand{justify-content:center}
+      .nav a{justify-content:center}
+      .nav .ic{width:auto}
+      .tbSub{display:none}
+      #content{padding-bottom:90px}
+      .bottomTabs{display:block}
+      .toastWrap{bottom:92px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .btn,.opt,.toast,.bar>div{transition:none}
+    }
+  </style>
+</head>
+<body data-page="quests">
+  <div id="app">
+    <aside id="sidebar" aria-label="Sidebar navigation">
+      <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
+        <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
+        <div>
+          <div class="sbTitle">Koine Greek</div>
+          <div class="sbSub">Duolingo-style</div>
+        </div>
+      </a>
+      <div class="sbGroup">
+        <h3>Main</h3>
+        <nav class="nav">
+          <a href="dashboard.html"><span class="ic">🏠</span><span class="tx">Dashboard</span></a>
+          <a href="practice.html"><span class="ic">🎯</span><span class="tx">Practice</span></a>
+          <a href="lessons.html"><span class="ic">📚</span><span class="tx">Lessons</span></a>
+          <a href="quests.html"><span class="ic">⚔️</span><span class="tx">Quests</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Learn</h3>
+        <nav class="nav">
+          <a href="vocabulary.html"><span class="ic">🔤</span><span class="tx">Vocabulary</span></a>
+          <a href="leaderboard.html"><span class="ic">🏆</span><span class="tx">Leaderboard</span></a>
+          <a href="rewards.html"><span class="ic">🎁</span><span class="tx">Rewards</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Social</h3>
+        <nav class="nav">
+          <a href="friends.html"><span class="ic">👥</span><span class="tx">Friends</span></a>
+          <a href="study-room.html"><span class="ic">💬</span><span class="tx">Study Room</span></a>
+        </nav>
+      </div>
+      <div class="sbGroup">
+        <h3>Account</h3>
+        <nav class="nav">
+          <a href="profile.html"><span class="ic">👤</span><span class="tx">Profile</span></a>
+          <a href="profile.html#settings"><span class="ic">⚙️</span><span class="tx">Settings</span></a>
+          <a href="#" id="signOutLink"><span class="ic">🚪</span><span class="tx">Sign Out</span></a>
+        </nav>
+      </div>
+    </aside>
+
+    <div id="main-wrapper">
+      <header id="top-bar">
+        <div class="tbLeft">
+          <div class="tbTitle">Quests</div>
+          <div class="tbSub">Themed challenges • Stars • One-time XP rewards</div>
+        </div>
+        <div class="tbRight">
+          <div class="pill" title="Daily streak"><span>🔥</span><b id="streakVal">—</b></div>
+          <div class="pill" title="Hearts"><span>❤️</span><b id="heartsVal">—</b></div>
+          <button class="pill bell" id="bellBtn" title="Notifications" type="button"><span class="bellI">🔔</span><span class="bellBadge" id="bellBadge" style="display:none">0</span></button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar" id="avatar"><span>👤</span></div>
+            <div class="miniName">
+              <div class="n" id="userName">Guest</div>
+              <div class="l" id="userLevel">Level —</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="content">
+        <div class="grid" id="questGrid" aria-label="Quest cards"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="bottomTabs" role="navigation" aria-label="Bottom tabs">
+    <div class="tabs">
+      <a class="tab" href="dashboard.html"><div>🏠</div><div>Home</div></a>
+      <a class="tab" href="practice.html"><div>🎯</div><div>Practice</div></a>
+      <a class="tab" href="lessons.html"><div>📚</div><div>Lessons</div></a>
+      <a class="tab" href="friends.html"><div>👥</div><div>Friends</div></a>
+      <a class="tab" href="profile.html"><div>👤</div><div>Profile</div></a>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" aria-label="Quest player">
+    <div class="modal">
+      <h1 class="h1" id="qTitle">Quest</h1>
+      <div class="sub" id="qSub">Answer 10 questions.</div>
+      <div class="bar"><div id="qBar"></div></div>
+      <div class="row">
+        <span class="pill2">⭐ Score: <b id="qScore">0</b></span>
+        <span class="pill2">🏁 <b id="qNum">1</b>/10</span>
+        <span class="pill2" id="qTimerWrap" style="display:none">⏱ <b id="qTimer">20</b>s</span>
+      </div>
+      <div id="qBody"></div>
+      <div class="btnRow" style="margin-top:12px">
+        <button class="btn" id="qQuit" type="button">Quit</button>
+      </div>
+      <div class="hint">Quests award XP only the first time you complete them. Replays are for practice.</div>
+    </div>
+  </div>
+
+  <div class="notifBackdrop" id="notifBackdrop" aria-hidden="true"></div>
+  <section class="notifPanel" id="notifPanel" aria-label="Notifications" aria-hidden="true">
+    <div class="notifHead">
+      <div class="t">Notifications</div>
+      <div class="actions">
+        <button class="nBtn" id="notifMarkAll" type="button">Mark all read</button>
+        <button class="nBtn primary" id="notifClose" type="button">Close</button>
+      </div>
+    </div>
+    <div class="notifBody" id="notifBody"></div>
+  </section>
+
+  <div class="toastWrap" aria-live="polite" aria-atomic="true">
+    <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    document.addEventListener('click', function(e) {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const bad = ['lesson.html','home.html'];
+      if (bad.some(b => a.getAttribute('href') === b)) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    function showToast(msg, type='info', title='Notice') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      const t = document.getElementById('toastTitle');
+      const m = document.getElementById('toastMsg');
+      dot.className = 'dot ' + (type === 'good' ? 'good' : type === 'bad' ? 'bad' : 'info');
+      t.textContent = title;
+      m.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function calcLevel(xp) {
+      const thresholds = [0,100,250,500,900,1400,2000,2800,3800,5000];
+      const titles = ["Newcomer","Letter Keeper","Word Seeker","Novice Scribe","Scribe","Scholar","Grammarian","Interpreter","Theologian","Master"];
+      let level = 1;
+      for (let i = 0; i < thresholds.length; i++) if (xp >= thresholds[i]) level = i + 1;
+      return {
+        level, title: titles[level-1],
+        currentThreshold: thresholds[level-1],
+        nextThreshold: thresholds[level] || 99999,
+        progress: level >= thresholds.length ? 100 :
+          Math.round((xp - thresholds[level-1]) / (thresholds[level] - thresholds[level-1]) * 100)
+      };
+    }
+
+    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
+
+    function wireSignOut(user){
+      const link = document.getElementById('signOutLink');
+      if (!link) return;
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        localStorage.removeItem('gk_guest');
+        try{ if (user && auth) await auth.signOut(); }catch(_){}
+        location.href = 'index.html';
+      });
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAKgu-QCwlfWha3W-c-vve2BoEV-Em5UM",
+      authDomain: "learn-basic-greek.firebaseapp.com",
+      projectId: "learn-basic-greek",
+      storageBucket: "learn-basic-greek.firebasestorage.app",
+      messagingSenderId: "628557836662",
+      appId: "1:628557836662:web:eb14cc1c26e5c75dda57",
+      measurementId: "G-6BYGXRJFT",
+      databaseURL: "https://learn-basic-greek-default-rtdb.firebaseio.com"
+    };
+    let auth=null, db=null;
+    function initFirebase(){
+      if (!window.firebase) return false;
+      if (firebase.apps && firebase.apps.length===0) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps) firebase.initializeApp(firebaseConfig);
+      auth=firebase.auth(); db=firebase.firestore(); return true;
+    }
+
+    async function loadLessonData() {
+      if (window.__LESSON_DATA) return window.__LESSON_DATA;
+      const txt = await fetch('lesson-player.html', { cache:'no-store' }).then(r => r.text());
+      const m = txt.match(/const\\s+LESSON_DATA\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});\\s*\\n\\s*\\n\\s*const\\s+firebaseConfig/);
+      if (!m) throw new Error("Could not load lesson data.");
+      const obj = (new Function('return ' + m[1]))();
+      window.__LESSON_DATA = obj;
+      return obj;
+    }
+
+    function setTopUser(user, data) {
+      const xp = Number.isFinite(data?.xp) ? data.xp : 0;
+      const lvl = calcLevel(xp);
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
+      document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
+      const av = document.getElementById('avatar');
+      const url = data?.photoURL || user?.photoURL;
+      if (url) { av.innerHTML=''; const img=document.createElement('img'); img.alt='Avatar'; img.src=url; av.appendChild(img); }
+    }
+
+    const QUESTS = [
+      { id:'alphabetMaster', icon:'⚔️', title:'Alphabet Master', desc:'10 questions from Lessons 1–2 (alphabet, vowels).', lessons:[1,2], count:10, timed:false, requires:1 },
+      { id:'grammarScholar', icon:'📜', title:'Grammar Scholar', desc:'Cases + verb parsing + adjectives (Lessons 5, 10, 11).', lessons:[5,10,11], count:10, timed:false, requires:11 },
+      { id:'vocabHunter', icon:'🔤', title:'Vocabulary Hunter', desc:'Greek → English matching from unlocked lessons.', lessons:'unlocked', count:10, timed:false, requires:1 },
+      { id:'sentenceArchitect', icon:'🏛️', title:'Sentence Architect', desc:'5 sentence builder challenges.', lessons:'unlocked', count:5, timed:false, requires:1, onlyType:'sentence_builder' },
+      { id:'speedConjugator', icon:'⚡', title:'Speed Conjugator', desc:'10 verb-form questions (timed).', lessons:[6,9,16,17,18,20,22], count:10, timed:true, requires:6 },
+      { id:'allLessonsMaster', icon:'🌟', title:'All Lessons Master', desc:'20 questions across all 24 lessons (final boss).', lessons:'all', count:20, timed:true, requires:24 }
+    ];
+
+    function starsFromAccuracy(acc){
+      if (acc >= 90) return 3;
+      if (acc >= 75) return 2;
+      if (acc >= 60) return 1;
+      return 0;
+    }
+
+    function questUnlocked(q, lessonsCompleted){ return lessonsCompleted >= q.requires; }
+
+    function buildPool(LESSON_DATA, q, lessonsCompleted){
+      let lessonIds = [];
+      if (q.lessons === 'all') lessonIds = Array.from({length:24},(_,i)=>i+1);
+      else if (q.lessons === 'unlocked') lessonIds = Array.from({length:lessonsCompleted},(_,i)=>i+1);
+      else lessonIds = q.lessons;
+
+      const ex = [];
+      lessonIds.forEach(id => {
+        const arr = (LESSON_DATA[id] && LESSON_DATA[id].exercises) || [];
+        arr.forEach(e => ex.push({ ...e, lessonId:id }));
+      });
+      const filtered = q.onlyType ? ex.filter(e => e.type === q.onlyType) : ex.filter(e => (e.type === 'multiple_choice' || e.type === 'translate_to_english' || e.type === 'sentence_builder'));
+      return shuffle(filtered);
+    }
+
+    function renderQuestCards(state){
+      const grid = document.getElementById('questGrid');
+      grid.innerHTML = '';
+      QUESTS.forEach(q => {
+        const unlocked = questUnlocked(q, state.lessonsCompleted);
+        const qState = (state.userData.quests && state.userData.quests[q.id]) || {};
+        const bestStars = Number.isFinite(qState.bestStars) ? qState.bestStars : 0;
+        const completed = !!qState.completed;
+        const card = document.createElement('div');
+        card.className = 'quest' + (unlocked ? '' : ' locked');
+        card.innerHTML = `
+          <div class="qt">
+            <div>
+              <div class="qname">${q.icon} ${q.title}</div>
+              <div class="qdesc">${q.desc}</div>
+            </div>
+            <div class="pill" style="white-space:nowrap">${unlocked ? (completed ? 'Completed' : 'Available') : 'Locked'}</div>
+          </div>
+          <div class="stars" aria-label="Stars">
+            ${[1,2,3].map(i => `<div class="star ${i<=bestStars?'on':''}">★</div>`).join('')}
+          </div>
+          <div class="btnRow">
+            <button class="btn ${unlocked?'btnPrimary':''}" type="button" data-q="${q.id}">${completed ? 'Replay' : 'Attempt'} →</button>
+          </div>
+        `;
+        const btn = card.querySelector('button[data-q]');
+        btn.addEventListener('click', () => {
+          if (!unlocked) return showToast(`Unlock by completing up to Lesson ${q.requires}.`, 'bad', 'Locked');
+          startQuest(state, q);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function openOverlay(open){ document.getElementById('overlay').classList.toggle('show', !!open); }
+
+    async function startQuest(state, quest){
+      let LESSON_DATA = null;
+      try { LESSON_DATA = await loadLessonData(); }
+      catch(e){ console.error(e); showToast("Could not load lesson content.", "bad", "Data error"); return; }
+
+      const pool = buildPool(LESSON_DATA, quest, state.lessonsCompleted).slice(0, quest.count);
+      if (!pool.length) { showToast("No questions available for this quest yet.", "bad", "Empty"); return; }
+
+      const ov = document.getElementById('overlay');
+      const qTitle = document.getElementById('qTitle');
+      const qSub = document.getElementById('qSub');
+      const qBar = document.getElementById('qBar');
+      const qBody = document.getElementById('qBody');
+      const qScore = document.getElementById('qScore');
+      const qNum = document.getElementById('qNum');
+      const qTimerWrap = document.getElementById('qTimerWrap');
+      const qTimer = document.getElementById('qTimer');
+
+      qTitle.textContent = `${quest.icon} ${quest.title}`;
+      qSub.textContent = `${quest.count} questions • ${quest.timed ? 'timed' : 'untimed'} • Stars based on accuracy`;
+      qTimerWrap.style.display = quest.timed ? '' : 'none';
+
+      let i = 0;
+      let correct = 0;
+      let timer = null;
+      let secs = 20;
+
+      function stopTimer(){ if (timer) { clearInterval(timer); timer = null; } }
+      function startTimer(){
+        if (!quest.timed) return;
+        stopTimer();
+        secs = 20;
+        qTimer.textContent = String(secs);
+        timer = setInterval(() => {
+          secs--;
+          qTimer.textContent = String(secs);
+          if (secs <= 0) { stopTimer(); i++; draw(); }
+        }, 1000);
+      }
+
+      function setProgress(){
+        qNum.textContent = String(Math.min(quest.count, i+1));
+        const pct = Math.round((i/quest.count)*100);
+        qBar.style.width = pct + '%';
+        qScore.textContent = String(correct);
+      }
+
+      function draw(){
+        stopTimer();
+        if (i >= pool.length) return finish();
+        setProgress();
+        const ex = pool[i];
+
+        // sentence_builder (tap-to-build like lesson-player)
+        if (ex.type === 'sentence_builder') {
+          const poolWords = shuffle(ex.words || []);
+          const chosen = [];
+          qBody.innerHTML = `
+            <div class="q">${ex.question}</div>
+            <div style="margin-top:10px;border:1px solid var(--border);background:rgba(0,0,0,0.18);border-radius:18px;padding:10px;min-height:52px;display:flex;flex-wrap:wrap;gap:8px;align-items:center" id="builder">${'<span style="color:var(--tm);font-size:12px">Tap words below…</span>'}</div>
+            <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px" id="pool"></div>
+            <div class="btnRow" style="margin-top:12px">
+              <button class="btn btnPrimary" id="submit" type="button">Submit</button>
+              <button class="btn" id="reset" type="button">Reset</button>
+            </div>
+            <div class="hint" id="explain"></div>
+          `;
+          const builder = document.getElementById('builder');
+          const poolEl = document.getElementById('pool');
+          const explain = document.getElementById('explain');
+          function renderBuilder(){
+            builder.innerHTML = '';
+            if (!chosen.length) builder.innerHTML = '<span style="color:var(--tm);font-size:12px">Tap words below…</span>';
+            chosen.forEach((w, idx) => {
+              const c = document.createElement('button');
+              c.className = 'pill';
+              c.type = 'button';
+              c.style.fontFamily = "'Times New Roman',Georgia,serif";
+              c.textContent = w;
+              c.addEventListener('click', () => { chosen.splice(idx,1); renderBuilder(); });
+              builder.appendChild(c);
+            });
+          }
+          poolWords.forEach(w => {
+            const c = document.createElement('button');
+            c.className = 'pill';
+            c.type = 'button';
+            c.style.fontFamily = "'Times New Roman',Georgia,serif";
+            c.textContent = w;
+            c.addEventListener('click', () => { chosen.push(w); renderBuilder(); });
+            poolEl.appendChild(c);
+          });
+          renderBuilder();
+          document.getElementById('reset').addEventListener('click', () => { chosen.length=0; explain.textContent=''; renderBuilder(); });
+          document.getElementById('submit').addEventListener('click', () => {
+            const ok = JSON.stringify(chosen) === JSON.stringify(ex.answer || []);
+            if (ok) { correct++; showToast("+2 XP (quest)", "good", "Correct"); }
+            else showToast("Incorrect", "bad", "Try next");
+            explain.textContent = ex.explanation || '';
+            setTimeout(() => { i++; draw(); }, 700);
+          });
+          startTimer();
+          return;
+        }
+
+        qBody.innerHTML = `
+          <div class="q">${ex.type === 'translate_to_english' ? `<span style="font-family:'Times New Roman',Georgia,serif;font-size:22px">${ex.question}</span>` : ex.question}</div>
+          <div class="opts" id="opts"></div>
+          <div class="hint" id="explain"></div>
+        `;
+        const opts = document.getElementById('opts');
+        const explain = document.getElementById('explain');
+        (ex.options || []).forEach(opt => {
+          const b = document.createElement('button');
+          b.className = 'opt';
+          b.type = 'button';
+          b.textContent = opt;
+          b.addEventListener('click', () => {
+            [...opts.children].forEach(x => x.disabled = true);
+            const ok = opt === ex.answer;
+            if (ok) { correct++; b.classList.add('good'); }
+            else { b.classList.add('bad'); [...opts.children].forEach(x => { if (x.textContent === ex.answer) x.classList.add('good'); }); }
+            explain.textContent = ex.explanation || '';
+            stopTimer();
+            setTimeout(() => { i++; draw(); }, 700);
+          });
+          opts.appendChild(b);
+        });
+        startTimer();
+      }
+
+      async function finish(){
+        stopTimer();
+        qBar.style.width = '100%';
+        const total = pool.length;
+        const acc = total ? Math.round((correct/total)*100) : 0;
+        const stars = starsFromAccuracy(acc);
+        const firstCompletion = !(state.userData.quests && state.userData.quests[quest.id] && state.userData.quests[quest.id].completed);
+        const xpReward = firstCompletion ? (stars ? 30 + stars*10 : 20) : 0;
+        const score100 = acc;
+        qBody.innerHTML = `
+          <div class="h1">Quest Complete ⭐</div>
+          <div class="sub">Accuracy: <b style="color:var(--tw)">${score100}%</b> • Stars: ${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+          <div class="hint">${firstCompletion ? `First completion reward: +${xpReward} XP` : `Replay complete (no XP reward).`}</div>
+          <div class="btnRow" style="margin-top:12px">
+            <button class="btn btnPrimary" id="closeBtn" type="button">Close</button>
+          </div>
+        `;
+        document.getElementById('closeBtn').addEventListener('click', () => { openOverlay(false); });
+
+        if (!state.user) return;
+        try{
+          const userRef = db.collection('users').doc(state.user.uid);
+          const patch = {};
+          const qState = (state.userData.quests && state.userData.quests[quest.id]) || {};
+          const bestStars = Math.max(Number.isFinite(qState.bestStars) ? qState.bestStars : 0, stars);
+          patch[`quests.${quest.id}`] = { completed:true, bestStars, lastAccuracy: score100, updatedAt: Date.now() };
+          if (xpReward) patch.xp = firebase.firestore.FieldValue.increment(xpReward);
+          await userRef.set(patch, { merge:true });
+          state.userData.quests = state.userData.quests || {};
+          state.userData.quests[quest.id] = { completed:true, bestStars, lastAccuracy: score100, updatedAt: Date.now() };
+          if (xpReward) showToast(`+${xpReward} XP`, "good", "Quest reward");
+          renderQuestCards(state);
+        }catch(e){
+          console.error(e);
+          showToast("Could not save quest progress.", "bad", "Save failed");
+        }
+      }
+
+      document.getElementById('qQuit').onclick = () => { stopTimer(); openOverlay(false); };
+      openOverlay(true);
+      draw();
+    }
+
+    async function initPage(user){
+      wireSignOut(user);
+      const state = { user, userData:{}, lessonsCompleted:0 };
+      if (user) {
+        const snap = await db.collection('users').doc(user.uid).get();
+        state.userData = snap.exists ? (snap.data() || {}) : {};
+        state.lessonsCompleted = Number.isFinite(state.userData.lessonsCompleted) ? state.userData.lessonsCompleted : 0;
+        setTopUser(user, state.userData);
+      } else {
+        setTopUser(null, { hearts:5, streak:0 });
+      }
+      renderQuestCards(state);
+    }
+
+    const isGuestAllowed = true;
+    (function boot(){
+      const ok = initFirebase();
+      if (!ok) { showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase"); initPage(null); return; }
+      firebase.auth().onAuthStateChanged(function(user){
+        if (!user && !isGuestAllowed && !isGuest()) { window.location.href='index.html'; return; }
+        if (!user && isGuest()) initPage(null);
+        else initPage(user);
+      });
+    })();
+  </script>
+</body>
+</html>
