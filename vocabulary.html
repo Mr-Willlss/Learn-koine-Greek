@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Vocabulary • Learn Koine Greek</title>
+  <script src="progress.js"></script>
+  <script src="game-data.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -167,7 +169,7 @@
         <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
         <div>
           <div class="sbTitle">Koine Greek</div>
-          <div class="sbSub">Duolingo-style</div>
+
         </div>
       </a>
       <div class="sbGroup">
@@ -350,18 +352,13 @@
     }
 
     async function loadLessonData() {
-      if (window.__LESSON_DATA) return window.__LESSON_DATA;
-      const txt = await fetch('lesson-player.html', { cache:'no-store' }).then(r => r.text());
-      const m = txt.match(/const\\s+LESSON_DATA\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});\\s*\\n\\s*\\n\\s*const\\s+firebaseConfig/);
-      if (!m) throw new Error("Could not load lesson data.");
-      const obj = (new Function('return ' + m[1]))();
-      window.__LESSON_DATA = obj;
-      return obj;
+      if (window.LESSON_DATA) return window.LESSON_DATA;
+      throw new Error("Lesson data missing. Ensure game-data.js is loaded.");
     }
 
-    function vocabFromLessons(LESSON_DATA, lessonsCompleted) {
+    function vocabFromLessons(LESSON_DATA, lessonsMax) {
       const out = [];
-      for (let i=1;i<=lessonsCompleted;i++){
+      for (let i=1;i<=lessonsMax;i++){
         const v = (LESSON_DATA[i] && LESSON_DATA[i].vocabulary) || [];
         v.forEach(x => out.push({ ...x, lessonId:i }));
       }
@@ -416,29 +413,33 @@
 
     async function initPage(user){
       wireSignOut(user);
-      const state = { user, userData:{}, lessonsCompleted:0, vocab:[], favorites:new Set(), tab:'browse' };
+      const state = { user, userData:{}, completedLessons:[], unlockedLessons:[1], vocab:[], favorites:new Set(), tab:'browse' };
 
       if (user) {
         const snap = await db.collection('users').doc(user.uid).get();
         state.userData = snap.exists ? (snap.data() || {}) : {};
-        state.lessonsCompleted = Number.isFinite(state.userData.lessonsCompleted) ? state.userData.lessonsCompleted : 0;
+        // Signed-in users still use localStorage progress for unlocking (consistent across pages).
         const favArr = Array.isArray(state.userData.favorites) ? state.userData.favorites : [];
         state.favorites = new Set(favArr);
         setTopUser(user, state.userData);
       } else {
         setTopUser(null, { hearts:5, streak:0 });
-        state.lessonsCompleted = 0;
         state.favorites = new Set(JSON.parse(sessionStorage.getItem('gk_fav') || '[]'));
       }
+
+      const prog = (window.Progress && Progress.getProgress) ? Progress.getProgress() : {};
+      state.unlockedLessons = (window.Progress && Progress.getUnlockedLessons) ? Progress.getUnlockedLessons() : [1];
+      state.completedLessons = Object.keys(prog).map(k => Number(k)).filter(n => Number.isFinite(n) && prog[String(n)] && prog[String(n)].completed).sort((a,b)=>a-b);
+      const maxUnlocked = state.unlockedLessons.length ? Math.max(...state.unlockedLessons) : 1;
 
       let LESSON_DATA = null;
       try { LESSON_DATA = await loadLessonData(); }
       catch(e){ console.error(e); showToast("Could not load lesson content.", "bad", "Data error"); }
-      if (LESSON_DATA) state.vocab = vocabFromLessons(LESSON_DATA, state.lessonsCompleted);
+      if (LESSON_DATA) state.vocab = vocabFromLessons(LESSON_DATA, maxUnlocked);
 
       // Populate lesson filter
       const lf = document.getElementById('lessonFilter');
-      lf.innerHTML = `<option value="all">All lessons</option>` + Array.from({length:state.lessonsCompleted},(_,i)=>`<option value="${i+1}">Lesson ${i+1}</option>`).join('');
+      lf.innerHTML = `<option value="all">All lessons</option>` + Array.from({length:maxUnlocked},(_,i)=>`<option value="${i+1}">Lesson ${i+1}</option>`).join('');
 
       function filtered() {
         const q = (document.getElementById('search').value || '').trim().toLowerCase();
@@ -454,8 +455,9 @@
           const g = (v.greek || '').toLowerCase();
           const e = (v.english || '').toLowerCase();
           const ex = (v.example || '').toLowerCase();
+          const ln = String(v.lessonId || '');
           const r = romanizeGreek(v.greek || '');
-          return g.includes(q) || e.includes(q) || ex.includes(q) || r.includes(q);
+          return g.includes(q) || e.includes(q) || ex.includes(q) || r.includes(q) || ln.includes(q);
         });
       }
 
@@ -465,42 +467,79 @@
         const total = state.vocab.length;
         const favCount = [...state.favorites].length;
         document.getElementById('stats').textContent =
-          total ? `You know ${list.length} of ${total} words from completed lessons • Favorites: ${favCount}` :
-            "Complete at least 1 lesson to unlock vocabulary.";
+          total ? `Showing ${list.length} of ${total} words • Favorites: ${favCount}` :
+            "Complete Lesson 1 to unlock vocabulary.";
         grid.innerHTML = '';
-        if (!total) return;
+        if (!total || state.completedLessons.length === 0) {
+          // Preview of Lesson 1 for brand new users.
+          if (window.LESSON_DATA && window.LESSON_DATA[1] && Array.isArray(window.LESSON_DATA[1].vocabulary)) {
+            const sample = window.LESSON_DATA[1].vocabulary.slice(0,5);
+            grid.innerHTML = `
+              <div class="card" style="grid-column:1/-1">
+                <div class="en">Preview words from Lesson 1</div>
+                <div class="ex">Complete Lesson 1 (60%+) to unlock full vocabulary browsing.</div>
+                <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+                  ${sample.map(v => `<span style="border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:999px;padding:6px 10px"><span style="font-family:'Times New Roman',Georgia,serif">${v.greek}</span> — ${v.english}</span>`).join('')}
+                </div>
+                <div style="margin-top:12px"><a class="btn" href="lesson-player.html?lesson=1">Start Lesson 1 →</a></div>
+              </div>
+            `;
+          }
+          return;
+        }
         if (!list.length) {
           grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="en">No matches</div><div class="ex">Try a different search or filter.</div></div>`;
           return;
         }
+        // Group by lesson
+        const byLesson = new Map();
         list.forEach(v => {
-          const k = keyOf(v);
-          const fav = state.favorites.has(k);
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <button class="star ${fav ? 'on':''}" type="button" title="${fav ? 'Unstar' : 'Star'}">${fav ? '★' : '☆'}</button>
-            <div class="gr">${v.greek}</div>
-            <div class="en">${v.english}</div>
-            <div class="ex">${v.example || ''}</div>
-            <div class="meta">Lesson ${v.lessonId} • Audio: (coming soon)</div>
-          `;
-          card.querySelector('button.star').addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if (fav) state.favorites.delete(k); else state.favorites.add(k);
-            if (state.user) {
-              try{
-                await db.collection('users').doc(state.user.uid).set({ favorites: [...state.favorites] }, { merge:true });
-              }catch(err){
-                console.error(err);
-                showToast("Could not save favorite.", "bad", "Save failed");
+          const lid = Number(v.lessonId) || 1;
+          if (!byLesson.has(lid)) byLesson.set(lid, []);
+          byLesson.get(lid).push(v);
+        });
+        [...byLesson.keys()].sort((a,b)=>a-b).forEach(lid => {
+          const lessonDone = state.completedLessons.includes(lid);
+          const lessonUnlocked = state.unlockedLessons.includes(lid);
+          const header = document.createElement('div');
+          header.className = 'card';
+          header.style.gridColumn = '1/-1';
+          header.innerHTML = `<div class="en">Lesson ${lid} • ${(window.LESSON_DATA && window.LESSON_DATA[lid] ? window.LESSON_DATA[lid].title : '')}</div><div class="ex">${lessonDone ? 'Unlocked' : lessonUnlocked ? 'In progress (words locked until completion)' : 'Locked'}</div>`;
+          grid.appendChild(header);
+
+          (byLesson.get(lid) || []).forEach(v => {
+            const k = keyOf(v);
+            const fav = state.favorites.has(k);
+            const card = document.createElement('div');
+            card.className = 'card';
+            const locked = !lessonDone;
+            card.style.filter = locked ? 'blur(0.3px)' : '';
+            card.style.opacity = locked ? '0.65' : '';
+            card.innerHTML = `
+              <button class="star ${fav ? 'on':''}" type="button" title="${fav ? 'Unstar' : 'Star'}">${fav ? '★' : '☆'}</button>
+              <div class="gr">${v.greek}</div>
+              <div class="en">${v.english} ${locked ? '<span style=\"margin-left:6px\">🔒</span>' : ''}</div>
+              <div class="ex">${v.example || ''}</div>
+              <div class="meta">Lesson ${v.lessonId}</div>
+            `;
+            card.querySelector('button.star').addEventListener('click', async (e) => {
+              e.stopPropagation();
+              if (fav) state.favorites.delete(k); else state.favorites.add(k);
+              if (state.user) {
+                try{
+                  await db.collection('users').doc(state.user.uid).set({ favorites: [...state.favorites] }, { merge:true });
+                }catch(err){
+                  console.error(err);
+                  showToast("Could not save favorite.", "bad", "Save failed");
+                }
+              } else {
+                sessionStorage.setItem('gk_fav', JSON.stringify([...state.favorites]));
               }
-            } else {
-              sessionStorage.setItem('gk_fav', JSON.stringify([...state.favorites]));
-            }
-            render();
+              render();
+            });
+            if (locked) card.addEventListener('click', () => showToast("Complete that lesson (60%+) to unlock these words.", "info", "Locked"));
+            grid.appendChild(card);
           });
-          grid.appendChild(card);
         });
       }
 

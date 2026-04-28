@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Lessons • Learn Koine Greek</title>
+  <script src="progress.js"></script>
+  <script src="game-data.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -235,7 +237,7 @@
         <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
         <div>
           <div class="sbTitle">Koine Greek</div>
-          <div class="sbSub">Duolingo-style</div>
+
         </div>
       </a>
       <div class="sbGroup">
@@ -391,10 +393,12 @@
       { n:5, icon:"🌟", title:"Advanced Structures", range:[21,24], color:"var(--gold)" }
     ];
 
-    // Lesson metadata to render map quickly (lesson-player holds full content).
+    // Lesson metadata to render map (game-data.js provides window.LESSON_DATA).
     const LESSON_META = Array.from({length:24}, (_,i) => {
-      const id = i+1;
-      return { id, world: id<=5?1:id<=10?2:id<=15?3:id<=20?4:5, title: `Lesson ${id}` };
+      const id = i + 1;
+      const world = id<=5?1:id<=10?2:id<=15?3:id<=20?4:5;
+      const title = (window.LESSON_DATA && window.LESSON_DATA[id] && window.LESSON_DATA[id].title) ? window.LESSON_DATA[id].title : `Lesson ${id}`;
+      return { id, world, title };
     });
 
     const firebaseConfig = {
@@ -622,27 +626,27 @@
       worldPath.innerHTML = '';
       lessonScroll.innerHTML = '';
 
-      const completed = state.completedLessons;
-      const currentLesson = state.currentLesson;
+      const completed = state.completedLessons || [];
+      const unlockedLessons = state.unlockedLessons || [1];
+      const currentLesson = state.currentLesson || 1;
 
       // World cards
       WORLDS.forEach(w => {
         const [start,end] = w.range;
         const total = end - start + 1;
         const done = completed.filter(x => x>=start && x<=end).length;
-        const prevWorldDone = w.n === 1 ? true : WORLDS.find(x => x.n === w.n - 1).range.every ? true : true;
         const prevRange = w.n === 1 ? null : WORLDS.find(x => x.n === w.n - 1).range;
         const prevTotal = prevRange ? (prevRange[1] - prevRange[0] + 1) : 0;
         const prevDone = prevRange ? completed.filter(x => x>=prevRange[0] && x<=prevRange[1]).length : prevTotal;
-        const unlocked = (w.n === 1) || (prevDone >= prevTotal);
-        const status = done >= total ? "COMPLETED" : (unlocked ? ((currentLesson>=start && currentLesson<=end) ? "ACTIVE" : "UNLOCKED") : "LOCKED");
+        const worldUnlocked = (w.n === 1) || (prevDone >= prevTotal);
+        const status = done >= total ? "COMPLETED" : (worldUnlocked ? ((currentLesson>=start && currentLesson<=end) ? "ACTIVE" : "UNLOCKED") : "LOCKED");
 
         const nextLessonInWorld = clamp(Math.max(start, Math.min(end, currentLesson)), start, end);
         const btnLabel = status === "LOCKED" ? "Locked" : (status === "COMPLETED" ? "Review World" : (status === "ACTIVE" ? "Continue" : "Start World"));
         const btnHref = status === "LOCKED" ? "#" : `lesson-player.html?lesson=${encodeURIComponent(nextLessonInWorld)}`;
 
         const card = document.createElement('div');
-        card.className = 'worldCard' + (unlocked ? '' : ' locked');
+        card.className = 'worldCard' + (worldUnlocked ? '' : ' locked');
         card.innerHTML = `
           <div class="wTop">
             <div>
@@ -650,13 +654,13 @@
               <div class="wMeta">Lessons ${start}–${end} • ${done}/${total} completed</div>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-              <span class="wBadge" style="border-color:${unlocked ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'}">${status}</span>
-              <a class="wBtn" ${status === "LOCKED" ? 'aria-disabled="true"' : ''} href="${btnHref}" style="border-color:${unlocked ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'};background:linear-gradient(180deg, ${w.color.replace('var','rgba').includes('rgba')? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.02)'} , rgba(255,255,255,0.02))">${btnLabel} →</a>
+              <span class="wBadge" style="border-color:${worldUnlocked ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'}">${status}</span>
+              <a class="wBtn" ${status === "LOCKED" ? 'aria-disabled="true"' : ''} href="${btnHref}" style="border-color:${worldUnlocked ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'};background:rgba(255,255,255,0.02)">${btnLabel} →</a>
             </div>
           </div>
           <div class="bar" aria-label="World progress"><div style="background:linear-gradient(90deg, ${w.color}, rgba(255,255,255,0.15));width:${Math.round((done/total)*100)}%"></div></div>
         `;
-        if (!unlocked) {
+        if (!worldUnlocked) {
           card.querySelector('.wBtn').addEventListener('click', (e) => {
             e.preventDefault();
             showToast("Finish the previous world to unlock this one.", "bad", "Locked");
@@ -668,7 +672,7 @@
       // Lesson chips
       for (let i = 1; i <= 24; i++) {
         const done = completed.includes(i);
-        const locked = i > currentLesson && !done;
+        const locked = !unlockedLessons.includes(i);
         const isNext = i === currentLesson && !done;
         const chip = document.createElement('a');
         chip.className = 'lessonChip' + (locked ? ' locked' : '') + (done ? ' done' : '') + (isNext ? ' next' : '');
@@ -680,7 +684,7 @@
           </div>
           <div class="lcTitle">${LESSON_META[i-1].title}</div>
         `;
-        if (locked) chip.addEventListener('click', (e) => { e.preventDefault(); showToast("Complete earlier lessons to unlock.", "bad", "Locked"); });
+        if (locked) chip.addEventListener('click', (e) => { e.preventDefault(); showToast("Complete earlier lessons (60%+) to unlock.", "bad", "Locked"); });
         lessonScroll.appendChild(chip);
       }
     }
@@ -689,21 +693,29 @@
       wireSignOut(user);
       if (user && db) setupNotificationCenter(user);
 
-      if (!user) {
-        setTopUser(null, { hearts:5, streak:0 });
-        renderLessons({ completedLessons: [], currentLesson: 1 });
-        return;
+      const unlockedLessons = (window.Progress && Progress.getUnlockedLessons) ? Progress.getUnlockedLessons() : [1];
+      const prog = (window.Progress && Progress.getProgress) ? Progress.getProgress() : {};
+      const completedLessons = Object.keys(prog).map(k => Number(k)).filter(n => Number.isFinite(n) && prog[String(n)] && prog[String(n)].completed).sort((a,b)=>a-b);
+      let currentLesson = 1;
+      for (let i = 1; i <= 24; i++) {
+        const row = prog[String(i)];
+        if (unlockedLessons.includes(i) && !(row && row.completed)) { currentLesson = i; break; }
+        if (i === 24) currentLesson = 24;
       }
 
-      const ref = db.collection('users').doc(user.uid);
-      const snap = await ref.get();
-      const data = snap.exists ? (snap.data() || {}) : {};
-      setTopUser(user, data);
+      if (!user) setTopUser(null, { hearts:5, streak:0, xp: (window.getTotalXP ? getTotalXP() : 0) });
+      else {
+        try{
+          const ref = db.collection('users').doc(user.uid);
+          const snap = await ref.get();
+          const data = snap.exists ? (snap.data() || {}) : {};
+          setTopUser(user, data);
+        }catch(_){
+          setTopUser(user, { hearts:5, streak:0, xp: (window.getTotalXP ? getTotalXP() : 0) });
+        }
+      }
 
-      const completedCount = Number.isFinite(data.lessonsCompleted) ? data.lessonsCompleted : 0;
-      const completedLessons = Array.from({length:completedCount}, (_,i)=>i+1);
-      const currentLesson = Number.isFinite(data.currentLesson) ? data.currentLesson : Math.min(24, completedCount + 1);
-      renderLessons({ completedLessons, currentLesson });
+      renderLessons({ completedLessons, unlockedLessons, currentLesson });
     }
 
     const isGuestAllowed = true;

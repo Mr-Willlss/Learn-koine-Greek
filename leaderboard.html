@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Leaderboard • Learn Koine Greek</title>
+  <script src="progress.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -149,7 +150,7 @@
         <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
         <div>
           <div class="sbTitle">Koine Greek</div>
-          <div class="sbSub">Duolingo-style</div>
+
         </div>
       </a>
       <div class="sbGroup">
@@ -354,38 +355,69 @@
       xpList.innerHTML = `<div class="sub">Loading…</div>`;
       practiceList.innerHTML = `<div class="sub">Loading…</div>`;
 
-      if (!user) {
-        setTopUser(null, { hearts:5, streak:0 });
-        xpList.innerHTML = `<div class="row"><div class="left"><div><div class="nm">Sign in to view leaderboards</div><div class="meta">Leaderboards require authenticated reads.</div></div></div><div class="right"><a class="btn" href="index.html">Sign in</a></div></div>`;
-        practiceList.innerHTML = `<div class="row"><div class="left"><div><div class="nm">Sign in to view practice scores</div><div class="meta">Save your own score from Practice → Speed Round.</div></div></div><div class="right"><a class="btn" href="index.html">Sign in</a></div></div>`;
-        return;
+      const today = new Date().toISOString().split('T')[0];
+      const currentName = (user && (user.displayName || user.email)) || localStorage.getItem('koine_current_user') || 'Samuel Williams';
+      const myXp = (window.getTotalXP ? getTotalXP() : 0);
+
+      // Try Firebase first (if signed in), but always fall back gracefully.
+      let usedFirebase = false;
+      if (user && db) {
+        try{
+          const uSnap = await db.collection('users').doc(user.uid).get();
+          const uData = uSnap.exists ? (uSnap.data() || {}) : {};
+          setTopUser(user, uData);
+        }catch(_){
+          setTopUser(user, { xp: myXp, streak:0, hearts:5 });
+        }
+
+        try{
+          const qs = await db.collection('leaderboard').orderBy('xp','desc').limit(25).get();
+          xpList.innerHTML = '';
+          let rank = 1;
+          qs.forEach(doc => { const d = doc.data() || {}; renderRow(xpList, rank++, d, `${d.xp || 0} XP`); });
+          if (qs.size) usedFirebase = true;
+        }catch(_){}
+
+        try{
+          const qs = await db.collection('practiceScores').where('date','==',today).orderBy('score','desc').limit(20).get();
+          practiceList.innerHTML = '';
+          let rank = 1;
+          qs.forEach(doc => { const d = doc.data() || {}; renderRow(practiceList, rank++, d, `${d.score || 0}`); });
+          if (qs.size) usedFirebase = true;
+        }catch(_){}
+      } else {
+        setTopUser(null, { xp: myXp, streak:0, hearts:5 });
       }
 
-      const uSnap = await db.collection('users').doc(user.uid).get();
-      const uData = uSnap.exists ? (uSnap.data() || {}) : {};
-      setTopUser(user, uData);
-
-      try{
-        const qs = await db.collection('leaderboard').orderBy('xp','desc').limit(25).get();
+      // Local XP leaderboard fallback
+      if (!usedFirebase || !xpList.children.length) {
         xpList.innerHTML = '';
-        let rank = 1;
-        qs.forEach(doc => { const d = doc.data() || {}; renderRow(xpList, rank++, d, `${d.xp || 0} XP`); });
-        if (!qs.size) xpList.innerHTML = `<div class="sub">No leaderboard entries yet. Complete a lesson to appear here.</div>`;
-      }catch(e){
-        console.error(e);
-        xpList.innerHTML = `<div class="sub">Could not load leaderboard.</div>`;
+        const users = [];
+        Object.keys(localStorage).forEach(k => {
+          if (!k.startsWith('koine_user_')) return;
+          try{
+            const u = JSON.parse(localStorage.getItem(k) || '{}');
+            if (u && typeof u === 'object') users.push(u);
+          }catch(_){}
+        });
+        if (!users.length) users.push({ displayName: currentName, xp: myXp, level: 1, rank:'Newcomer', streak:0, photoURL:'' });
+        users.sort((a,b) => (Number(b.xp||0) - Number(a.xp||0)));
+        users.slice(0, 25).forEach((u, idx) => renderRow(xpList, idx+1, u, `${Number(u.xp||0)} XP`));
       }
 
-      try{
-        const today = new Date().toISOString().split('T')[0];
-        const qs = await db.collection('practiceScores').where('date','==',today).orderBy('score','desc').limit(20).get();
+      // Local practice today fallback
+      if (!usedFirebase || !practiceList.children.length) {
         practiceList.innerHTML = '';
-        let rank = 1;
-        qs.forEach(doc => { const d = doc.data() || {}; renderRow(practiceList, rank++, d, `${d.score || 0}`); });
-        if (!qs.size) practiceList.innerHTML = `<div class="sub">No scores yet today. Play a Speed Round to set the pace.</div>`;
-      }catch(e){
-        console.error(e);
-        practiceList.innerHTML = `<div class="sub">Could not load practice scores.</div>`;
+        const key = `koine_practice_${today}`;
+        let rows = [];
+        try{ rows = JSON.parse(localStorage.getItem(key) || '[]'); }catch(_){ rows = []; }
+        if (!Array.isArray(rows)) rows = [];
+        if (!rows.length) {
+          practiceList.innerHTML = `<div class="sub">No scores yet today. Play a Speed Round to set the pace.</div>`;
+        } else {
+          rows.sort((a,b)=>Number(b.score||0)-Number(a.score||0));
+          rows.slice(0, 20).forEach((r, idx) => renderRow(practiceList, idx+1, { displayName: r.name || currentName, photoURL:'', rank:'', level:1, streak:0 }, `${Number(r.score||0)}`));
+        }
       }
     }
 

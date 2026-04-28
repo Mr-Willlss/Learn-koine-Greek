@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Learn Koine Greek">
   <title>Lesson • Learn Koine Greek</title>
+  <script src="progress.js"></script>
+  <script src="game-data.js"></script>
   <style>
     :root{
       --bg-base:#0f1117;--bg-sidebar:#13151e;--bg-card:#181c27;--bg-card2:#1d2235;--bg-input:#1a1f2e;--bg-hover:rgba(255,255,255,0.04);
@@ -320,7 +322,7 @@
         <div class="sbLogo" aria-hidden="true"><span>Ω</span></div>
         <div>
           <div class="sbTitle">Koine Greek</div>
-          <div class="sbSub">Duolingo-style</div>
+
         </div>
       </a>
       <div class="sbGroup">
@@ -955,6 +957,13 @@
 
         spawnConfetti();
         const newWords = (lesson.vocabulary || []).length;
+        const passed = accuracy >= 60;
+        // Always record local attempt (unlocking requires 60%+).
+        try{
+          if (window.markLessonComplete) window.markLessonComplete(lessonId, accuracy, finalXp);
+          else if (window.Progress && Progress.markLessonComplete) Progress.markLessonComplete(lessonId, accuracy, finalXp);
+        }catch(_){}
+
         const body = `
           <div style="margin-top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
             <div style="border:1px solid var(--border);border-radius:18px;padding:10px;background:rgba(255,255,255,0.02)">
@@ -971,14 +980,17 @@
               <div style="font-weight:900;color:var(--tw);font-size:18px;margin-top:4px">${newWords}</div>
             </div>
           </div>
+          ${passed ? `` : `<div style="margin-top:12px;border:1px solid rgba(249,115,22,0.28);background:rgba(249,115,22,0.10);border-radius:16px;padding:10px;color:rgba(226,232,240,0.92)"><b style="color:var(--tw)">60% required to unlock the next lesson.</b> You scored <b style="color:var(--tw)">${accuracy}%</b>. Review and retry to progress.</div>`}
           <div class="btnRow">
-            <a class="btn btnPrimary" id="nextBtn" href="lesson-player.html?lesson=${encodeURIComponent(Math.min(24, lessonId+1))}">Continue to next lesson →</a>
+            ${passed ? `<a class="btn btnPrimary" id="nextBtn" href="lesson-player.html?lesson=${encodeURIComponent(Math.min(24, lessonId+1))}">Continue to next lesson →</a>` : `<button class="btn btnPrimary" id="retryBtn" type="button">Retry lesson →</button>`}
             <button class="btn" id="reviewBtn" type="button">Review lesson</button>
             <a class="btn" href="lessons.html">Back to map</a>
           </div>
         `;
         setCard("Lesson Complete! 🎉", "Phase 3/3 • Summary", body);
         document.getElementById('reviewBtn').addEventListener('click', () => { idx = 0; answered = 0; correct = 0; xpEarned = 0; showTheory(); });
+        const rb = document.getElementById('retryBtn');
+        if (rb) rb.addEventListener('click', () => { idx = 0; answered = 0; correct = 0; xpEarned = 0; showTheory(); });
 
         if (!user) {
           showModal("Save your progress?", "You finished a lesson as a guest. Sign in with Google to save XP, streaks, and friends.", [
@@ -987,6 +999,8 @@
           ]);
           return;
         }
+
+        if (!passed) return;
 
         // Persist completion once.
         const userRef = db.collection('users').doc(user.uid);
