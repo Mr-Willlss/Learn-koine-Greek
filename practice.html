@@ -358,12 +358,11 @@
 
     async function loadLessonData() {
       if (window.__LESSON_DATA) return window.__LESSON_DATA;
-      const txt = await fetch('lesson-player.html', { cache:'no-store' }).then(r => r.text());
-      const m = txt.match(/const\\s+LESSON_DATA\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});\\s*\\n\\s*\\n\\s*const\\s+firebaseConfig/);
-      if (!m) throw new Error("Could not load lesson data.");
-      const obj = (new Function('return ' + m[1]))();
-      window.__LESSON_DATA = obj;
-      return obj;
+      if (window.LESSON_DATA) {
+        window.__LESSON_DATA = window.LESSON_DATA;
+        return window.__LESSON_DATA;
+      }
+      throw new Error("LESSON_DATA not found — ensure game-data.js is loaded.");
     }
 
     function setTopUser(user, data) {

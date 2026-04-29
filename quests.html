@@ -361,12 +361,11 @@
 
     async function loadLessonData() {
       if (window.__LESSON_DATA) return window.__LESSON_DATA;
-      const txt = await fetch('lesson-player.html', { cache:'no-store' }).then(r => r.text());
-      const m = txt.match(/const\\s+LESSON_DATA\\s*=\\s*(\\{[\\s\\S]*?\\n\\s*\\});\\s*\\n\\s*\\n\\s*const\\s+firebaseConfig/);
-      if (!m) throw new Error("Could not load lesson data.");
-      const obj = (new Function('return ' + m[1]))();
-      window.__LESSON_DATA = obj;
-      return obj;
+      if (window.LESSON_DATA) {
+        window.__LESSON_DATA = window.LESSON_DATA;
+        return window.__LESSON_DATA;
+      }
+      throw new Error("LESSON_DATA not found — ensure game-data.js is loaded.");
     }
 
     function setTopUser(user, data) {
@@ -387,7 +386,7 @@
       { id:'vocabHunter', icon:'🔤', title:'Vocabulary Hunter', desc:'Greek → English matching from unlocked lessons.', lessons:'unlocked', count:10, timed:false, requires:1 },
       { id:'sentenceArchitect', icon:'🏛️', title:'Sentence Architect', desc:'5 sentence builder challenges.', lessons:'unlocked', count:5, timed:false, requires:1, onlyType:'sentence_builder' },
       { id:'speedConjugator', icon:'⚡', title:'Speed Conjugator', desc:'10 verb-form questions (timed).', lessons:[6,9,16,17,18,20,22], count:10, timed:true, requires:6 },
-      { id:'allLessonsMaster', icon:'🌟', title:'All Lessons Master', desc:'20 questions across all 24 lessons (final boss).', lessons:'all', count:20, timed:true, requires:24 }
+      { id:'allLessonsMaster', icon:'🌟', title:'All Lessons Master', desc:'20 questions across all 25 lessons (final boss).', lessons:'all', count:20, timed:true, requires:25 }
     ];
 
     function starsFromAccuracy(acc){
@@ -401,7 +400,7 @@
 
     function buildPool(LESSON_DATA, q, lessonsCompleted){
       let lessonIds = [];
-      if (q.lessons === 'all') lessonIds = Array.from({length:24},(_,i)=>i+1);
+      if (q.lessons === 'all') lessonIds = Array.from({length:25},(_,i)=>i+1);
       else if (q.lessons === 'unlocked') lessonIds = Array.from({length:lessonsCompleted},(_,i)=>i+1);
       else lessonIds = q.lessons;
 
