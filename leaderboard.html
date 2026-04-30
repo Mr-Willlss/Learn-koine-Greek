@@ -144,6 +144,8 @@
   </style>
 </head>
 <body data-page="leaderboard">
+  <div id="auth-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a2e;z-index:9999"><p style="color:white;font-size:1.2rem">Loading...</p></div>
+  <div id="app-content" style="display:none">
   <div id="app">
     <aside id="sidebar" aria-label="Sidebar navigation">
       <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
@@ -200,7 +202,7 @@
           <div style="display:flex;align-items:center;gap:10px">
             <div class="avatar" id="avatar"><span>👤</span></div>
             <div class="miniName">
-              <div class="n" id="userName">Guest</div>
+              <div class="n" id="userName">User</div>
               <div class="l" id="userLevel">Level —</div>
             </div>
           </div>
@@ -251,10 +253,14 @@
   <div class="toastWrap" aria-live="polite" aria-atomic="true">
     <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
   </div>
+  </div>
+  </div>
+
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="auth-guard.js"></script>
 
   <script>
     document.addEventListener('click', function(e) {
@@ -285,15 +291,12 @@
       return { level, title: titles[level-1] };
     }
 
-    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
-
-    function wireSignOut(user){
+        function wireSignOut(user){
       const link = document.getElementById('signOutLink');
       if (!link) return;
       link.addEventListener('click', async (e) => {
         e.preventDefault();
-        localStorage.removeItem('gk_guest');
-        try{ if (user && auth) await auth.signOut(); }catch(_){}
+                try{ if (user && auth) await auth.signOut(); }catch(_){}
         location.href = 'index.html';
       });
     }
@@ -319,8 +322,8 @@
     function setTopUser(user, data) {
       const xp = Number.isFinite(data?.xp) ? data.xp : 0;
       const lvl = calcLevel(xp);
-      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
-      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || (user?.email || 'User'));
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level';
       document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
       document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
       const av = document.getElementById('avatar');
@@ -421,15 +424,13 @@
       }
     }
 
-    const isGuestAllowed = true;
     (function boot(){
       const ok = initFirebase();
-      if (!ok) { showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase"); initPage(null); return; }
-      firebase.auth().onAuthStateChanged(function(user){
-        if (!user && !isGuestAllowed && !isGuest()) { window.location.href='index.html'; return; }
-        if (!user && isGuest()) initPage(null);
-        else initPage(user);
-      });
+      if (!ok) { window.location.replace('index.html'); return; }
+      document.addEventListener('authReady', function(e){
+        initPage(e.detail);
+      }, { once: true });
+      AuthGuard.start({ loginUrl: 'index.html' });
     })();
   </script>
 </body>

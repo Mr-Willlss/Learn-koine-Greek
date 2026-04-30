@@ -181,6 +181,46 @@
       text-align:center;
       min-height:16px;
     }
+    .orRow{
+      display:flex;align-items:center;gap:10px;
+      margin:14px 0 10px 0;
+      color:rgba(148,163,184,0.92);
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:0.08em;
+    }
+    .orRow span{height:1px;flex:1;background:rgba(255,255,255,0.08)}
+    .orRow b{font-weight:900;letter-spacing:0.14em}
+    .field{margin-top:10px}
+    .lbl{display:block;font-size:12px;color:rgba(226,232,240,0.86);font-weight:800;margin:0 0 6px 2px}
+    .inp{
+      width:100%;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.10);
+      background:rgba(26,31,46,0.9);
+      color:var(--ts);
+      outline:none;
+      transition:border-color var(--t1), box-shadow var(--t1);
+    }
+    .inp:focus{border-color:rgba(124,92,252,0.5);box-shadow:0 0 0 3px rgba(124,92,252,0.12)}
+    .rowLinks{
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      margin-top:10px;
+      font-size:12px;
+      color:rgba(226,232,240,0.88);
+      font-weight:800;
+    }
+    .linkBtn{
+      padding:0;
+      background:none;
+      border:0;
+      color:rgba(226,232,240,0.9);
+      opacity:0.9;
+      text-decoration:underline;
+      cursor:pointer;
+    }
+    .linkBtn:hover{opacity:1}
 
     .fine{
       margin-top:14px;
@@ -227,7 +267,26 @@
         Sign in with Google
       </button>
       <div class="err" id="err"></div>
-      <a class="guest" href="#" id="guestBtn">Continue as Guest</a>
+
+      <div class="orRow" aria-hidden="true"><span></span><b>— OR —</b><span></span></div>
+
+      <form id="emailForm" autocomplete="on">
+        <div class="field">
+          <label class="lbl" for="email">Email</label>
+          <input class="inp" id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required />
+        </div>
+        <div class="field">
+          <label class="lbl" for="password">Password</label>
+          <input class="inp" id="password" type="password" autocomplete="current-password" placeholder="••••••••" required />
+        </div>
+        <button class="btn" id="emailBtn" type="submit" style="margin-top:12px">Sign In</button>
+        <div class="rowLinks">
+          <button class="linkBtn" id="toggleMode" type="button">Create Account</button>
+          <button class="linkBtn" id="forgotBtn" type="button">Forgot Password?</button>
+        </div>
+        <div class="err" id="emailErr"></div>
+      </form>
+
 
       <div class="pills" aria-label="Features">
         <div class="pill">24 Lessons</div>
@@ -268,20 +327,64 @@
     function show(el){ el.classList.remove('hidden'); }
     function setErr(msg){ document.getElementById('err').textContent = msg || ''; }
 
-    document.addEventListener('DOMContentLoaded', function(){
+    document.addEventListener('DOMContentLoaded', async function(){
       const card = document.getElementById('card');
       const googleBtn = document.getElementById('googleBtn');
-      const guestBtn = document.getElementById('guestBtn');
+      const emailForm = document.getElementById('emailForm');
+      const emailBtn = document.getElementById('emailBtn');
+      const toggleModeBtn = document.getElementById('toggleMode');
+      const forgotBtn = document.getElementById('forgotBtn');
+      const emailErr = document.getElementById('emailErr');
+      const emailInput = document.getElementById('email');
+      const passInput = document.getElementById('password');
+      let mode = 'signin'; // signin | signup
 
       if (!initFirebase()) {
         show(card);
         setErr("Firebase failed to load. You can still continue as guest.");
       }
 
+      if (auth && auth.setPersistence && firebase?.auth?.Auth?.Persistence?.LOCAL) {
+        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+      }
+
+      async function ensureUserDoc(user){
+        if (!user || !db) return;
+        const ref = db.collection('users').doc(user.uid);
+        const snap = await ref.get();
+        if (snap.exists) return;
+
+        const display = user.displayName || (user.email ? String(user.email).split('@')[0] : 'Learner') || 'Learner';
+        const username = '@' + String(display).toLowerCase().replace(/\s/g,'').replace(/[^a-z0-9_]/g,'').slice(0, 18);
+        await ref.set({
+          displayName: display,
+          email: user.email || '',
+          photoURL: user.photoURL || '',
+          username,
+          bio: '',
+          joinedDate: firebase.firestore.FieldValue.serverTimestamp(),
+          xp: 0,
+          streak: 0,
+          lastActiveDate: '',
+          hearts: 5,
+          gems: 0,
+          crowns: 0,
+          rank: 'Newcomer',
+          level: 1,
+          lessonsCompleted: 0,
+          accuracy: 0,
+          currentLesson: 1,
+          currentWorld: 1,
+          friends: [],
+          friendRequests: [],
+          achievements: {},
+          settings: { notifications: true, dailyGoal: 1 }
+        }, { merge:true });
+      }
+
       if (auth) {
         auth.onAuthStateChanged(function(user){
           if (user) {
-            localStorage.removeItem('gk_guest');
             window.location.href = 'dashboard.html';
           } else {
             show(card);
@@ -301,38 +404,7 @@
           const user = res && res.user;
           if (!user) throw new Error("Sign-in failed. Please try again.");
 
-          localStorage.removeItem('gk_guest');
-
-          const ref = db.collection('users').doc(user.uid);
-          const snap = await ref.get();
-          if (!snap.exists) {
-            const display = user.displayName || 'Learner';
-            const username = '@' + String(display).toLowerCase().replace(/\\s/g,'').replace(/[^a-z0-9_]/g,'').slice(0, 18);
-            await ref.set({
-              displayName: display,
-              email: user.email || '',
-              photoURL: user.photoURL || '',
-              username,
-              bio: '',
-              joinedDate: firebase.firestore.FieldValue.serverTimestamp(),
-              xp: 0,
-              streak: 0,
-              lastActiveDate: '',
-              hearts: 5,
-              gems: 0,
-              crowns: 0,
-              rank: 'Newcomer',
-              level: 1,
-              lessonsCompleted: 0,
-              accuracy: 0,
-              currentLesson: 1,
-              currentWorld: 1,
-              friends: [],
-              friendRequests: [],
-              achievements: {},
-              settings: { notifications: true, dailyGoal: 1 }
-            }, { merge:true });
-          }
+          await ensureUserDoc(user);
           window.location.href = 'dashboard.html';
         }catch(e){
           console.error(e);
@@ -342,11 +414,92 @@
         }
       });
 
-      guestBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        localStorage.setItem('gk_guest', '1');
-        window.location.href = 'dashboard.html';
+      function setEmailErr(msg){ emailErr.textContent = msg || ''; }
+      function mapAuthError(e){
+        const code = (e && e.code) ? String(e.code) : '';
+        const map = {
+          'auth/invalid-email': 'That email address looks invalid.',
+          'auth/user-disabled': 'This account has been disabled.',
+          'auth/user-not-found': 'No account found for that email.',
+          'auth/wrong-password': 'Incorrect password.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.',
+          'auth/weak-password': 'Password is too weak (use at least 6 characters).',
+          'auth/email-already-in-use': 'That email is already in use.',
+          'auth/missing-email': 'Enter your email address first.',
+          'auth/missing-password': 'Enter your password first.'
+        };
+        return map[code] || (e && e.message ? e.message : 'Could not sign in. Please try again.');
+      }
+
+      function updateModeUi(){
+        if (mode === 'signup') {
+          emailBtn.textContent = 'Create Account';
+          toggleModeBtn.textContent = 'Back to Sign In';
+          passInput.autocomplete = 'new-password';
+        } else {
+          emailBtn.textContent = 'Sign In';
+          toggleModeBtn.textContent = 'Create Account';
+          passInput.autocomplete = 'current-password';
+        }
+      }
+      updateModeUi();
+
+      toggleModeBtn.addEventListener('click', function(){
+        mode = (mode === 'signin') ? 'signup' : 'signin';
+        setEmailErr('');
+        updateModeUi();
       });
+
+      forgotBtn.addEventListener('click', async function(){
+        if (!auth) { setEmailErr("Firebase isn't ready yet."); return; }
+        setEmailErr('');
+        const email = String(emailInput.value || '').trim();
+        if (!email) { setEmailErr('Enter your email first, then click “Forgot Password?”.'); return; }
+        forgotBtn.disabled = true;
+        try{
+          await auth.sendPasswordResetEmail(email);
+          setEmailErr('Password reset email sent. Check your inbox.');
+        }catch(e){
+          console.error(e);
+          setEmailErr(mapAuthError(e));
+        }finally{
+          forgotBtn.disabled = false;
+        }
+      });
+
+      emailForm.addEventListener('submit', async function(e){
+        e.preventDefault();
+        if (!auth || !db) { setEmailErr("Firebase isn't ready. Try again, or continue as guest."); return; }
+        setEmailErr('');
+        emailBtn.disabled = true;
+        const email = String(emailInput.value || '').trim();
+        const password = String(passInput.value || '');
+        try{
+          let cred = null;
+          if (mode === 'signup') {
+            cred = await auth.createUserWithEmailAndPassword(email, password);
+            try{
+              const u = cred && cred.user;
+              if (u && !u.displayName && u.updateProfile) {
+                const display = email.split('@')[0] || 'Learner';
+                await u.updateProfile({ displayName: display }).catch(()=>{});
+              }
+            }catch(_){}
+          } else {
+            cred = await auth.signInWithEmailAndPassword(email, password);
+          }
+          const user = cred && cred.user;
+          if (!user) throw new Error('Sign-in failed. Please try again.');
+          await ensureUserDoc(user);
+          window.location.href = 'dashboard.html';
+        }catch(err){
+          console.error(err);
+          setEmailErr(mapAuthError(err));
+        }finally{
+          emailBtn.disabled = false;
+        }
+      });
+
     });
   </script>
 </body>

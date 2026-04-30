@@ -176,6 +176,8 @@
   </style>
 </head>
 <body data-page="profile">
+  <div id="auth-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a2e;z-index:9999"><p style="color:white;font-size:1.2rem">Loading...</p></div>
+  <div id="app-content" style="display:none">
   <div id="app">
     <aside id="sidebar" aria-label="Sidebar navigation">
       <a class="sbBrand" href="dashboard.html" aria-label="Learn Koine Greek home">
@@ -232,7 +234,7 @@
           <div style="display:flex;align-items:center;gap:10px">
             <div class="avatar" id="avatar"><span>👤</span></div>
             <div class="miniName">
-              <div class="n" id="userName">Guest</div>
+              <div class="n" id="userName">User</div>
               <div class="l" id="userLevel">Level —</div>
             </div>
           </div>
@@ -242,7 +244,7 @@
         <section class="headerCard" id="headerCard">
           <div class="bigAv" id="bigAv">👤</div>
           <div style="min-width:220px;flex:1 1 220px">
-            <div class="hName" id="hName">Guest</div>
+            <div class="hName" id="hName">User</div>
             <div class="hUser" id="hUser">@guest</div>
             <div class="hBio" id="hBio">Sign in to view and edit your profile.</div>
           </div>
@@ -348,10 +350,14 @@
   <div class="toastWrap" aria-live="polite" aria-atomic="true">
     <div class="toast" id="toast"><span class="dot info" id="toastDot"></span><div><b id="toastTitle">Notice</b><div style="color:var(--tm);font-size:12px" id="toastMsg"></div></div></div>
   </div>
+  </div>
+  </div>
+
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="auth-guard.js"></script>
 
   <script>
     document.addEventListener('click', function(e) {
@@ -385,15 +391,12 @@
       return { level, title: titles[level-1], progress };
     }
 
-    function isGuest(){ return localStorage.getItem('gk_guest') === '1'; }
-
-    function wireSignOut(user){
+        function wireSignOut(user){
       const link = document.getElementById('signOutLink');
       if (!link) return;
       link.addEventListener('click', async (e) => {
         e.preventDefault();
-        localStorage.removeItem('gk_guest');
-        try{ if (user && auth) await auth.signOut(); }catch(_){}
+                try{ if (user && auth) await auth.signOut(); }catch(_){}
         location.href = 'index.html';
       });
     }
@@ -437,8 +440,8 @@
     function setTopUser(user, data) {
       const xp = Number.isFinite(data?.xp) ? data.xp : 0;
       const lvl = calcLevel(xp);
-      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || 'Guest');
-      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level —';
+      document.getElementById('userName').textContent = (data?.displayName || user?.displayName || user?.email || (user?.email || 'User'));
+      document.getElementById('userLevel').textContent = user ? `Level ${lvl.level} • ${lvl.title}` : 'Level';
       document.getElementById('streakVal').textContent = String(Number.isFinite(data?.streak) ? data.streak : 0);
       document.getElementById('heartsVal').textContent = String(Number.isFinite(data?.hearts) ? data.hearts : 5);
       const av = document.getElementById('avatar');
@@ -459,22 +462,7 @@
       outBtn.onclick = async () => { await auth.signOut(); showToast("Signed out.", "info", "Account"); location.href = 'index.html'; };
 
       if (!user) {
-        setTopUser(null, { hearts:5, streak:0 });
-        editBtn.disabled = true;
-        signBtn.style.display = '';
-        outBtn.style.display = 'none';
-        document.getElementById('hName').textContent = "Guest";
-        document.getElementById('hUser').textContent = "@guest";
-        document.getElementById('hBio').textContent = "Sign in to view and edit your profile.";
-        document.getElementById('xpVal').textContent = "—";
-        document.getElementById('lvlVal').textContent = "—";
-        document.getElementById('rankVal').textContent = "—";
-        document.getElementById('streakCardVal').textContent = "—";
-        document.getElementById('heartsCardVal').textContent = "—";
-        document.getElementById('lessVal').textContent = "—";
-        document.getElementById('xpBar').style.width = "0%";
-        document.getElementById('achGrid').innerHTML = ACHIEVEMENTS.map(a => `<div class="ach locked"><div class="ic">${a.icon}</div><div><b>${a.name}</b><div class="d">${a.desc}</div></div></div>`).join('');
-        document.getElementById('feed').innerHTML = `<div class="row"><div><div class="t">Guest mode</div><div class="d">Progress won’t save.</div></div><div class="d">—</div></div>`;
+        window.location.replace('index.html');
         return;
       }
 
@@ -570,15 +558,13 @@
       };
     }
 
-    const isGuestAllowed = true;
     (function boot(){
       const ok = initFirebase();
-      if (!ok) { showToast("Firebase SDK failed to load. Guest mode still works.", "bad", "Firebase"); initPage(null); return; }
-      firebase.auth().onAuthStateChanged(function(user){
-        if (!user && !isGuestAllowed && !isGuest()) { window.location.href='index.html'; return; }
-        if (!user && isGuest()) initPage(null);
-        else initPage(user);
-      });
+      if (!ok) { window.location.replace('index.html'); return; }
+      document.addEventListener('authReady', function(e){
+        initPage(e.detail);
+      }, { once: true });
+      AuthGuard.start({ loginUrl: 'index.html' });
     })();
   </script>
 </body>
