@@ -1,123 +1,123 @@
 // auth-guard.js
-// Global compat Firebase auth guard for static GitHub Pages hosting.
-(function () {
-  "use strict";
+// Drop this file in the root of your GitHub Pages repo.
+// It is loaded via <script src="auth-guard.js"> AFTER the Firebase CDN scripts.
 
-  function toast(msg) {
-    if (typeof window.showToast === "function") {
-      try { window.showToast(msg); return; } catch (_) {}
-    }
-    try { console.log(msg); } catch (_) {}
+// ─── Global helper functions expected by other pages ────────────────────────
+
+function toast(msg) {
+  if (typeof showToast === 'function') {
+    showToast(msg);
+  } else {
+    console.log('[toast]', msg);
+  }
+}
+
+function applyProgress(data) {
+  if (typeof window.applyProgress === 'function') {
+    window.applyProgress(data);
+  }
+}
+
+function getProgressPayload() {
+  return typeof window.getProgressPayload === 'function'
+    ? window.getProgressPayload()
+    : {};
+}
+
+function getRemoteProgressPayload() {
+  return typeof window.getRemoteProgressPayload === 'function'
+    ? window.getRemoteProgressPayload()
+    : getProgressPayload();
+}
+
+// ─── AuthGuard ───────────────────────────────────────────────────────────────
+
+var AuthGuard = (function () {
+
+  var _settled = false;
+
+  function _reveal(user) {
+    if (_settled) return;
+    _settled = true;
+
+    // Hide loading screen
+    var loader = document.getElementById('auth-loader');
+    if (loader) loader.style.display = 'none';
+
+    // Show app content
+    var content = document.getElementById('app-content');
+    if (content) content.style.display = '';
+
+    // Fire authReady so lesson-player and other pages can initialise
+    document.dispatchEvent(
+      new CustomEvent('authReady', { detail: user || null })
+    );
   }
 
-  function applyProgress(data) {
-    if (typeof window.applyProgress === "function") {
-      try { window.applyProgress(data); } catch (_) {}
-    }
-  }
-
-  function getProgressPayload() {
-    return (typeof window.getProgressPayload === "function")
-      ? window.getProgressPayload()
-      : {};
-  }
-
-  function getRemoteProgressPayload() {
-    return (typeof window.getRemoteProgressPayload === "function")
-      ? window.getRemoteProgressPayload()
-      : getProgressPayload();
-  }
-
-  function revealPage() {
-    var loader = document.getElementById("auth-loader");
-    var content = document.getElementById("app-content");
-    if (loader) loader.style.display = "none";
-    if (content) content.style.display = "block";
-  }
-
-  var started = false;
-  var settled = false;
-
-  function start(opts) {
-    opts = opts || {};
-    var loginUrl = opts.loginUrl || "index.html"; // kept for API compatibility; intentionally unused
-    void loginUrl;
-
-    if (started) return;
-    started = true;
-    settled = false;
-
-    function finish(user, reason) {
-      if (settled) return;
-      settled = true;
-      revealPage();
-      document.dispatchEvent(new CustomEvent("authReady", { detail: user || null }));
-      if (reason) {
-        try {
-          window.GreekQuestFirebaseState = window.GreekQuestFirebaseState || {};
-          if (typeof window.GreekQuestFirebaseState.reason !== "string" || !window.GreekQuestFirebaseState.reason) {
-            window.GreekQuestFirebaseState.reason = reason;
-          }
-        } catch (_) {}
-      }
-    }
-
-    var timeoutId = setTimeout(function () {
-      finish(null, "Auth timeout after 5000ms");
-    }, 5000);
-
+  function _tryInitFirebase() {
     try {
-      if (!window.firebase || typeof window.firebase.auth !== "function") {
-        window.GreekQuestFirebaseState = { configured: false, reason: "Firebase SDK not available." };
-        clearTimeout(timeoutId);
-        finish(null, "Firebase SDK not available.");
-        return;
+      if (!window.firebase) {
+        window.GreekQuestFirebaseState = {
+          configured: false,
+          reason: 'Firebase SDK not loaded.'
+        };
+        return false;
       }
 
-      var auth;
-      try {
-        auth = window.firebase.auth();
-      } catch (errAuth) {
-        var authMsg = (errAuth && errAuth.message) ? errAuth.message : "firebase.auth() failed.";
-        window.GreekQuestFirebaseState = { configured: false, reason: authMsg };
-        clearTimeout(timeoutId);
-        finish(null, authMsg);
-        return;
+      // Only initialise once
+      if (!firebase.apps || firebase.apps.length === 0) {
+        // firebaseConfig must already be defined on the page that calls AuthGuard.start()
+        if (typeof firebaseConfig !== 'undefined') {
+          firebase.initializeApp(firebaseConfig);
+        } else {
+          window.GreekQuestFirebaseState = {
+            configured: false,
+            reason: 'firebaseConfig is not defined on this page.'
+          };
+          return false;
+        }
       }
 
-      if (!auth || typeof auth.onAuthStateChanged !== "function") {
-        window.GreekQuestFirebaseState = { configured: false, reason: "Firebase Auth not configured." };
-        clearTimeout(timeoutId);
-        finish(null, "Firebase Auth not configured.");
-        return;
-      }
+      window.auth = firebase.auth ? firebase.auth() : null;
+      window.db   = firebase.firestore ? firebase.firestore() : null;
 
       window.GreekQuestFirebaseState = { configured: true };
+      return !!(window.auth);
 
-      auth.onAuthStateChanged(
-        function (user) {
-          clearTimeout(timeoutId);
-          finish(user || null, "");
-        },
-        function (err) {
-          clearTimeout(timeoutId);
-          var msg = (err && err.message) ? err.message : "onAuthStateChanged error.";
-          window.GreekQuestFirebaseState = { configured: false, reason: msg };
-          finish(null, msg);
-        }
-      );
-    } catch (errOuter) {
-      clearTimeout(timeoutId);
-      var outerMsg = (errOuter && errOuter.message) ? errOuter.message : "Unknown auth guard error.";
-      window.GreekQuestFirebaseState = { configured: false, reason: outerMsg };
-      finish(null, outerMsg);
+    } catch (err) {
+      window.auth = null;
+      window.db   = null;
+      window.GreekQuestFirebaseState = {
+        configured: false,
+        reason: err.message || 'Firebase init error.'
+      };
+      return false;
     }
   }
 
-  window.AuthGuard = { start: start };
-  window.toast = toast;
-  window.applyProgress = applyProgress;
-  window.getProgressPayload = getProgressPayload;
-  window.getRemoteProgressPayload = getRemoteProgressPayload;
-})();
+  function start(options) {
+    options = options || {};
 
+    var fbOk = _tryInitFirebase();
+
+    if (!fbOk || !window.auth) {
+      // No Firebase — reveal immediately as guest
+      _reveal(null);
+      return;
+    }
+
+    // 5-second timeout so the page never stays stuck on "Loading…"
+    var timer = setTimeout(function () {
+      console.warn('[AuthGuard] Firebase auth timed out — continuing as guest.');
+      _reveal(null);
+    }, 5000);
+
+    window.auth.onAuthStateChanged(function (user) {
+      clearTimeout(timer);
+      _reveal(user || null);
+    });
+  }
+
+  return { start: start };
+
+})();
