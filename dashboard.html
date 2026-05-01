@@ -822,7 +822,25 @@ Top 5 research findings applied (2024–2025):
       const worldPreview = document.getElementById('worldPreview');
 
       if (!user) {
-        window.location.replace('index.html');
+        document.getElementById('userName').textContent = "Signed out";
+        document.getElementById('userLevel').textContent = "Sign in to sync";
+        document.getElementById('streakVal').textContent = "0";
+        renderHearts(5);
+        setBanner("Signed out", 0, 1, 1, "Sign in to continue");
+        goalBar.style.width = "0%";
+        xpBar.style.width = "0%";
+        document.getElementById('streakText').classList.remove('skel');
+        document.getElementById('streakText').textContent = "Sign in to track streaks.";
+        document.getElementById('xpText').classList.remove('skel');
+        document.getElementById('xpText').textContent = "Sign in to sync XP and levels.";
+        const rank = document.getElementById('rankText');
+        rank.classList.remove('skel');
+        rank.textContent = "Sign in required for league";
+        const fr = document.getElementById('friendsOnlineText');
+        fr.classList.remove('skel');
+        fr.textContent = "Sign in to see friends";
+        activityFeed.innerHTML = `<div class="rowItem"><div><div class="t">Not signed in</div><div class="d">Browse lessons, then sign in to save progress.</div></div><div class="d">—</div></div>`;
+        worldPreview.innerHTML = WORLDS.map(w => `<div class="rowItem"><div><div class="t">${w.name}</div><div class="d">${w.range}</div></div><div class="d">Visible</div></div>`).join('');
         return;
       }
 
@@ -917,11 +935,7 @@ Top 5 research findings applied (2024–2025):
     }
 
     (function boot(){
-      const ok = initFirebase();
-      if (!ok) {
-        window.location.replace('index.html');
-        return;
-      }
+      initFirebase();
       document.addEventListener('authReady', function(e){
         loadUserDashboard(e.detail);
       }, { once: true });

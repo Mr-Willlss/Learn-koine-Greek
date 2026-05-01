@@ -1113,11 +1113,7 @@
     }
 
     (function boot(){
-      const ok = initFirebase();
-      if (!ok) {
-        window.location.replace('index.html');
-        return;
-      }
+      initFirebase();
       document.addEventListener('authReady', function(e){
         initLesson(e.detail);
       }, { once: true });
